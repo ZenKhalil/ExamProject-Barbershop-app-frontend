@@ -7,7 +7,7 @@ let isBookingPageLoaded = false;
 document.addEventListener("DOMContentLoaded", function () {
   setupNavigation();
   services.loadPriceList();
-  bookings.loadBookingPage();
+  bookings.loadBookingPage(); 
 
   // Check if a section is saved in local storage
   const savedSection = localStorage.getItem("currentSection");

@@ -12,6 +12,7 @@ function loadBookingPage() {
   setupBookingForm();
 }
 
+
 // Initialize the calendar with weekly view and business hours
 function initializeCalendar() {
   const calendarEl = document.getElementById("calendar");

@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   loadPriceList();
-});
+}); 
 
 function loadPriceList() {
    fetch("http://localhost:3000/api/services")
