@@ -1,5 +1,5 @@
 import services from "./taps/services.js";
-import bookings from "./taps/bookings.js";
+import bookings from "./taps/booking.js";
 
 let isBookingPageLoaded = false;
 

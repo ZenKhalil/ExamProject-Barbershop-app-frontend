@@ -1,14 +1,15 @@
 /* Ensure that the HTML and body elements take up the full height and width */
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
-  width: 100%; 
+  width: 100%;
 }
 
 /* General Styles */
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   background-color: #f4f4f4;
   color: #424242;
 }
@@ -47,7 +48,6 @@ nav a {
 /* Additional Styles */
 /* (Include the rest of your styles here, such as main, footer, buttons, etc.) */
 
-
 /* Calendar container styles */
 #calendar {
   max-width: 1000px; /* Slightly larger */
@@ -62,7 +62,6 @@ nav a {
 .fc-timegrid-slot.selected-slot {
   background-color: #ffff99;
 }
-
 
 /* Service List Styles */
 .service {
@@ -91,7 +90,10 @@ button:hover {
 }
 
 /* Form Styles */
-select, input[type="text"], input[type="email"], input[type="tel"] {
+select,
+input[type="text"],
+input[type="email"],
+input[type="tel"] {
   width: 100%;
   padding: 12px;
   margin: 8px 0;
@@ -139,7 +141,7 @@ footer {
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+  background-color: rgba(0, 0, 0, 0.6); /* Black w/ opacity */
 }
 
 /* Show the modal when 'hidden' class is removed */
@@ -161,14 +163,14 @@ footer {
 
 /* Close button style */
 .close-modal {
-    cursor: pointer;
-    color: #aaa;
-    background: #3c0303;
-    border: none;
-    font-size: 1.5em;
-    position: absolute;
-    top: -5px;
-    right: 7px;
+  cursor: pointer;
+  color: #aaa;
+  background: #3c0303;
+  border: none;
+  font-size: 1.5em;
+  position: absolute;
+  top: -5px;
+  right: 7px;
 }
 
 .close-modal:hover {
