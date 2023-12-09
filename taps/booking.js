@@ -116,27 +116,19 @@ function initializeCalendar() {
 
 function disablePrevButtonIfNeeded() {
   const prevButton = document.querySelector(".fc-prev-button");
-  const currentWeekStart = new Date();
-  currentWeekStart.setHours(0, 0, 0, 0);
-  currentWeekStart.setDate(
-    currentWeekStart.getDate() - currentWeekStart.getDay()
-  );
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of today
 
+  // Get the start date of the current view
   const viewStart = new Date(calendar.view.activeStart);
-  if (viewStart <= currentWeekStart) {
-    prevButton.disabled = true;
-  } else {
-    prevButton.disabled = false;
-  }
+
+  // Disable the previous button if the view start date is today or in the past
+  prevButton.disabled = viewStart.getTime() <= today.getTime();
 }
 
 
-function fetchUnavailableTimeslotsForCurrentView(barberId) {
-  console.log(
-    `fetchUnavailableTimeslotsForCurrentView called with barberId: ${barberId}`
-  );
-  console.trace(); // This line will output the stack trace to the console
 
+function fetchUnavailableTimeslotsForCurrentView(barberId) {
   if (!barberId) {
     console.warn("No barber selected.");
     return;
@@ -176,41 +168,6 @@ function fetchUnavailableTimeslotsForCurrentView(barberId) {
   );
 }
 
-function fetchUnavailableTimeslots(barberId, date) {
-  fetch(
-    `http://localhost:3000/api/bookings/unavailable-timeslots?barberId=${barberId}&date=${date}`
-  )
-    .then((response) => response.json())
-    .then((bookedSlots) => {
-      if (!Array.isArray(bookedSlots)) {
-        console.error("Unexpected response format:", bookedSlots);
-        return;
-      }
-
-      // Clear existing unavailable timeslot events
-      calendar.getEvents().forEach((event) => {
-        if (event.extendedProps.isUnavailable) {
-          event.remove();
-        }
-      });
-
-      // Add new unavailable timeslot events based on the booked slots
-      bookedSlots.forEach((slot) => {
-        calendar.addEvent({
-          title: "Unavailable",
-          start: slot.start,
-          end: slot.end,
-          allDay: false,
-          color: "red",
-          extendedProps: { isUnavailable: true },
-        });
-      });
-    })
-    .catch((error) =>
-      console.error("Error fetching unavailable timeslots:", error)
-    );
-}
-
 function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
 
   // Fetch unavailable timeslots for the barber in the given period
@@ -219,9 +176,7 @@ function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
   )
     .then((response) => response.json())
     .then((bookedSlots) => {
-      console.log("Booked Slots:", bookedSlots);
       if (!Array.isArray(bookedSlots)) {
-        console.error("Expected an array of booked slots:", bookedSlots);
         return;
       }
       // Clear out any existing 'unavailable' events
