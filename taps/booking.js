@@ -20,12 +20,13 @@ function initializeCalendar() {
 
     // Define the opening hours for each day of the week
     const openingHours = {
-        1: { startTime: "10:00", endTime: "18:00" }, // Monday
-        2: { startTime: "10:00", endTime: "18:00" }, // Tuesday
-        3: { startTime: "10:00", endTime: "18:00" }, // Wednesday
-        4: { startTime: "10:00", endTime: "18:00" }, // Thursday
-        5: { startTime: "10:00", endTime: "18:00" }, // Friday
-        6: { startTime: "10:00", endTime: "15:00" }, // Saturday
+      // Sunday - closed all day
+      1: { startTime: "10:00", endTime: "18:00" }, // Monday
+      2: { startTime: "10:00", endTime: "18:00" }, // Tuesday
+      3: { startTime: "10:00", endTime: "18:00" }, // Wednesday
+      4: { startTime: "10:00", endTime: "18:00" }, // Thursday
+      5: { startTime: "10:00", endTime: "18:00" }, // Friday
+      6: { startTime: "10:00", endTime: "15:00" }, // Saturday
     };
 
     const today = new Date();
@@ -34,80 +35,108 @@ function initializeCalendar() {
     currentWeekStart.setDate(today.getDate() - currentDayOfWeek);
 
     calendar = new Calendar(calendarEl, {
-        plugins: [timeGridPlugin, interactionPlugin],
-        initialView: "timeGridWeek",
-        headerToolbar: {
-            left: "prev,next today",
-            center: "title",
-            right: "timeGridWeek,timeGridDay",
-        },
-        slotDuration: "00:15:00",
-        slotLabelInterval: "00:15",
-        allDaySlot: false,
-        hiddenDays: [0], // Hide Sunday
-        businessHours: {
-            daysOfWeek: [1, 2, 3, 4, 5, 6], // Monday to Saturday
-            startTime: "10:00",
-            endTime: "18:00",
-        },
-        slotLabelFormat: {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-        },
-        dateClick: handleDateClick,
-        slotMinTime: "10:00",
-        slotMaxTime: "18:00", // Adjust this for Saturday if needed
-        slotLabelContent: (arg) => {
-            const dayOfWeek = arg.date.getDay();
-            const { startTime, endTime } = openingHours[dayOfWeek] || {};
-            if (startTime && endTime) {
-                const slotTime = arg.text;
-                if (slotTime >= startTime && slotTime < endTime) {
-                    return arg.text;
-                }
-            }
-            return "";
-        },
-        firstDay: currentDayOfWeek,
-        datesSet: function(dateInfo) {
-            const barberSelect = document.getElementById("barber-select");
-            const barberId = barberSelect.value;
-            if (barberId) {
-                fetchUnavailableTimeslotsForPeriod(
-                    dateInfo.startStr,
-                    dateInfo.endStr,
-                    barberId
-                );
-            }
-            disablePrevButtonIfNeeded();
-        },
-         eventSources: [
-            // Existing event sources...
-            // Grey out 15:00 to 18:00 on Saturdays
-            {
-                events: function(info, successCallback, failureCallback) {
-                    var saturdayEvents = [];
-                    var startDate = new Date(info.start.valueOf());
-                    var endDate = new Date(info.end.valueOf());
+      plugins: [timeGridPlugin, interactionPlugin],
+      initialView: "timeGridWeek",
+      headerToolbar: {
+        left: "prev,next today",
+        center: "title",
+        right: "timeGridWeek,timeGridDay",
+      },
+      slotDuration: "00:10:00",
+      slotLabelInterval: "00:15",
+      allDaySlot: false,
+      businessHours: {
+        daysOfWeek: [1, 2, 3, 4, 5, 6], // Monday to Saturday
+        startTime: "10:00",
+        endTime: "18:00",
+      },
+      slotLabelFormat: {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      },
+      dateClick: handleDateClick,
+      slotMinTime: "10:00",
+      slotMaxTime: "18:00", // Adjust this for Saturday if needed
+      slotLabelContent: (arg) => {
+        const dayOfWeek = arg.date.getDay();
+        const { startTime, endTime } = openingHours[dayOfWeek] || {};
+        if (startTime && endTime) {
+          const slotTime = arg.text;
+          if (slotTime >= startTime && slotTime < endTime) {
+            return arg.text;
+          }
+        }
+        return "";
+      },
+      firstDay: currentDayOfWeek,
+      datesSet: function (dateInfo) {
+        const barberSelect = document.getElementById("barber-select");
+        const barberId = barberSelect.value;
+        if (barberId) {
+          fetchUnavailableTimeslotsForPeriod(
+            dateInfo.startStr,
+            dateInfo.endStr,
+            barberId
+          );
+        }
+        disablePrevButtonIfNeeded();
+      },
+      eventSources: [
+        {
+          events: function (info, successCallback, failureCallback) {
+            var events = [];
+            var startDate = new Date(info.start.valueOf());
+            var endDate = new Date(info.end.valueOf());
 
-                    while (startDate < endDate) {
-                        if (startDate.getDay() === 6) { // 6 is Saturday
-                            saturdayEvents.push({
-                                title: 'Closed',
-                                start: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 15, 0),
-                                end: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 18, 0),
-                                rendering: 'background',
-                                color: '#cccccc' // Grey color
-                            });
-                        }
-                        startDate.setDate(startDate.getDate() + 1);
-                    }
-
-                    successCallback(saturdayEvents);
-                }
+            while (startDate < endDate) {
+              // Saturday partial closure
+              if (startDate.getDay() === 6) {
+                events.push({
+                  title: "Closed",
+                  start: new Date(
+                    startDate.getFullYear(),
+                    startDate.getMonth(),
+                    startDate.getDate(),
+                    15,
+                    0
+                  ),
+                  end: new Date(
+                    startDate.getFullYear(),
+                    startDate.getMonth(),
+                    startDate.getDate(),
+                    18,
+                    0
+                  ),
+                  rendering: "background",
+                  color: "#cccccc",
+                });
+              }
+              // Sunday full day closure
+              if (startDate.getDay() === 0) {
+                events.push({
+                  title: "Closed",
+                  start: new Date(
+                    startDate.getFullYear(),
+                    startDate.getMonth(),
+                    startDate.getDate()
+                  ),
+                  end: new Date(
+                    startDate.getFullYear(),
+                    startDate.getMonth(),
+                    startDate.getDate() + 1
+                  ),
+                  rendering: "background",
+                  color: "#cccccc",
+                });
+              }
+              startDate.setDate(startDate.getDate() + 1);
             }
-        ],
+
+            successCallback(events);
+          },
+        },
+      ],
     });
 
     calendar.render();
@@ -135,7 +164,7 @@ function fetchUnavailableTimeslotsForCurrentView(barberId) {
   }
 
   // Fetch unavailable dates and add them to the calendar
-  fetch(`http://localhost:3000/api/barber/${barberId}/unavailable-dates`)
+  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`)
     .then((response) => response.json())
     .then((unavailableDates) => {
       // Clear previous unavailable dates
@@ -202,6 +231,10 @@ function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
     .catch((error) =>
       console.error("Error fetching unavailable timeslots:", error)
     );
+}
+
+function fetchUnavailableTimesForBarber() {
+  
 }
 
 // Populate service bubbles from the API

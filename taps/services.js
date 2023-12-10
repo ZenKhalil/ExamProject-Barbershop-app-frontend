@@ -1,25 +1,55 @@
 document.addEventListener("DOMContentLoaded", function () {
-  loadPriceList();
-}); 
+  console.log("DOM fully loaded and parsed");
+  setupPriceListModal();
+});
+
+function toggleModal(displayState) {
+  const modal = document.getElementById("priceListModal");
+  modal.style.display = displayState;
+  sessionStorage.setItem("isPriceListModalOpen", displayState === "block");
+}
+
+function setupPriceListModal() {
+  const priceListButton = document.getElementById("priceListButton");
+  const span = document.querySelector(".close-button-pricelist");
+
+  if (priceListButton) {
+    priceListButton.addEventListener("click", function () {
+      toggleModal("block");
+      loadPriceList(); // Load data when modal is opened
+    });
+  }
+
+  if (span) {
+    span.addEventListener("click", function () {
+      toggleModal("none");
+    });
+  }
+
+  window.addEventListener("click", function (event) {
+    if (event.target === document.getElementById("priceListModal")) {
+      toggleModal("none");
+    }
+  });
+}
 
 function loadPriceList() {
-   fetch("http://localhost:3000/api/services")
-     .then((response) => response.json())
-     .then((services) => {
-       const priceListHtml = services
-         .map(
-           (service) => `
+  fetch("http://localhost:3000/api/services")
+    .then((response) => response.json())
+    .then((services) => {
+      const priceListHtml = services
+        .map(
+          (service) => `
         <div class="service">
           <h3>${service.service_name}</h3>
-          <p>Price: $${service.price}</p>
-          ${adminButtons(service.service_id)}
+          <p>Price: ${service.price} kr</p>
         </div>
       `
-         )
-         .join("");
-       document.getElementById("pricelist-section").innerHTML = priceListHtml;
-     })
-     .catch((error) => console.error("Error fetching services:", error));
+        )
+        .join("");
+      document.getElementById("modal-price-list").innerHTML = priceListHtml;
+    })
+    .catch((error) => console.error("Error fetching services:", error));
 }
 
 // Function to populate service options in a select dropdown
@@ -97,9 +127,11 @@ function editService(serviceId) {
 
 export default {
   loadPriceList,
+  toggleModal,
+  setupPriceListModal,
   populateServices,
   adminButtons,
   isAdminLoggedIn,
   deleteService,
-  editService
+  editService,
 };

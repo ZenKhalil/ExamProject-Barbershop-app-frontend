@@ -45,9 +45,6 @@ nav a {
   font-weight: bold;
 }
 
-/* Additional Styles */
-/* (Include the rest of your styles here, such as main, footer, buttons, etc.) */
-
 /* Calendar container styles */
 #calendar {
   max-width: 1000px; /* Slightly larger */
@@ -63,15 +60,88 @@ nav a {
   background-color: #ffff99;
 }
 
-/* Service List Styles */
-.service {
-  background-color: white;
-  border: 1px solid #e0e0e0; /* Lighter border */
-  padding: 15px;
-  margin-bottom: 15px; /* Slightly more space between services */
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+/* modal-price-list */
+#priceListModal {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 1000; /* High z-index */
+  align-items: center; 
+  justify-content: center; 
+  display: flex; 
 }
+
+.modal-content-pricelist {
+    background: #fff;
+    border-radius: 5px;
+    padding: 20px; /* Adjusted padding */
+    box-shadow: 0 4px 8px #0000001a;
+    max-width: 600px; 
+    width: 80%;  
+}
+
+#modal-price-list {
+  background: #f8f8f8; /* Light grey background similar to the image */
+  border: none; /* No border needed */
+  text-align: left; /* Align text to the left */
+  font-family: 'Arial', sans-serif; /* Font similar to the image */
+  max-width: 600px; /* Max width of the price list */
+  margin: auto; /* Center in the available space */
+}
+
+#modal-price-list h2 {
+  color: #204056; /* Navy color for the title */
+  font-size: 36px; /* Larger font size for the title */
+  font-weight: bold; /* Bold font weight */
+  text-align: center; /* Center the title */
+  margin-bottom: 30px; /* Space below the title */
+}
+
+#modal-price-list .service {
+  border-bottom: 1px dotted #ccc; /* Dotted line for each service */
+  padding: 15px 0; /* Padding around service items */
+  display: flex; /* Flex layout to align service name and price */
+  justify-content: space-between; /* Space between name and price */
+  font-size: 20px; /* Larger font size for service items */
+  line-height: 1.5; /* Space between lines */
+}
+
+#modal-price-list .service:last-child {
+  border-bottom: none; /* No border for the last item */
+}
+
+#modal-price-list .service h3 {
+  margin: 0; /* Remove default margin */
+  color: #000; /* Black text color for service name */
+  font-weight: normal; /* Normal font weight */
+}
+
+#modal-price-list .service p {
+  margin: 0; /* Remove default margin */
+  color: #009688; /* Teal color for the price */
+  font-weight: bold; /* Bold font weight */
+}
+
+.close-button-pricelist {
+  cursor: pointer;
+  color: #aaa;
+  background: #3c0303;
+  border: none;
+  font-size: 1.5em;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.close-button-pricelist:hover {
+  color: #333;
+}
+
+/* Add styles for price list similar to the image uploaded by the user */
+
 
 /* Admin Button Styles */
 button {
@@ -90,7 +160,15 @@ button:hover {
 }
 
 /* Form Styles */
-select,
+select {
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #bdbdbd; /* Lighter border for input fields */
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="tel"] {
@@ -111,13 +189,6 @@ input[type="tel"] {
   font-style: italic;
 }
 
-/* Footer Styles */
-footer {
-  text-align: center;
-  padding: 20px;
-  background-color: #424242; /* Darker footer for contrast */
-  color: white;
-}
 
 /* Tooltip Style */
 #tooltip {
