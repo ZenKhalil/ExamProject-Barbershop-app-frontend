@@ -128,9 +128,8 @@ This admin panel provides comprehensive control over the booking and scheduling 
 - Main Script (`script.js`): Orchestrates the overall functionality of the application, including navigation between different sections and loading specific page content.
 - Stylesheet (`style.css`): Provides the primary styling for the application, ensuring a consistent and appealing user interface.
 
-### Functional Modules
+### Other functional Modules
 
-- Booking (`taps/booking.js`): Manages the booking functionality, including calendar integration and appointment handling.
 - Services (`taps/services.js`): Deals with displaying services, price lists, and handling admin functionalities related to services.
 
 ## Contributing
