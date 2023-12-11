@@ -17,7 +17,7 @@ main section {
 
 .welcome h2 {
   font-size: 2em; /* Make the welcome message larger */
-  color: #0275d8; /* A blue color for the heading */
+  color: #6d7548; /* A blue color for the heading */
   margin-bottom: 20px; /* Space below the heading */
 }
 
@@ -27,24 +27,41 @@ main section {
 }
 
 /* About section styles */
-#about-section {
-  background-color: #f7f7f7; /* A light grey background */
-  border-top: 1px solid #ddd; /* A separator from the previous content */
+#about-section .container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
 }
 
 #about-section h2 {
-  font-size: 2em; /* Consistent sizing with the home section */
-  color: #0275d8; /* Consistent coloring with the home section */
-  text-align: center; /* Center-align text */
-  margin-bottom: 20px; /* Space below the heading */
+    color: #333;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
 }
 
 #about-section p {
-  max-width: 800px; /* A max-width to keep lines of text readable */
-  margin: auto; /* Center the text block */
-  font-size: 1em; /* Standard font size for the text */
-  color: #333; /* A standard dark grey for text */
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
 }
+
+#about-section button {
+    padding: 10px 20px;
+    background-color: #0275d8;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+#about-section button:hover {
+    background-color: #0056b3;
+}
+
 
 /* Gallery section styles */
 #gallery-section {

@@ -1,39 +1,332 @@
 /* Style for the modal */
 .modal-admin {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    position: relative;
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+  align-items: center;
+  justify-content: center;
 }
+
 
 /* Modal Content/Box */
 .modal-admin-content {
-    background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    padding: 1.5rem; /* Padding inside the modal content */
+    padding-top: 0;
+    position: relative;
+    background-color: #fff;
+    margin: auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
+    width: auto; /* This allows it to grow according to content up to max-width */
+    max-width: 250px; /* Set a max-width that suits your design */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    border-radius: 10px;
 }
+
+.modal-header-admin h2 {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Modern, sans-serif font */
+    font-size: 2rem; /* 32px font size for prominence */
+    color: #333; /* Dark grey for a strong contrast */
+    margin-bottom: 1rem; /* Spacing below the title */
+    text-transform: uppercase; /* UPPERCASE text for a more styled look */
+    letter-spacing: 1px; /* Space out the letters slightly */
+    text-align: center; /* Center align the text */
+    font-weight: bold; /* Bold font for emphasis */
+    line-height: 1.2; /* Adjust line height for better readability */
+    border-bottom: 2px solid #eaeaea; /* Subtle bottom border */
+    padding-bottom: 0.5rem; /* Padding below the text, above the border */
+}
+
+#change-dates-modal .close-modal {
+    cursor: pointer;
+    color: #000000;
+    border: none;
+    font-size: 2em;
+    background-color: rgba(68, 157, 68, 0);
+    position: absolute;
+    top: -5px;
+    right: 7px;
+}
+
+#change-dates-modal .modal-content{
+    background: #fff;
+    border-radius: 8px;
+    width: 30%;
+    max-width: 305px;
+    padding: 13px;
+    position: relative;
+}
+
 
 /* The Close Button */
 .close-button-admin {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+  color: #aaa;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 25px;
+  font-weight: bold;
 }
 
 .close-button-admin:hover,
 .close-button-admin:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
 }
 
+@keyframes animatetop {
+  from {top: -300px; opacity: 0}
+  to {top: 0; opacity: 1}
+}
+
+/* Style adjustments for admin login */
+#admin-login-area {
+  position: absolute; /* Position the login area absolutely within its relative parent */
+  top: 10px; /* 10px from the top of the header */
+  right: 10px; /* 10px from the right side of the header */
+  z-index: 2; /* Ensure it's above other content */
+}
+
+#admin-login-button {
+    color: #fff;
+    background: none;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    padding: 5px 15px;
+    transition: all .3s;
+    margin: -3px;
+}
+
+#admin-login-button:hover {
+  background: #fff; /* Background color on hover */
+  color: #0275d8; /* Text color on hover to match the header */
+  border-color: #0275d8; /* Border color on hover to match the header */
+}
+
+/* Style for the admin login form */
+#admin-login-form {
+    flex-direction: column; /* Stack the fields vertically */
+    gap: 10px; /* Spacing between each field */
+}
+
+#admin-login-form input[type="text"],
+#admin-login-form input[type="password"] {
+    padding: 10px;
+    margin: 5px 0; /* Spacing above and below */
+    border: 1px solid #ddd;
+    border-radius: 4px; /* Rounded corners */
+    font-size: 16px; /* Larger font size for better readability */
+}
+
+#admin-login-form button[type="submit"] {
+    padding: 10px;
+    background-color: #5cb85c; /* Bootstrap's btn-success color */
+    color: white;
+    border: none;
+    border-radius: 4px; /* Rounded corners */
+    font-size: 16px; /* Matching the input field font size */
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+#admin-login-form button[type="submit"]:hover {
+    background-color: #4cae4c; /* A darker shade when hovered */
+}
+
+/* Style for the bookings list */
+.booking-list {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    justify-content: space-around;
+}
+
+.booking-list-item {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    width: 100%; /* Default to full width on small screens */
+    max-width: 300px; /* Prevent boxes from getting too wide */
+    margin: 24px;
+    padding: 26px;
+    box-shadow: 0 2px 4px #0000001a;
+    height: 250px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+
+
+.booking-detail {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.booking-detail strong {
+  color: #333;
+  font-weight: 600;
+}
+
+
+/*Dashboard admin style*/
+
+.dashboard-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.dashboard-card {
+  display: inline-block;
+  margin: 10px;
+  padding: 20px;
+  width: 200px;
+  height: 100px;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  line-height: 100px;
+  vertical-align: middle;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-container h2 {
+  margin-bottom: 30px;
+  color: #333;
+  font-size: 2rem;
+}
+
+/* Style the container for sort and filter options */
+.sort-filter-container {
+  display: flex;
+  margin-bottom: 20px;
+  padding: 0 15px;
+}
+
+/* Style each sort and filter section */
+.sort-filter-section {
+  display: flex;
+  align-items: center;
+  margin: 5px;
+}
+
+/* Style the labels */
+.sort-filter-section label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+/* Style the select elements */
+.sort-filter-section select {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: white;
+  cursor: pointer;
+}
+
+/* Add hover and focus styles for the select elements */
+.sort-filter-section select:hover,
+.sort-filter-section select:focus {
+  border-color: #888;
+  outline: none;
+}
+
+/* Style for the booking list */
+.booking-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+.availability-form {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 547px;
+    margin: 0 auto;
+    padding: 14px;
+    box-shadow: 0 2px 4px #0000001a;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-control {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 80%;
+    padding: 8px;
+    font-size: 16px;
+}
+
+.form-actions {
+    text-align: center;
+    padding-top: 0px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: #5cb85c;
+  color: white;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.btn:hover {
+  background-color: #449d44;
+}
+
+#main-content h3 {
+    text-align: center;
+}
+
+.unavailability-item.selected {
+  background-color: #e0e0e0; /* or any highlight color */
+}
+
+/* For tablets and small desktops */
+@media (min-width: 768px) {
+    .booking-list-item {
+        width: calc(50% - 48px); /* 2 items per row */
+    }
+}
+
+/* For large desktops */
+@media (min-width: 992px) {
+    .booking-list-item {
+        width: calc(33.333% - 48px); /* 3 items per row */
+    }
+}
+
+/* For extra large screens */
+@media (min-width: 1200px) {
+    .booking-list-item {
+        width: calc(25% - 48px); /* 4 items per row */
+    }
+}

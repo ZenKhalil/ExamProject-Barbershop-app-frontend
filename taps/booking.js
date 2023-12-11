@@ -365,21 +365,26 @@ function handleDateClick(info) {
 
     // Update the selected date and time display in the modal
     const displayDateField = modal.querySelector("#selected-date");
-    if (displayDateField) displayDateField.textContent = `Selected Date: ${formattedDate}`;
+    if (displayDateField) displayDateField.textContent = `Date: ${formattedDate}`;
 
     const displayTimeField = modal.querySelector("#selected-time");
-    if (displayTimeField) displayTimeField.textContent = `Selected Time: ${selectedTime}`;
+    if (displayTimeField) displayTimeField.textContent = `Time: ${selectedTime}`;
 
     // Display the selected barber's name in the modal
     const displayBarberField = modal.querySelector("#selected-barber");
-    if (displayBarberField) displayBarberField.textContent = `Selected Barber: ${selectedBarberName}`;
+    if (displayBarberField) displayBarberField.textContent = `Barber: ${selectedBarberName}`;
 
 }
 
 // Close the modal if clicked outside of the modal content
 window.onclick = function (event) {
   const modal = document.getElementById("booking-modal");
+  // Check if modal is not null
+  if (!modal) return;
+
   const modalContent = modal.querySelector(".modal-content");
+  // Check if modalContent is not null
+  if (!modalContent) return;
 
   if (event.target === modal && !modalContent.contains(event.target)) {
     closeModal();

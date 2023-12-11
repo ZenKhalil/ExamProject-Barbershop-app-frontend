@@ -3,32 +3,39 @@ document.addEventListener("DOMContentLoaded", function () {
   setupPriceListModal();
 });
 
+// Function to toggle modal display
 function toggleModal(displayState) {
   const modal = document.getElementById("priceListModal");
-  modal.style.display = displayState;
-  sessionStorage.setItem("isPriceListModalOpen", displayState === "block");
+  modal.style.display = displayState ? "flex" : "none";
+  if (displayState) {
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+  }
 }
 
+// Set up the modal once the document has loaded
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM fully loaded and parsed");
+  setupPriceListModal();
+});
+
 function setupPriceListModal() {
-  const priceListButton = document.getElementById("priceListButton");
-  const span = document.querySelector(".close-button-pricelist");
+  // Attach event listener for price list button
+  document.getElementById("priceListButton").addEventListener("click", function () {
+    toggleModal(true); // Show the modal
+    loadPriceList(); // Load the price list when opening the modal
+  });
 
-  if (priceListButton) {
-    priceListButton.addEventListener("click", function () {
-      toggleModal("block");
-      loadPriceList(); // Load data when modal is opened
-    });
-  }
+  // Attach event listener for close button inside the modal
+  document.querySelector(".close-button-pricelist").addEventListener("click", function () {
+    toggleModal(false); // Hide the modal
+  });
 
-  if (span) {
-    span.addEventListener("click", function () {
-      toggleModal("none");
-    });
-  }
-
+  // Close the modal if clicking outside of it
   window.addEventListener("click", function (event) {
-    if (event.target === document.getElementById("priceListModal")) {
-      toggleModal("none");
+    const modal = document.getElementById("priceListModal");
+    if (event.target === modal) {
+      toggleModal(false); // Hide the modal
     }
   });
 }

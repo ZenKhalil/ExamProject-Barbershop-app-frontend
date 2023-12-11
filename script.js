@@ -5,23 +5,15 @@ let isBookingPageLoaded = false;
 
 // Global Setup
 document.addEventListener("DOMContentLoaded", function () {
+   var footerHeight = document.querySelector("footer").offsetHeight;
+   var mainContent = document.getElementById("main-content");
+   mainContent.style.paddingBottom = footerHeight + "px";
   console.log("Document ready. Setting up navigation and sections.");
   setupNavigation();
 
-  // Checking if the price list modal was previously open
-  const isPriceListModalOpen =
-    sessionStorage.getItem("isPriceListModalOpen") === "true";
-  console.log("Is Price List Modal Open:", isPriceListModalOpen);
-
-  // Close price list modal if it was previously open
-  if (isPriceListModalOpen) {
-    console.log("Closing previously opened price list modal.");
-    services.toggleModal("none");
-  }
-
-  // Check if a section is saved in local storage
-  const savedSection = localStorage.getItem("currentSection");
-  console.log("Saved Section:", savedSection);
+  // Retrieve the last visited section from sessionStorage
+  const savedSection = sessionStorage.getItem("currentSection");
+  console.log("Retrieved saved section:", savedSection);
 
   // Show the saved section or default to the home page
   if (savedSection) {
@@ -34,12 +26,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Setup price list modal toggle in services
   services.setupPriceListModal();
+
+ // If admin.js is loaded and the function exists, call it
+  if (window.checkAdminLoginStatus) {
+    window.checkAdminLoginStatus();
+  }
+
 });
 
 function showSection(sectionId) {
   console.log("Attempting to show section:", sectionId);
   document.querySelectorAll("main section").forEach((section) => {
-    console.log("Hiding section:", section.id);
     section.style.display = "none";
   });
 
@@ -47,6 +44,9 @@ function showSection(sectionId) {
   if (selectedSection) {
     console.log("Displaying section:", sectionId);
     selectedSection.style.display = "block";
+
+    // Save the current section in sessionStorage
+    sessionStorage.setItem("currentSection", sectionId);
 
     // Ensure booking page is loaded only when its section is active
     if (sectionId === "booking-section" && !isBookingPageLoaded) {
@@ -60,7 +60,21 @@ function showSection(sectionId) {
   } else {
     console.error("Failed to find section with ID:", sectionId);
   }
+
+   if (sectionId === "about-section") {
+     loadAboutPage();
+   }
+
+    if (sectionId === "home-section") {
+      loadHomePage();
+    }
+
+    if (sectionId === "pricelist-section") {
+      setupPriceListModal();
+      selectedSection.style.display = "flex";
+    }
 }
+
 
 function setupNavigation() {
   document.querySelectorAll("#main-nav a").forEach((link) => {
@@ -73,6 +87,25 @@ function setupNavigation() {
   });
   console.log("Navigation setup complete.");
 }
+
+// In script.js
+window.generateAdminNavBar = function() {
+  const navBar = document.getElementById("main-nav");
+  navBar.innerHTML = `
+    <ul>
+      <li><a href="#" id="dashboard-link">Dashboard</a></li>
+      <li><a href="#" id="view-bookings-link">View Bookings</a></li>
+      <li><a href="#" id="edit-availabilities-link">Edit Availabilities</a></li>
+      <li><a href="#" id="update-opening-hours-link">Update Opening Hours</a></li>
+      <li><a href="#" id="admin-logout-link"></a></li>
+    </ul>`;
+
+  // Call the function from admin.js to set up event listeners
+  if (window.setupAdminNavBarListeners) {
+    window.setupAdminNavBarListeners();
+  }
+};
+
 
 function loadHomePage() {
   console.log("Loading home page content.");
@@ -93,12 +126,23 @@ function loadHomePage() {
   console.log("Home page content loaded and set.");
 }
 
-function updateMainContent(html, sectionId) {
-  const section = document.getElementById(sectionId);
-  if (section) {
-    console.log("Updating main content for section:", sectionId);
-    section.innerHTML = html;
-  } else {
-    console.error("Failed to update content. Section not found:", sectionId);
+function loadAboutPage() {
+  console.log("Loading about page content.");
+
+  const aboutSection = document.getElementById("about-section");
+  if (!aboutSection) {
+    console.error("About section not found in the document.");
+    return;
   }
+
+  const aboutHtml = `
+    <div class="about-container">
+      <h2>About Our Barbershop</h2>
+      <p>Welcome to Modern Barbershop, where tradition meets modernity. Established in 1995, we've been providing top-notch grooming services for over two decades. Our skilled barbers are artisans of their craft, dedicated to giving you the best experience and a look you'll love.</p>
+      <p>We believe in the timeless power of a great haircut, the importance of a place for men to feel comfortable and valued, and the simple pleasure of a sharp look for any occasion. We're not just a business; we're a cornerstone of the community, and we're proud to uphold the classic values of quality and service.</p>
+      <p>Whether you're looking for a quick trim, a classic cut, or a complete makeover, we're here for you. Walk-ins are welcome, so come in and experience the difference at Modern Barbershop today!</p>
+    </div>`;
+
+  aboutSection.innerHTML = aboutHtml;
+  console.log("About page content loaded and set.");
 }
