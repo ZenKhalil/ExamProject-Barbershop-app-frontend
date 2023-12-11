@@ -14,6 +14,7 @@ Installation and Local Setup
 
 4.  Accessing the App: The app will be accessible at `http://localhost:1234` or the specified port in your terminal.
 
+
 Technologies Used
 -----------------
 
@@ -47,7 +48,7 @@ The admin panel of the Barbershop app frontend, as defined in `admin/admin.js`, 
 -   Dashboard Features:
     -   View Bookings: Admins can view all bookings. They can sort bookings by date and filter them by barber.
     -   Edit Availabilities: This option allows admins to manage barber availability, including adding and removing unavailable dates.
-    -   Update Opening Hours: While the specific implementation isn't detailed in the provided code, this option presumably allows admins to update the barbershop's operating hours.
+    -   Update Opening Hours: While the specific implementation isn't detailed in the provided code, this option  allows admins to update the barbershop's operating hours.
 
 ### Booking Management
 
