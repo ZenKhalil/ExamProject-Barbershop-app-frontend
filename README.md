@@ -65,7 +65,7 @@ The admin panel of the Barbershop app frontend, as defined in `admin/admin.js`, 
 
 This admin panel provides comprehensive control over the booking and scheduling aspects of the barbershop, making it a crucial part of the application for administrative tasks.
 
-### Customer Booking Interface (`taps/booking.js`)
+## Customer Booking Interface (`taps/booking.js`)
 ### Booking Page Initialization
 
 - Load Booking Page: When the booking page is loaded, it initializes the calendar, populates services and barbers, and sets up the booking form.
