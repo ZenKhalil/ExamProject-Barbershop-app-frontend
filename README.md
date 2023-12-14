@@ -12,6 +12,9 @@ Welcome to the frontend repository of the Barbershop application, a modern platf
 
 4.  Accessing the App: The app will be accessible at `http://localhost:1234` or the specified port in your terminal.
 
+## Access to deployed website
+https://examproject-testdata-3.azurewebsites.net/
+
 ## Technologies Used
 
 - HTML/CSS/JavaScript: Fundamental technologies for frontend development.
