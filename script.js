@@ -117,7 +117,9 @@ function loadHomePage() {
   }
 
   const homeHtml = `
-    <div class="welcome">
+    <div class="hero-image">
+    </div>
+    <div class="welcome animated fadeIn" id="welcome-message">
       <h2>Welcome to The Barber Shop</h2>
       <p>Discover our world-class services and meet our talented team.</p>
     </div>`;

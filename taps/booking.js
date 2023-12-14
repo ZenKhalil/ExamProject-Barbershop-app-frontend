@@ -5,6 +5,15 @@ import interactionPlugin from "@fullcalendar/interaction";
 // Declare calendar as a global variable
 let calendar;
 
+const openingHours = {
+  1: { startTime: "10:00", endTime: "18:00" }, // Monday
+  2: { startTime: "10:00", endTime: "18:00" }, // Tuesday
+  3: { startTime: "10:00", endTime: "18:00" }, // Wednesday
+  4: { startTime: "10:00", endTime: "18:00" }, // Thursday
+  5: { startTime: "10:00", endTime: "18:00" }, // Friday
+  6: { startTime: "10:00", endTime: "15:00" }, // Saturday
+};
+
 // Load the booking page with necessary setup
 function loadBookingPage() {
   initializeCalendar();
@@ -15,132 +24,122 @@ function loadBookingPage() {
 
 // Initialize the calendar with weekly view and business hours
 function initializeCalendar() {
-    const calendarEl = document.getElementById("calendar");
-    if (!calendarEl) return;
+  const calendarEl = document.getElementById("calendar");
+  if (!calendarEl) return;
 
-    // Define the opening hours for each day of the week
-    const openingHours = {
-      // Sunday - closed all day
-      1: { startTime: "10:00", endTime: "18:00" }, // Monday
-      2: { startTime: "10:00", endTime: "18:00" }, // Tuesday
-      3: { startTime: "10:00", endTime: "18:00" }, // Wednesday
-      4: { startTime: "10:00", endTime: "18:00" }, // Thursday
-      5: { startTime: "10:00", endTime: "18:00" }, // Friday
-      6: { startTime: "10:00", endTime: "15:00" }, // Saturday
-    };
+  const today = new Date();
+  const currentDayOfWeek = today.getDay();
+  const currentWeekStart = new Date(today);
+  currentWeekStart.setDate(today.getDate() - currentDayOfWeek);
 
-    const today = new Date();
-    const currentDayOfWeek = today.getDay();
-    const currentWeekStart = new Date(today);
-    currentWeekStart.setDate(today.getDate() - currentDayOfWeek);
-
-    calendar = new Calendar(calendarEl, {
-      plugins: [timeGridPlugin, interactionPlugin],
-      initialView: "timeGridWeek",
-      headerToolbar: {
-        left: "prev,next today",
-        center: "title",
-        right: "timeGridWeek,timeGridDay",
-      },
-      slotDuration: "00:10:00",
-      slotLabelInterval: "00:15",
-      allDaySlot: false,
-      businessHours: {
-        daysOfWeek: [1, 2, 3, 4, 5, 6], // Monday to Saturday
-        startTime: "10:00",
-        endTime: "18:00",
-      },
-      slotLabelFormat: {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      },
-      dateClick: handleDateClick,
-      slotMinTime: "10:00",
-      slotMaxTime: "18:00", // Adjust this for Saturday if needed
-      slotLabelContent: (arg) => {
-        const dayOfWeek = arg.date.getDay();
-        const { startTime, endTime } = openingHours[dayOfWeek] || {};
-        if (startTime && endTime) {
-          const slotTime = arg.text;
-          if (slotTime >= startTime && slotTime < endTime) {
-            return arg.text;
-          }
+  calendar = new Calendar(calendarEl, {
+    plugins: [timeGridPlugin, interactionPlugin],
+    initialView: "timeGridWeek",
+    headerToolbar: {
+      left: "prev,next today",
+      center: "title",
+      right: "timeGridWeek,timeGridDay",
+    },
+    slotDuration: "00:10:00",
+    slotLabelInterval: "00:15",
+    allDaySlot: false,
+    businessHours: {
+      daysOfWeek: [1, 2, 3, 4, 5, 6], // Monday to Saturday
+      startTime: "10:00",
+      endTime: "18:00",
+    },
+    slotLabelFormat: {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    },
+    dateClick: handleDateClick,
+    slotMinTime: "10:00",
+    slotMaxTime: "18:00", // Adjust this for Saturday if needed
+    slotLabelContent: (arg) => {
+      const dayOfWeek = arg.date.getDay();
+      const { startTime, endTime } = openingHours[dayOfWeek] || {};
+      if (startTime && endTime) {
+        const slotTime = arg.text;
+        if (slotTime >= startTime && slotTime < endTime) {
+          return arg.text;
         }
-        return "";
-      },
-      firstDay: currentDayOfWeek,
-      datesSet: function (dateInfo) {
-        const barberSelect = document.getElementById("barber-select");
-        const barberId = barberSelect.value;
-        if (barberId) {
-          fetchUnavailableTimeslotsForPeriod(
-            dateInfo.startStr,
-            dateInfo.endStr,
-            barberId
-          );
-        }
-        disablePrevButtonIfNeeded();
-      },
-      eventSources: [
-        {
-          events: function (info, successCallback, failureCallback) {
-            var events = [];
-            var startDate = new Date(info.start.valueOf());
-            var endDate = new Date(info.end.valueOf());
+      }
+      return "";
+    },
+    firstDay: currentDayOfWeek,
+    datesSet: function (dateInfo) {
+      const barberSelect = document.getElementById("barber-select");
+      const barberId = barberSelect.value;
 
-            while (startDate < endDate) {
-              // Saturday partial closure
-              if (startDate.getDay() === 6) {
-                events.push({
-                  title: "Closed",
-                  start: new Date(
-                    startDate.getFullYear(),
-                    startDate.getMonth(),
-                    startDate.getDate(),
-                    15,
-                    0
-                  ),
-                  end: new Date(
-                    startDate.getFullYear(),
-                    startDate.getMonth(),
-                    startDate.getDate(),
-                    18,
-                    0
-                  ),
-                  rendering: "background",
-                  color: "#cccccc",
-                });
-              }
-              // Sunday full day closure
-              if (startDate.getDay() === 0) {
-                events.push({
-                  title: "Closed",
-                  start: new Date(
-                    startDate.getFullYear(),
-                    startDate.getMonth(),
-                    startDate.getDate()
-                  ),
-                  end: new Date(
-                    startDate.getFullYear(),
-                    startDate.getMonth(),
-                    startDate.getDate() + 1
-                  ),
-                  rendering: "background",
-                  color: "#cccccc",
-                });
-              }
-              startDate.setDate(startDate.getDate() + 1);
+      if (barberId) {
+        fetchUnavailableTimeslotsForCurrentView(barberId);
+        fetchUnavailableTimesForBarber(barberId); // Fetch for the current view
+      }
+      disablePrevButtonIfNeeded();
+    },
+    eventSources: [
+      {
+        events: function (info, successCallback, failureCallback) {
+          var events = [];
+          var startDate = new Date(info.start.valueOf());
+          var endDate = new Date(info.end.valueOf());
+
+          while (startDate < endDate) {
+            // Check for Saturday partial closure
+            if (startDate.getDay() === 6) {
+              // Saturday
+              events.push({
+                title: "Closed",
+                start: new Date(
+                  startDate.getFullYear(),
+                  startDate.getMonth(),
+                  startDate.getDate(),
+                  15,
+                  0
+                ),
+                end: new Date(
+                  startDate.getFullYear(),
+                  startDate.getMonth(),
+                  startDate.getDate(),
+                  23,
+                  59
+                ),
+                rendering: "background",
+                color: "#cccccc",
+              });
             }
 
-            successCallback(events);
-          },
-        },
-      ],
-    });
+            // Check for Sunday full day closure
+            if (startDate.getDay() === 0) {
+              // Sunday
+              events.push({
+                title: "Closed",
+                start: new Date(
+                  startDate.getFullYear(),
+                  startDate.getMonth(),
+                  startDate.getDate()
+                ),
+                end: new Date(
+                  startDate.getFullYear(),
+                  startDate.getMonth(),
+                  startDate.getDate() + 1
+                ),
+                rendering: "background",
+                color: "#cccccc",
+              });
+            }
 
-    calendar.render();
-    
+            startDate.setDate(startDate.getDate() + 1);
+          }
+
+          successCallback(events);
+        },
+      },
+    ],
+  });
+
+  calendar.render();
 }
 
 function disablePrevButtonIfNeeded() {
@@ -155,8 +154,6 @@ function disablePrevButtonIfNeeded() {
   prevButton.disabled = viewStart.getTime() <= today.getTime();
 }
 
-
-
 function fetchUnavailableTimeslotsForCurrentView(barberId) {
   if (!barberId) {
     console.warn("No barber selected.");
@@ -164,7 +161,7 @@ function fetchUnavailableTimeslotsForCurrentView(barberId) {
   }
 
   // Fetch unavailable dates and add them to the calendar
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`)
+  fetch(`https://examproject-testdata-3.azurewebsites.net/api/barbers/${barberId}/unavailable-dates`)
     .then((response) => response.json())
     .then((unavailableDates) => {
       // Clear previous unavailable dates
@@ -198,10 +195,9 @@ function fetchUnavailableTimeslotsForCurrentView(barberId) {
 }
 
 function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
-
   // Fetch unavailable timeslots for the barber in the given period
   fetch(
-    `http://localhost:3000/api/bookings/unavailable-timeslots?barberId=${barberId}&start=${start}&end=${end}`
+    `https://examproject-testdata-3.azurewebsites.net/api/bookings/unavailable-timeslots?barberId=${barberId}&start=${start}&end=${end}`
   )
     .then((response) => response.json())
     .then((bookedSlots) => {
@@ -223,7 +219,7 @@ function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
           start: slot.start,
           end: slot.end,
           allDay: false,
-          color: "red",
+          color: "rgb(158 60 60)",
           extendedProps: { isUnavailable: true },
         });
       });
@@ -233,13 +229,113 @@ function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
     );
 }
 
-function fetchUnavailableTimesForBarber() {
-  
+var renderedUnavailableDates = new Set();
+
+
+function fetchUnavailableTimesForBarber(barberId) {
+  // ændret af omar
+
+  // first we'll check if barberId is null or undefined, if it is, we return immediately since we can't proceed with the reqeust
+  if (!barberId) {
+    console.error("Error! No barber selected or the value is undefined");
+    return;
+  }
+
+  // we'll store the rendereddates in a set data structure incase there are duplicates to prevent double rendering
+  const renderedDates = new Set();
+
+  fetch(
+    `https://examproject-testdata-3.azurewebsites.net/api/barbers/unavailable-dates2?barberId=${barberId}`
+  )
+    .then((response) => response.json())
+    .then((unavailableDates) => {
+      // Add new unavailable dates
+      unavailableDates.forEach((date) => {
+        const dateTime = new Date(date);
+        const day = dateTime.getDay();
+        const { startTime, endTime } = openingHours[day] || {};
+
+        if (startTime && endTime) {
+          const startDateTime = new Date(date + "T" + startTime);
+          const endDateTime = new Date(date + "T" + endTime);
+
+          // Check if the event is already rendered
+          if (!renderedUnavailableDates.has(date)) {
+            renderedUnavailableDates.add(date);
+
+            calendar.addEvent({
+              title: "Unavailable",
+              start: startDateTime,
+              end: endDateTime,
+              rendering: "background",
+              color: "rgb(118 129 141)",
+            });
+          }
+        }
+      });
+    })
+    .catch((error) =>
+      console.error("An error has occurred fetching barber dates", error)
+    );
+}
+
+function onBarberChange() {
+  const barberSelect = document.getElementById("barber-select");
+  const newBarberId = barberSelect.value;
+
+  clearUnavailableEvents();
+  renderedUnavailableDates.clear();
+  fetchUnavailableTimesForBarber(newBarberId);
+}
+
+function clearUnavailableEvents() {
+  const events = calendar.getEvents();
+  events.forEach((event) => {
+    if (["Unavailable", "Booked"].includes(event.title)) {
+      event.remove();
+    }
+  });
+  renderedUnavailableDates.clear();
+}
+
+
+// Attach this function to the barber-select change event
+document
+.getElementById("barber-select")
+.addEventListener("change", onBarberChange);
+
+// Populate barbers from the API
+function populateBarbers() {
+  fetch("https://examproject-testdata-3.azurewebsites.net/api/barbers")
+    .then((response) => response.json())
+    .then((barbers) => {
+      const barberSelect = document.getElementById("barber-select");
+      barberSelect.innerHTML = barbers
+        .map(
+          (barber) =>
+            `<option value="${barber.barber_id}">${barber.name}</option>`
+        )
+        .join("");
+
+      // Set an initial barber value and fetch their timeslots
+      if (barbers.length > 0) {
+        barberSelect.value = barbers[0].barber_id;
+        fetchUnavailableTimeslotsForCurrentView(barbers[0].barber_id);
+        fetchUnavailableTimesForBarber(barbers[0].barber_id);
+      }
+
+      // Change event to update timeslots when a new barber is selected
+      barberSelect.addEventListener("change", function () {
+        fetchUnavailableTimeslotsForCurrentView(this.value);
+        fetchUnavailableTimesForBarber(this.value);
+      });
+    })
+    .catch((error) => console.error("Error fetching barbers:", error));
 }
 
 // Populate service bubbles from the API
 function populateServices() {
-  fetch("http://localhost:3000/api/services")
+  fetch("https://examproject-testdata-3.azurewebsites.net/api/services")
     .then((response) => response.json())
     .then((services) => {
       if (!Array.isArray(services)) {
@@ -280,33 +376,6 @@ document.querySelectorAll(".service-button").forEach((button) => {
   });
 });
 
-// Populate barbers from the API
-function populateBarbers() {
-  fetch("http://localhost:3000/api/barbers")
-    .then((response) => response.json())
-    .then((barbers) => {
-      const barberSelect = document.getElementById("barber-select");
-      barberSelect.innerHTML = barbers
-        .map(
-          (barber) =>
-            `<option value="${barber.barber_id}">${barber.name}</option>`
-        )
-        .join("");
-
-      // Set an initial barber value and fetch their timeslots
-      if (barbers.length > 0) {
-        barberSelect.value = barbers[0].barber_id;
-        fetchUnavailableTimeslotsForCurrentView(barbers[0].barber_id);
-      }
-
-      // Change event to update timeslots when a new barber is selected
-      barberSelect.addEventListener("change", function () {
-        fetchUnavailableTimeslotsForCurrentView(this.value);
-      });
-    })
-    .catch((error) => console.error("Error fetching barbers:", error));
-}
-
 
 // Setup the booking form with event listeners
 function setupBookingForm() {
@@ -329,6 +398,7 @@ function handleBarberChange() {
     return;
   }
 
+  fetchUnavailableTimesForBarber(barberId);
   fetchUnavailableTimeslotsForCurrentView(barberId);
 
   // Use the calendar instance directly without getApi()
@@ -340,40 +410,67 @@ function handleBarberChange() {
 
 // Handle date click on the calendar
 function handleDateClick(info) {
-    // Check if a barber is selected in the main barber select dropdown
-    const barberSelect = document.getElementById("barber-select");
-    if (!barberSelect.value) {
-        alert("Please select a barber first.");
-        return;
-    }
+  // Check if the clicked day is a closed day
+  if (isClosedDay(info.date)) {
+    alert("The barber shop is closed on this day.");
+    return; // Do nothing more
+  }
 
-    const selectedDate = info.date;
-    const formattedDate = selectedDate.toISOString().split("T")[0];
-    const selectedTime = selectedDate.toTimeString().split(" ")[0].substring(0, 5);
-    const selectedBarberName = barberSelect.options[barberSelect.selectedIndex].text;
+  // Check if a barber is selected in the main barber select dropdown
+  const barberSelect = document.getElementById("barber-select");
+  if (!barberSelect.value) {
+    alert("Please select a barber first.");
+    return;
+  }
 
-    // Show the modal
-    const modal = document.getElementById("booking-modal");
-    modal.classList.remove("hidden");
+  const selectedDate = info.date;
+  const formattedDate = selectedDate.toISOString().split("T")[0];
+  const selectedTime = selectedDate
+    .toTimeString()
+    .split(" ")[0]
+    .substring(0, 5);
+  const selectedBarberName =
+    barberSelect.options[barberSelect.selectedIndex].text;
 
-    // Populate hidden input fields or display fields in the modal
-    const hiddenDateField = modal.querySelector("#hidden-date-field");
-    if (hiddenDateField) hiddenDateField.value = formattedDate;
+  // Show the modal
+  const modal = document.getElementById("booking-modal");
+  modal.classList.remove("hidden");
 
-    const hiddenTimeField = modal.querySelector("#hidden-time-field");
-    if (hiddenTimeField) hiddenTimeField.value = selectedTime;
+  // Populate hidden input fields or display fields in the modal
+  const hiddenDateField = modal.querySelector("#hidden-date-field");
+  if (hiddenDateField) hiddenDateField.value = formattedDate;
 
-    // Update the selected date and time display in the modal
-    const displayDateField = modal.querySelector("#selected-date");
-    if (displayDateField) displayDateField.textContent = `Date: ${formattedDate}`;
+  const hiddenTimeField = modal.querySelector("#hidden-time-field");
+  if (hiddenTimeField) hiddenTimeField.value = selectedTime;
 
-    const displayTimeField = modal.querySelector("#selected-time");
-    if (displayTimeField) displayTimeField.textContent = `Time: ${selectedTime}`;
+  // Update the selected date and time display in the modal
+  const displayDateField = modal.querySelector("#selected-date");
+  if (displayDateField) displayDateField.textContent = `Date: ${formattedDate}`;
 
-    // Display the selected barber's name in the modal
-    const displayBarberField = modal.querySelector("#selected-barber");
-    if (displayBarberField) displayBarberField.textContent = `Barber: ${selectedBarberName}`;
+  const displayTimeField = modal.querySelector("#selected-time");
+  if (displayTimeField) displayTimeField.textContent = `Time: ${selectedTime}`;
 
+  // Display the selected barber's name in the modal
+  const displayBarberField = modal.querySelector("#selected-barber");
+  if (displayBarberField)
+    displayBarberField.textContent = `Barber: ${selectedBarberName}`;
+}
+
+function isClosedDay(date) {
+  const dayOfWeek = date.getDay();
+  const hour = date.getHours();
+
+  // Check if it's Sunday (day 0)
+  if (dayOfWeek === 0) {
+    return true; // Closed all day on Sundays
+  }
+
+  // Check if it's Saturday (day 6) and the time is 15:00 or later
+  if (dayOfWeek === 6 && hour >= 15) {
+    return true; // Closed on Saturdays from 15:00
+  }
+
+  return false; // Open at all other times
 }
 
 // Close the modal if clicked outside of the modal content
@@ -435,7 +532,7 @@ function handleBookingSubmit(event) {
   };
 
   // Submit the booking data
-  fetch("http://localhost:3000/api/bookings/create", {
+  fetch("https://examproject-testdata-3.azurewebsites.net/api/bookings/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -448,17 +545,41 @@ function handleBookingSubmit(event) {
       }
       return response.json();
     })
-    .then((data) => {
-      if (data.message) {
-        alert(data.message);
-      }
-    })
+ .then((data) => {
+    if (data.message) {
+      alert(data.message);
+      // Close the modal
+      closeModal();
+      // Clear the modal content here
+      clearModalContent();
+      // Optionally, refresh the page or update the calendar view
+      location.reload(); // Uncomment this line to refresh the page
+      // updateCalendar(); // Call a function to update the calendar if implemented
+    }
+  })
     .catch((error) => {
       console.error("Error creating booking:", error);
       alert("Failed to create booking");
     });
 }
 
+function clearModalContent() {
+  // Reset all input fields in the modal
+  const modal = document.getElementById("booking-modal");
+  if (!modal) return;
+
+  const inputs = modal.querySelectorAll(
+    'input[type="text"], input[type="email"], input[type="tel"]'
+  );
+  inputs.forEach((input) => (input.value = ""));
+
+  // Unselect all service bubbles
+  const serviceBubbles = modal.querySelectorAll(".service-bubble.selected");
+  serviceBubbles.forEach((bubble) => bubble.classList.remove("selected"));
+
+  // Reset any other dynamic elements in the modal as needed
+  // For example, if you have any specific messages or dynamic content, reset them here
+}
 // Make sure to call this function to initialize the form handling
 document.addEventListener("DOMContentLoaded", () => {
   const bookingForm = document.getElementById("booking-form");
@@ -470,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function populateServiceBubbles(services, containerId, isMainService) {
   const container = document.getElementById(containerId);
   // Clear existing content
-  container.innerHTML = '';
+  container.innerHTML = "";
 
   // Ensure services is an array before trying to iterate over it
   if (Array.isArray(services)) {

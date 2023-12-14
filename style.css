@@ -171,7 +171,7 @@ nav a {
 button {
     color: #fff;
     cursor: pointer;
-    background-color: #5cb85c;
+    background-color: #9aa874;
     border: none;
     border-radius: 4px;
     margin-top: 10px;
@@ -339,6 +339,37 @@ div#selected-datetime {
   background-color: #007bff; /* Blue background for selected service */
   color: white;
 }
+
+
+/* Add to your main CSS file */
+.hero-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.welcome {
+  position: relative;
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+  margin-top: -100px; /* Adjust as necessary */
+  max-width: 600px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animated.fadeIn {
+  animation: fadeIn 2s ease forwards;
+}
+
 
 
 
