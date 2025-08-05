@@ -255,6 +255,16 @@
   margin: 0;
 }
 
+
+.availability-form {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 547px;
+    margin: 0 auto;
+    padding: 14px;
+    box-shadow: 0 2px 4px #0000001a;
+}
+
 .form-group {
   margin-bottom: 15px;
 }

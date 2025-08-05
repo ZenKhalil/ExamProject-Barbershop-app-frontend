@@ -1,0 +1,1021 @@
+/* CSS Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+#priceListModal.active {
+    display: flex; /* or use flex if needed */
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Root Variables for Consistent Theming */
+:root {
+  --primary-color: #2c3e50;       
+  --secondary-color: #18bc9c;     
+  --accent-color: #e74c3c;       
+  --background-color: #d7d7c1;    
+  --text-color: #2c3e50;         
+  --header-bg: #34495e;            
+  --footer-bg: #2c3e50;            
+  --button-bg: #18bc9c;            
+  --button-hover-bg: #16a085;      
+  --modal-bg: rgba(44, 62, 80, 0.9); 
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* General Styles */
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Header and Navigation Styles */
+header {
+  width: 100%;
+  background-color: var(--header-bg);
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#admin-login-area {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  display: block;
+}
+
+#main-nav {
+  display: block; /* Show by default on desktop */
+  z-index: 1;
+}
+
+nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+nav ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  list-style-type: none;
+}
+
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a,
+nav ul li button {
+  padding: 10px 15px;
+  border-radius: 25px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+nav ul li a {
+  color: #ffffff;
+      text-decoration: revert;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 1.5);
+}
+
+nav ul li a:hover {
+  color: var(--secondary-color);
+}
+
+nav ul li button {
+  background-color: var(--secondary-color);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+}
+
+nav ul li button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 10px;
+}
+
+.off-screen-menu {
+  display: none; 
+}
+
+/* Off-Screen Menu Styles */
+@media (max-width: 768px) {
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 25px;
+}
+
+  #main-nav {
+    display: none;
+  }
+
+/* Display the hamburger menu on mobile */
+  .ham-menu {
+    display: flex; /* Make hamburger menu visible on mobile */
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px; /* Adjusted width for better visibility */
+    height: 25px; /* Adjusted height */
+    position: absolute; /* Position it absolutely within the header */
+    top: 15px; /* Adjust as needed */
+    left: 20px; /* Position on the left side */
+    cursor: pointer;
+    z-index: 1001; /* Ensure it appears above other elements */
+  }
+
+  /* Off-Screen Menu Styling for Mobile */
+  .off-screen-menu {
+    background-color: #222831;
+    color: #ffffff;
+    height: 100vh;
+    width: 250px; /* Adjusted width for better usability */
+    position: fixed;
+    top: 0;
+    left: -250px; /* Start off-screen to the left */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 1.25rem;
+    transition: left 0.3s ease; /* Smooth slide-in transition */
+    z-index: 1000;
+  }
+
+  .off-screen-menu.active {
+      left: 0; 
+      
+  }
+
+  .off-screen-menu ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 300px; 
+  }
+
+  .off-screen-menu ul li {
+    margin: 15px 0;
+  }
+
+  .off-screen-menu ul li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: block; /* Make the entire area clickable */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .off-screen-menu ul li a:hover {
+    background-color: var(--secondary-color);
+    color: #ffffff;
+  }
+
+  .off-screen-menu ul li button {
+    /* Ensure buttons inside the menu have consistent styling */
+    background: none;      
+    border: none;         
+    box-shadow: none;      
+    padding: 10px 20px;          
+    margin: 0;             
+    color: #ffffff;         
+    font: inherit;      
+    font-family: 'Montserrat', sans-serif;   
+    cursor: pointer;       
+    text-decoration: none; 
+    width: 100%; /* Make buttons full width */
+    text-align: left; /* Align text to the left */
+  }
+
+  .off-screen-menu ul li button:hover {
+    background-color: var(--secondary-color);
+    color: #ffffff;
+  }
+
+  /* Close Button in Off-Screen Menu */
+  .off-screen-menu .close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px; /* Position the close button on the right */
+    font-size: 24px;
+    cursor: pointer;
+    color: #ffffff;
+  }
+
+  .off-screen-menu .close-btn:hover {
+    color: var(--secondary-color);
+  }
+
+  /* Hamburger Menu Span Styles */
+  .ham-menu span {
+      height: 3px; /* Adjusted height for better visibility */
+      width: 100%;
+      background-color: #ffffff;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      position: relative;
+  }
+
+  /* Hamburger Menu Animation when active */
+  .ham-menu.active span:nth-child(1) {
+      transform: rotate(45deg);
+      top: 8px;
+      position: absolute;
+  }
+
+  .ham-menu.active span:nth-child(2) {
+      opacity: 0;
+  }
+
+  .ham-menu.active span:nth-child(3) {
+      transform: rotate(-45deg);
+      top: 8px;
+      position: absolute;
+  }
+
+  .sort-filter-container {
+    /* padding: 0 0px; */
+    right: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-content: space-around;
+}
+footer {
+    background-color: var(--footer-bg);
+    color: #fff;
+    text-align: center;
+    width: 100%;
+    padding: 20px 0;
+   /* position: static;*/
+    box-shadow: 0 -2px 4px #0000001a;
+    top: 220px;
+}
+}
+
+/* Off-Screen Menu Transition (Optional for Smoothness) */
+.off-screen-menu {
+  /* Ensure smooth transition when activating the menu */
+  transition: left 0.3s ease;
+}
+
+/* Ensure the hamburger menu is hidden on desktop */
+@media (min-width: 769px) {
+  .ham-menu {
+    display: none;
+  }
+
+  .off-screen-menu {
+    display: none; /* Ensure off-screen menu is hidden on desktop */
+  }
+}
+
+
+/* Hero Section Styles */
+.hero-section {
+  position: relative;
+  height: 100vh; /* Full viewport height for a modern, immersive look */
+  overflow: hidden;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  margin: 0; /* Ensure no default margin */
+}
+
+/* Hero Image Styling */
+.hero-image {
+  position: fixed;
+  top: 97px;
+  bottom: 50px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Welcome Text Styles */
+.welcome {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(44, 62, 80, 0.8); /* Slightly darken for better contrast */
+  color: #ffffff;
+  padding: 30px 50px;
+  border-radius: 15px;
+  text-align: center;
+  animation: fadeInOpacity 1s ease-in-out forwards; /* Updated fade-in animation */
+  opacity: 0; /* Start with opacity 0 for fade-in effect */
+  max-width: 90%;
+}
+
+.welcome h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+.welcome p {
+  font-size: 1.2em;
+  line-height: 1.5; /* Improve readability */
+  color: #db9c9c;
+}
+
+/* Fade-In Animation */
+@keyframes fadeInOpacity {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .hero-image {
+  position: fixed;
+  top: 50px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+}
+  .welcome {
+    position: fixed;
+    padding: 20px 30px;
+    width: 100%;
+  }
+
+  .welcome h1 {
+    font-size: 2.5em;
+  }
+
+  .welcome p {
+    font-size: 1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome h1 {
+    font-size: 2em;
+  }
+
+  .welcome p {
+    font-size: 0.9em;
+  }
+}
+
+.fc .fc-toolbar.fc-header-toolbar{
+    margin-bottom: 1em;
+    font-size: 11px;
+}
+
+/* Main Content Styles */
+#main-content {
+  flex-grow: 1;
+  padding-bottom: 0;
+  overflow: auto; /* Prevents any scrolling */
+  margin-top: 40px;
+}
+
+/* Booking Section */
+#booking-section {
+  max-width: 90%; /* Limit width for responsiveness */
+  /* max-height: 80vh; */ /* Comment out or remove this line */
+  margin: 0 auto;
+  padding: 10px;
+  overflow: auto; /* Allow internal scroll if content overflows */
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles specific to the Booking Section */
+#main-content #booking-section {
+  display: block; /* Change from flex to block */
+  flex-direction: column;
+  flex-grow: 1;
+  /* overflow-y: hidden; */ /* Comment out or remove this line */
+  justify-content: center;
+  padding: 0;
+}
+
+
+
+/* Booking container and calendar adjustments */
+.booking-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the content */
+    justify-content: center;
+  /* max-height: 100%; */ /* Comment out or remove this line */
+    padding: 10px;
+}
+
+.barber-selection {
+    width: auto; /* Set to auto to avoid taking up full width */
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+.barber-selection label {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+#calendar {
+  max-width: 100%;
+  width: 100%;
+  max-height: 60vh; /* Limit height to prevent overflow */
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  overflow-y: auto; /* Add internal scrolling if needed */
+}
+
+/* General Styles */
+.availability-form {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 547px;
+    margin: 0 auto;
+    padding: 14px;
+    box-shadow: 0 2px 4px #0000001a;
+}
+
+/* Mobile-specific Styles */
+@media (max-width: 768px) {
+  
+    #main-content .availability-form {
+        background: #fff;
+        border-radius: 8px;
+        max-width: 350px;
+        margin: 10px auto;
+        padding: 14px;
+        box-shadow: 0 2px 4px #0000001a;
+    }
+    .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #5cb85c;
+    color: white;
+    cursor: pointer;
+    margin-left: 10px;
+    margin: 5px;
+}
+
+}
+
+/* General Mobile Adjustments */
+@media (max-width: 768px) {
+    /* Adjust Booking Container Layout */
+    .booking-container {
+        background: #dcd9d6;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        top: -10px;
+        padding: 1px;
+        display: contents;
+    }
+
+  #main-content {
+    flex-grow: 1;
+    padding-bottom: 0;
+    margin-top: 40px;
+    /* Remove or adjust overflow as needed */
+    /* overflow: hidden; */
+}
+
+
+    .barber-selection {
+        text-align: center;
+        width: 100%;
+        position: relative;
+        top: 3px;
+    }
+
+  
+    /* Calendar Header and Controls */
+    .fc-toolbar {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .fc-toolbar h2 {
+        font-size: 1.5em; /* Resize header */
+    }
+
+    .fc-button-group, .fc-toolbar-title {
+        margin: 5px 0; /* Add margin for spacing */
+    }
+
+    /* Buttons in Calendar */
+    .fc-button {
+        font-size: 14px;
+        padding: 5px 10px;
+        margin: 0 5px; /* Add slight margin between buttons */
+    }
+
+    /* Calendar Day Headers */
+    .fc-col-header-cell {
+        font-size: 12px; /* Reduce font size */
+        padding: 5px; /* Adjust padding */
+    }
+
+    .fc-timegrid-slot {
+        height: 2em; /* Increase slot height for easier viewing */
+    }
+
+    /* Date/Time Slots */
+    .fc-timegrid-slot-label {
+        font-size: 12px; /* Reduce font size */
+        padding: 3px; /* Adjust padding */
+    }
+}
+
+/* Footer stays at the bottom */
+footer {
+  background-color: var(--header-bg);
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+  width: 100%;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  /*position: relative;*/
+}
+
+footer p {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Modal Styles */
+#priceListModal {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 10002; /* High z-index */
+  align-items: center; 
+  justify-content: center; 
+  display: none; 
+}
+
+
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 2; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.6); /* Black w/ opacity */
+  
+}
+
+.modal:not(.hidden) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  width: 50%; /* Set a max-width for larger screens */
+  max-width: 500px; /* You can adjust this value */
+  position: relative;
+}
+
+.modal-content-pricelist {
+  justify-content: center;
+    align-items: center;
+    width: 40%; 
+    margin: 0; /* Remove margins */
+    border-radius: 20; /* No rounded corners */
+    box-shadow: 0px -5px 15px rgba(0, 0, 0, 0.2); /* Shadow at the top */
+    background: linear-gradient(#1a242f, #090d12); 
+  }
+
+.modal-admin-content {
+  max-width: 400px;
+  width: 90%;
+}
+
+.close-button-pricelist,
+.close-button-admin,
+.close-modal {
+  color: var(--primary-color);
+  font-size: 1.5em;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.close-button-pricelist:hover,
+.close-button-admin:hover,
+.close-modal:hover {
+  color: var(--accent-color);
+}
+
+/* Price List Modal Styles */
+#modal-price-list {
+ background: transparent; /* No background for the container */
+    padding: 20px; 
+  }
+
+#modal-price-list h2 {
+   font-size: 24px; 
+    margin-bottom: 20px;
+    color: #204056; /* Use your primary color */
+    text-align: left; /* Align the title to the left */
+  }
+
+#modal-price-list .service {
+  background: #272525;
+    border: none; /* No border */
+    padding: 15px 20px;
+    margin-bottom: 10px; /* Space between services */
+    border-radius: 8px; /* Rounded corners for service items */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically center content */
+  }
+
+#modal-price-list .service:last-child {
+  border-bottom: none; /* No border for the last item */
+}
+
+#modal-price-list .service h3 {
+ color: #ffffff; 
+    font-size: 16px;
+    margin: 0;
+  }
+
+#modal-price-list .service p {
+ color: #87aeab; /* Your accent color */
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0;
+  }
+
+.close-button-pricelist {
+    font-size: 24px;
+    top: 15px;
+    right: 20px;
+    color: #333; /* Match the close button color */
+    position: absolute; /* Ensure it's positioned correctly */
+  }
+
+.close-button-pricelist:hover {
+  color: #333;
+}
+
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Tooltip Style */
+#tooltip {
+  position: absolute;
+  background-color: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 999;
+  display: none;
+  font-size: 14px;
+}
+
+/* Modal container */
+#booking-modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Enable scrolling if needed */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 1000; /* Ensure it's on top of other elements */
+}
+
+/* Show the modal when the 'show' class is added */
+#booking-modal.show {
+  display: block;
+}
+
+/* Modal content */
+#booking-modal .modal-content {
+  background-color: #fff;
+  margin: 5% auto; /* Center the modal content vertically */
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%; /* Adjust as needed */
+  max-width: 500px;
+  position: relative;
+}
+
+/* Close button */
+#booking-modal .close-button {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 30px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+}
+
+#booking-modal .close-button:hover,
+#booking-modal .close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+/* Selected date and time at the top */
+div#selected-datetime {
+  font-family: 'Poppins', sans-serif;
+  margin-bottom: 20px;
+}
+
+#selected-datetime p {
+  font-size: 1em;
+  color: var(--text-color);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Booking Form Styles */
+#booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center; /* Align labels and inputs in the center */
+  width: 100%; /* Ensure it takes up full width */
+  gap: 10px;
+}
+
+.form-group label {
+  width: 100px;
+  font-weight: bold;
+}
+
+/* Ensure headings are visible */
+.form-group h3 {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    color: #333; /* Adjust color as needed */
+}
+
+
+.form-group input {
+  flex: 1; /* Inputs take up the remaining space */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.service-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.service-bubble {
+  background-color: #bdc3c7;
+  color: #2c3e50;
+  border-radius: 25px;
+  padding: 10px 20px;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+  font-size: 16px;
+}
+
+.service-bubble:hover {
+  background-color: var(--secondary-color);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.service-bubble.selected {
+  background-color: var(--secondary-color);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#booking-form button {
+  align-self: center;
+  width: 100%;
+  padding: 10px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#booking-form button:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+
+  #booking-modal .modal-content {
+    background-color: #fff;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    margin: 5% auto;
+    padding: 20px;
+    position: relative;
+    top: 120px;
+}
+
+  #calendar {
+    max-width: none;
+    margin: 0 auto;
+    width: 95%;
+    margin-top: -37px;
+    padding: 15px;
+    font-size: 14px; /* Slightly smaller font for better fit */
+    min-height: 80vh; /* Adjust as needed for comfortable scrolling */
+    /* margin-bottom: 80px; */
+    overflow: auto;
+    }
+
+  #booking-section {
+    padding: 15px;
+  }
+
+  .form-group h3 {
+    color: #333;
+    margin-bottom: 5px;
+    font-size: 15px;
+    display: block;
+}
+}
+
+@media (max-width: 768px) { 
+  #priceListModal {
+    align-items: flex-end; /* Align to bottom on mobile */
+    overflow-y: auto; 
+    
+  }
+  
+  #priceListModal.active { 
+  display: flex; /* Use flex to enable centering */
+  align-items: center;
+  justify-content: center;
+}
+
+  .modal-content-pricelist {
+    justify-content: center;
+    align-items: center;
+    width: 70%; /* Full width on mobile */
+    margin: 0; /* Remove margins */
+    border-radius: 20; /* No rounded corners */
+    box-shadow: 0px -5px 15px rgba(0, 0, 0, 0.2); /* Shadow at the top */
+    background: linear-gradient(#1a242f, #090d12); 
+  }
+
+  #modal-price-list {
+    background: transparent; /* No background for the container */
+    padding: 20px; 
+  }
+
+  #modal-price-list h2 {
+    font-size: 24px; 
+    margin-bottom: 20px;
+    color: #204056; /* Use your primary color */
+    text-align: left; /* Align the title to the left */
+  }
+
+  #modal-price-list .service {
+    background: #272525;
+    border: none; /* No border */
+    padding: 15px 20px;
+    margin-bottom: 10px; /* Space between services */
+    border-radius: 8px; /* Rounded corners for service items */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically center content */
+  }
+
+  #modal-price-list .service h3 {
+    color: #ffffff; 
+    font-size: 16px;
+    margin: 0;
+  }
+
+  #modal-price-list .service p {
+    color: #87aeab; /* Your accent color */
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0;
+  }
+
+  .close-button-pricelist {
+    font-size: 24px;
+    top: 15px;
+    right: 20px;
+    color: #333; /* Match the close button color */
+    position: absolute; /* Ensure it's positioned correctly */
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content-pricelist,
+  .modal-content,
+  .modal-admin-content {
+    width: 95%;
+    padding: 5px;
+  }
+
+  button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .welcome h1 {
+    font-size: 2em;
+  }
+
+  .welcome p {
+    font-size: 0.9em;
+  }
+}
+
+.instagram-feed-container {
+    max-width: 100%;   /* Make it responsive */
+   /* max-height: 500px; Limit height */
+   /* overflow: hidden;   Hide anything outside the container */
+    border-radius: 10px; /* Rounded corners for a polished look */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    margin: 0 auto;    /* Center it on the page */
+    padding: 10px;     /* Add padding around the widget */
+    background-color: #f9f9f9; /* Optional: background color */
+}

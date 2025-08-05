@@ -1,16 +1,85 @@
 let barbersData = {};
 populateBarbers();
 
+export const adminFunctions = {
+    'dashboard-section': loadAdminDashboard,
+    'view-bookings-section': viewBookings,
+    'edit-availabilities-section': displayEditAvailabilityForm,
+};
+
+function setupAdminNavigation() {
+    document.querySelectorAll("#main-nav a, .off-screen-menu a").forEach((link) => {
+        link.addEventListener("click", function (event) {
+            const href = this.getAttribute("href");
+            const sectionId = href ? href.substring(1) : null;
+
+            if (adminFunctions.hasOwnProperty(sectionId)) {
+                event.preventDefault();
+                console.log("Admin navigation to section:", sectionId);
+                adminFunctions[sectionId]();
+            }
+        });
+    });
+}
+
+// Expose functions for admin.js if needed
+export function generateAdminNavBar() {
+    const navBar = document.getElementById("main-nav");
+    if (!navBar) {
+        console.error("Main navigation (nav#main-nav) not found.");
+        return;
+    }
+
+    // Update the main navigation with admin links
+    navBar.innerHTML = `
+        <ul>
+            <li><a href="#dashboard-section" id="dashboard-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="#view-bookings-section" id="view-bookings-link"><i class="fas fa-calendar-check"></i> View Bookings</a></li>
+            <li><a href="#edit-availabilities-section" id="edit-availabilities-link"><i class="fas fa-edit"></i> Edit Availabilities</a></li>
+            <!-- <li><a href="#update-opening-hours-section" id="update-opening-hours-link"><i class="fas fa-clock"></i> Update Opening Hours</a></li> -->
+            <!-- <li><a href="#" id="admin-logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li> -->
+        </ul>
+    `;
+    
+    // Update the off-screen menu with admin links
+    updateOffScreenMenuToAdmin();
+
+    // Call the function to set up event listeners for admin links
+    setupAdminNavBarListeners();
+  
+    // Set up admin navigation
+    setupAdminNavigation();
+};
+
+
+// Function to update the off-screen menu with admin links
+function updateOffScreenMenuToAdmin() {
+    const offScreenMenu = document.querySelector(".off-screen-menu ul");
+    if (!offScreenMenu) {
+        console.error("Off-screen menu's <ul> not found.");
+        return;
+    }
+
+    offScreenMenu.innerHTML = `
+        <li><a href="#dashboard-section">Dashboard</a></li>
+        <li><a href="#view-bookings-section">View Bookings</a></li>
+        <li><a href="#edit-availabilities-section">Edit Availabilities</a></li>
+        <!-- <li><a href="#update-opening-hours-section">Update Opening Hours</a></li> -->
+        <!-- <li><a href="#" id="admin-logout-link">Logout</a></li> -->
+    `;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const adminLoginButton = document.getElementById("admin-login-button");
   const adminLoginModal = document.getElementById("admin-login-modal");
   const closeButton = adminLoginModal.querySelector(".close-button-admin");
   const adminLoginForm = document.getElementById("admin-login-form");
+  
   const adminToken = localStorage.getItem("adminToken");
 
    if (adminToken) {
     // Admin is logged in, adjust UI accordingly
-    window.generateAdminNavBar();
+    generateAdminNavBar();
     adminLoginButton.textContent = "Logout";
     adminLoginButton.onclick = logoutAdmin; 
   } else {
@@ -107,7 +176,7 @@ function checkAdminLoginStatus() {
 
   if (adminToken) {
     // Admin is logged in, adjust UI accordingly
-    window.generateAdminNavBar();
+    generateAdminNavBar();
     adminLoginButton.textContent = "Logout";
     adminLoginButton.onclick = logoutAdmin; 
   } else {
@@ -135,41 +204,56 @@ function logoutAdmin() {
   window.location.reload();
 }
 
-window.setupAdminNavBarListeners = function() {
-  document.getElementById("dashboard-link").addEventListener("click", (e) => {
-    e.preventDefault();
-    loadAdminDashboard();
-  });
+export function setupAdminNavBarListeners() {
+    const dashboardLink = document.getElementById("dashboard-link");
+    if (dashboardLink) {
+        dashboardLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            loadAdminDashboard();
+        });
+    } else {
+        console.error("Element with ID 'dashboard-link' not found.");
+    }
 
-  document.getElementById("view-bookings-link").addEventListener("click", (e) => {
-      e.preventDefault();
-      viewBookings();
-    });
+    const viewBookingsLink = document.getElementById("view-bookings-link");
+    if (viewBookingsLink) {
+        viewBookingsLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            viewBookings();
+        });
+    } else {
+        console.error("Element with ID 'view-bookings-link' not found.");
+    }
 
-  document.getElementById("edit-availabilities-link").addEventListener("click", (e) => {  e.preventDefault();  displayEditAvailabilityForm();
-    });
+    const editAvailabilitiesLink = document.getElementById("edit-availabilities-link");
+    if (editAvailabilitiesLink) {
+        editAvailabilitiesLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            displayEditAvailabilityForm();
+        });
+    } else {
+        console.error("Element with ID 'edit-availabilities-link' not found.");
+    }
 
-  document.getElementById("admin-logout-link").addEventListener("click", (e) => {
-      e.preventDefault();
-      logoutAdmin();
-    });
 };
+
+
 
 /* Admin dashboard */
 
-function loadAdminDashboard() {
+export function loadAdminDashboard() {
+      console.log("loadAdminDashboard() called");
   // Call the function to generate the admin navigation bar
   generateAdminNavBar();
 
-  const dashboardHtml = `
-    <div class="dashboard-container">
-      <h2>Admin Dashboard</h2>
-      <div class="dashboard-card" id="view-bookings-btn">View Bookings</div>
-      <div class="dashboard-card" id="edit-availabilities-btn">Edit Availabilities</div>
-      <div class="dashboard-card" id="update-opening-hours-btn">Update Opening Hours</div>
-      <!-- Add more dashboard cards as needed -->
-    </div>
-  `;
+const dashboardHtml = `
+  <div class="dashboard-container">
+    <h2>Admin Dashboard</h2>
+    <div class="dashboard-card" id="view-bookings-btn">View Bookings</div>
+    <div class="dashboard-card" id="edit-availabilities-btn">Edit Availabilities</div>
+    <!-- <div class="dashboard-card" id="update-opening-hours-btn">Update Opening Hours</div> -->
+  </div>
+`;
 
   const mainContent = document.getElementById("main-content");
   mainContent.innerHTML = dashboardHtml;
@@ -183,12 +267,14 @@ function loadAdminDashboard() {
   // Uncomment and implement these functions if needed
   // document.getElementById("update-opening-hours-btn").addEventListener("click", updateOpeningHours);
   // document.getElementById("logout-btn").addEventListener("click", logoutAdmin);
+  
 }
+//window.loadAdminDashboard = loadAdminDashboard;
 
 
 // Define viewBookings, editAvailabilities, updateOpeningHours, and logoutAdmin functions as per your functionality requirements.
 
-function viewBookings() {
+export function viewBookings() {
   // Create the sorting and filtering UI
   const mainContent = document.getElementById("main-content");
   mainContent.innerHTML = `
@@ -225,6 +311,7 @@ function viewBookings() {
     .getElementById("filter-barber")
     .addEventListener("change", fetchBookingsAndDisplay);
 }
+window.viewBookings = viewBookings;
 
 function fetchBookingsAndDisplay() {
   fetch("http://localhost:3000/api/bookings", {
@@ -279,10 +366,48 @@ function displayBookings(bookings) {
       <div class="booking-detail"><strong>Date:</strong> ${formattedDate}</div>
       <div class="booking-detail"><strong>Time:</strong> ${booking.booking_time}</div>
       <div class="booking-detail"><strong>Barber:</strong> ${barberName}</div>
+      <button class="delete-booking-button" data-booking-id="${booking.booking_id}">Delete Booking</button>
     `;
     bookingsList.appendChild(listItem);
   });
+
+  // Attach event listeners to delete buttons
+  const deleteButtons = document.querySelectorAll(".delete-booking-button");
+  deleteButtons.forEach((button) => {
+    button.addEventListener("click", function() {
+      const bookingId = this.getAttribute("data-booking-id");
+      if (confirm("Are you sure you want to delete this booking?")) {
+        deleteBooking(bookingId);
+      }
+    });
+  });
 }
+
+function deleteBooking(bookingId) {
+  fetch(`http://localhost:3000/api/bookings/delete/${bookingId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem("adminToken")}`,
+    },
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("Failed to delete booking");
+    }
+    return response.text(); // Adjust based on what your API returns
+  })
+  .then(data => {
+    alert("Booking deleted successfully");
+    // Refresh the bookings list
+    fetchBookingsAndDisplay();
+  })
+  .catch(error => {
+    console.error("Error deleting booking:", error);
+    alert("Error deleting booking");
+  });
+}
+
 
 // Populate filter dropdown with barber options
 function populateFilterBarbers() {
@@ -294,6 +419,10 @@ function populateFilterBarbers() {
     .then((response) => response.json())
     .then((barbers) => {
       const barberFilterSelect = document.getElementById("filter-barber");
+      // Clear existing options first, keeping only the "All Barbers" option
+      barberFilterSelect.innerHTML = '<option value="all">All Barbers</option>';
+      
+      // Add new barber options
       barbers.forEach((barber) => {
         const option = document.createElement("option");
         option.value = barber.barber_id;
@@ -350,7 +479,7 @@ function fetchAndDisplayBarberAvailabilities() {
     .catch((error) => console.error("Error fetching barbers:", error));
 }
 
-function displayEditAvailabilityForm() {
+export function displayEditAvailabilityForm() {
   const formHtml = `
     <h3>Barber Schedule Management</h3>
     <form id="edit-availability-form" class="availability-form">
@@ -372,31 +501,43 @@ function displayEditAvailabilityForm() {
       <div class="form-actions">
         <button type="button" id="add-unavailability-btn" class="btn">Mark as Unavailable</button>
         <button type="button" id="show-change-dates-modal" class="btn">Change Dates</button>
-        <button type="button" id="remove-unavailability-btn" class="btn">Remove Unavailability</button>
-      </div>
-      
-      <!-- Hidden Inputs for Existing Unavailability -->
-      <input type="hidden" id="old-start-date" value="">
-      <input type="hidden" id="old-end-date" value="">
-
-      <!-- Modal for Changing Dates -->
-      <div id="change-dates-modal" class="modal hidden">
-        <div class="modal-content">
-          <span class="close-modal">&times;</span>
-          <h4>Select Unavailability to Change</h4>
-          <div id="current-unavailabilities-container"></div>
-          <div class="form-group">
-            <label for="new-start-date">New Start Date:</label>
-            <input type="date" id="new-start-date" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="new-end-date">New End Date:</label>
-            <input type="date" id="new-end-date" class="form-control">
-          </div>
-          <button type="button" id="submit-change-dates" class="btn">Submit Changes</button>
-        </div>
+        <button type="button" id="show-remove-unavailability-modal" class="btn">Remove Unavailability</button>
       </div>
     </form>
+
+    <!-- Hidden Inputs for Existing Unavailability -->
+      <input type="hidden" id="old-start-date" value="">
+      <input type="hidden" id="old-end-date" value="">
+    
+    <!-- Modal for Changing Dates -->
+    <div id="change-dates-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h4>Select Unavailability to Change</h4>
+        <div id="current-unavailabilities-container"></div>
+        <div class="form-group">
+          <label for="new-start-date">New Start Date:</label>
+          <input type="date" id="new-start-date" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="new-end-date">New End Date:</label>
+          <input type="date" id="new-end-date" class="form-control">
+        </div>
+        <button type="button" id="submit-change-dates" class="btn">Submit Changes</button>
+      </div>
+    </div>
+    
+    <!-- Modal for Removing Unavailability -->
+    <div id="remove-unavailability-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h4>Remove Unavailability</h4>
+        <form id="remove-unavailability-form">
+          <div id="remove-unavailabilities-container"></div>
+          <button type="submit" class="btn">Confirm Removal</button>
+        </form>
+      </div>
+    </div>
   `;
 
   const mainContent = document.getElementById("main-content");
@@ -407,9 +548,6 @@ function displayEditAvailabilityForm() {
     .getElementById("add-unavailability-btn")
     .addEventListener("click", createBarberAvailability);
   document
-    .getElementById("remove-unavailability-btn")
-    .addEventListener("click", deleteBarberAvailability);
-  document
     .getElementById("show-change-dates-modal")
     .addEventListener("click", () => {
       const barberId = document.getElementById("barber-select").value;
@@ -418,20 +556,40 @@ function displayEditAvailabilityForm() {
         document
           .getElementById("change-dates-modal")
           .classList.remove("hidden");
+      } else {
+        alert("Please select a barber first.");
       }
     });
-
+  document
+    .getElementById("show-remove-unavailability-modal")
+    .addEventListener("click", () => {
+      const barberId = document.getElementById("barber-select").value;
+      if (barberId) {
+        fetchCurrentUnavailabilitiesForRemoval(barberId);
+        document
+          .getElementById("remove-unavailability-modal")
+          .classList.remove("hidden");
+      } else {
+        alert("Please select a barber first.");
+      }
+    });
   document
     .getElementById("submit-change-dates")
     .addEventListener("click", () => {
       updateBarberAvailability();
     });
 
-  // Add event listener to close the modal
-  document.querySelector(".close-modal").addEventListener("click", () => {
-    document.getElementById("change-dates-modal").classList.add("hidden");
+  // Add event listeners to close both modals
+  const closeButtons = document.querySelectorAll(".close-modal");
+  closeButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      button.closest(".modal").classList.add("hidden");
+    });
   });
 }
+window.displayEditAvailabilityForm = displayEditAvailabilityForm;
+
+
 
 
 function createBarberAvailability() {
@@ -590,6 +748,128 @@ function deleteBarberAvailability() {
       alert("Error deleting availability");
     });
 }
+
+function fetchCurrentUnavailabilitiesForRemoval(barberId) {
+  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch current unavailabilities");
+      }
+      return response.json();
+    })
+    .then((unavailabilities) => {
+      console.log("Unavailabilities for Removal:", unavailabilities); // Debug
+      const container = document.getElementById("remove-unavailabilities-container");
+      container.innerHTML = ""; // Clear previous entries
+
+      const removeForm = document.getElementById("remove-unavailability-form");
+      if (!removeForm) {
+        console.error("Form 'remove-unavailability-form' not found");
+        return;
+      }
+
+      // Select the "Confirm Removal" button within the form
+      const confirmButton = removeForm.querySelector("button[type='submit']");
+
+      if (unavailabilities.length === 0) {
+        // If no unavailabilities, display the message
+        container.textContent = "No unavailabilities set for this barber.";
+
+        // Hide the "Confirm Removal" button
+        if (confirmButton) {
+          confirmButton.style.display = "none";
+        }
+      } else {
+        // If unavailabilities exist, display them as checkboxes
+        unavailabilities.forEach((date) => {
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = `remove-${date}`;
+          checkbox.name = "removeDates";
+          checkbox.value = date;
+
+          const label = document.createElement("label");
+          label.htmlFor = `remove-${date}`;
+          label.textContent = ` ${date}`;
+
+          const div = document.createElement("div");
+          div.appendChild(checkbox);
+          div.appendChild(label);
+
+          container.appendChild(div);
+        });
+
+        // Show the "Confirm Removal" button
+        if (confirmButton) {
+          confirmButton.style.display = "block";
+        }
+      }
+
+      // Attach event listener to the form submission
+      if (removeForm) {
+        // Remove existing event listeners to prevent multiple attachments
+        removeForm.replaceWith(removeForm.cloneNode(true));
+        const newRemoveForm = document.getElementById("remove-unavailability-form");
+        newRemoveForm.addEventListener("submit", handleRemoveUnavailability);
+      } else {
+        console.error("Form 'remove-unavailability-form' not found");
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching current unavailabilities:", error);
+      alert("Error fetching current unavailabilities");
+    });
+}
+
+
+
+function handleRemoveUnavailability(event) {
+  event.preventDefault(); // Prevent form from submitting normally
+
+  const barberId = document.getElementById("barber-select").value;
+  const checkboxes = document.querySelectorAll('input[name="removeDates"]:checked');
+  const selectedDates = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+  if (selectedDates.length === 0) {
+    alert("Please select at least one date to remove.");
+    return;
+  }
+
+  // Confirmation before deletion
+  if (!confirm(`Are you sure you want to remove unavailability for the selected ${selectedDates.length} date(s)?`)) {
+    return;
+  }
+
+  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+    },
+    body: JSON.stringify({ dates: selectedDates }),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to delete unavailability");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      alert(data.message || "Availability deleted successfully");
+      // Refresh the list of unavailabilities
+      fetchCurrentUnavailabilitiesForRemoval(barberId);
+      // fetchUnavailableTimeslotsForCurrentView(barberId);
+    })
+    .catch((error) => {
+      console.error("Error deleting availability:", error);
+      alert("Error deleting availability");
+    });
+}
+
 
 // Populate barbers from the API
 function populateBarbers() {

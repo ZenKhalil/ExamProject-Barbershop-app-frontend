@@ -1,0 +1,52 @@
+.about-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin-top: -23px;
+    overflow: auto;
+}
+
+.about-container h1 {
+    font-size: 2.5em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.about-container p {
+    font-size: 1.2em;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+#map {
+    width: 100%;
+    height: 400px;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .about-container {
+        padding: 15px;
+    }
+
+    .about-container h1 {
+        font-size: 2em;
+    }
+
+    #map {
+        height: 300px;
+    }
+}
+
+#map {
+    overflow-y: auto;
+z-index: 1;
+  width: 100%;
+  height: 400px; /* Adjust height as needed */
+  border: 1px solid #ccc; /* Optional: Add a border */
+}

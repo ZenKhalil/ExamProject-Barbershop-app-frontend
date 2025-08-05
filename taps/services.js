@@ -1,63 +1,85 @@
+// DOMContentLoaded listeners
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("DOM fully loaded and parsed");
-  setupPriceListModal();
+    setupPriceListModal();
 });
 
 // Function to toggle modal display
 function toggleModal(displayState) {
-  const modal = document.getElementById("priceListModal");
-  modal.style.display = displayState ? "flex" : "none";
-  if (displayState) {
-    modal.style.justifyContent = "center";
-    modal.style.alignItems = "center";
-  }
+    const modal = document.getElementById("priceListModal");
+    if (modal) {
+        modal.style.display = displayState ? "flex" : "none";
+        if (displayState) {
+            modal.style.justifyContent = "center";
+            modal.style.alignItems = "center";
+        }
+    } else {
+        console.error("Price List Modal element not found");
+    }
+}
+
+// Function to open the Price List Modal
+export function openPriceListModal() {
+    loadPriceList(); // Ensure the price list is loaded
+    toggleModal(true); // Show the modal
 }
 
 // Set up the modal once the document has loaded
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("DOM fully loaded and parsed");
-  setupPriceListModal();
-});
-
 function setupPriceListModal() {
-  // Attach event listener for price list button
-  document.getElementById("priceListButton").addEventListener("click", function () {
-    toggleModal(true); // Show the modal
-    loadPriceList(); // Load the price list when opening the modal
-  });
-
-  // Attach event listener for close button inside the modal
-  document.querySelector(".close-button-pricelist").addEventListener("click", function () {
-    toggleModal(false); // Hide the modal
-  });
-
-  // Close the modal if clicking outside of it
-  window.addEventListener("click", function (event) {
-    const modal = document.getElementById("priceListModal");
-    if (event.target === modal) {
-      toggleModal(false); // Hide the modal
+    // Add event listener for opening the modal (linked to the price list button)
+    const priceListButton = document.getElementById("priceListButton");
+    if (priceListButton) {
+        priceListButton.addEventListener("click", function (event) {
+            // Prevent the click event from bubbling up
+            event.stopPropagation(); 
+            openPriceListModal();
+        });
+    } else {
+        console.error("Price List Button not found");
     }
-  });
+
+    const closeButton = document.querySelector(".close-button-pricelist");
+    if (closeButton) {
+        closeButton.addEventListener("click", function () {
+            toggleModal(false); // Hide the modal
+        });
+    } else {
+        console.error("Close button for Price List modal not found");
+    }
+
+    // Close the modal if clicking outside of it
+    window.addEventListener("click", function (event) {
+        const modal = document.getElementById("priceListModal");
+        if (event.target === modal) {
+            toggleModal(false); // Hide the modal
+        }
+    });
 }
 
+// Function to load the price list from the server
 function loadPriceList() {
-  fetch("http://localhost:3000/api/services")
-    .then((response) => response.json())
-    .then((services) => {
-      const priceListHtml = services
-        .map(
-          (service) => `
-        <div class="service">
-          <h3>${service.service_name}</h3>
-          <p>Price: ${service.price} kr</p>
-        </div>
-      `
-        )
-        .join("");
-      document.getElementById("modal-price-list").innerHTML = priceListHtml;
-    })
-    .catch((error) => console.error("Error fetching services:", error));
+    fetch("http://localhost:3000/api/services")
+        .then((response) => response.json())
+        .then((services) => {
+            const priceListHtml = services
+                .map(
+                    (service) => `
+                <div class="service">
+                    <h3>${service.service_name}</h3>
+                    <p>Price: ${service.price} kr</p>
+                </div>
+            `
+                )
+                .join("");
+            const modalPriceList = document.getElementById("modal-price-list");
+            if (modalPriceList) {
+                modalPriceList.innerHTML = priceListHtml;
+            } else {
+                console.error("Modal Price List element not found");
+            }
+        })
+        .catch((error) => console.error("Error fetching services:", error));
 }
+
 
 // Function to populate service options in a select dropdown
 function populateServices(selectElementId) {
@@ -65,12 +87,16 @@ function populateServices(selectElementId) {
     .then((response) => response.json())
     .then((services) => {
       const selectElement = document.getElementById(selectElementId);
-      selectElement.innerHTML = services
-        .map(
-          (service) =>
-            `<option value="${service.service_id}">${service.service_name} - $${service.price}</option>`
-        )
-        .join("");
+      if (selectElement) {
+        selectElement.innerHTML = services
+          .map(
+            (service) =>
+              `<option value="${service.service_id}">${service.service_name} - $${service.price}</option>`
+          )
+          .join("");
+      } else {
+        console.error(`Select element with id ${selectElementId} not found`);
+      }
     })
     .catch((error) => console.error("Error fetching services:", error));
 }
@@ -133,6 +159,7 @@ function editService(serviceId) {
 }
 
 export default {
+  openPriceListModal,
   loadPriceList,
   toggleModal,
   setupPriceListModal,

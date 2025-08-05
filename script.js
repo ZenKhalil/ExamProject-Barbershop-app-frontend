@@ -1,45 +1,70 @@
 import services from "./taps/services.js";
 import bookings from "./taps/booking.js";
+import {loadAboutPage} from "./taps/about.js"
 
-let isBookingPageLoaded = false;
+let navigationInitialized = false;
+
 
 // Global Setup
 document.addEventListener("DOMContentLoaded", function () {
-   var footerHeight = document.querySelector("footer").offsetHeight;
-   var mainContent = document.getElementById("main-content");
-   mainContent.style.paddingBottom = footerHeight + "px";
-  console.log("Document ready. Setting up navigation and sections.");
-  setupNavigation();
+    // Adjust main content padding based on footer height
+    var footerHeight = document.querySelector("footer").offsetHeight;
+    var mainContent = document.getElementById("main-content");
+    mainContent.style.paddingBottom = footerHeight + "px";
 
-  // Retrieve the last visited section from sessionStorage
-  const savedSection = sessionStorage.getItem("currentSection");
-  console.log("Retrieved saved section:", savedSection);
+    setupNavigation();
 
-  // Show the saved section or default to the home page
-  if (savedSection) {
-    console.log("Showing saved section:", savedSection);
-    showSection(savedSection);
-  } else {
-    console.log("No saved section found. Loading home page.");
-    loadHomePage();
-  }
+    // Retrieve the last visited section from sessionStorage
+    const savedSection = sessionStorage.getItem("currentSection");
+    console.log("Retrieved saved section:", savedSection);
 
-  // Setup price list modal toggle in services
-  services.setupPriceListModal();
+    // Show the saved section or default to the home page
+    if (savedSection) {
+        console.log("Showing saved section:", savedSection);
+        showSection(savedSection);
+    } else {
+        console.log("No saved section found. Loading home page.");
+        loadHomePage();
+    }
 
- // If admin.js is loaded and the function exists, call it
-  if (window.checkAdminLoginStatus) {
-    window.checkAdminLoginStatus();
-  }
 
+    // Setup hamburger menu toggle
+    setupHamburgerMenu();
+
+ // **Setup admin login button from admin.js**
+    if (window.setupAdminLogin) {
+        window.setupAdminLogin();
+    }
+
+    // If admin.js is loaded and the function exists, call it
+    if (window.checkAdminLoginStatus) {
+        window.checkAdminLoginStatus();
+    }
+
+    // Setup price list modal
+    services.setupPriceListModal();
+
+    
 });
 
-function showSection(sectionId) {
+
+// Function to show a specific section
+export function showSection(sectionId) {
   console.log("Attempting to show section:", sectionId);
-  document.querySelectorAll("main section").forEach((section) => {
-    section.style.display = "none";
+
+  // Hide all sections first
+  document.querySelectorAll('main > section').forEach((section) => {
+    section.style.display = 'none';  // Hide all sections
   });
 
+  // Handle the price list section separately as it's a modal
+  if (sectionId === 'pricelist-section') {
+    console.log("Opening price list modal");
+    services.openPriceListModal();
+    return; // Exit early to prevent further section navigation
+  }
+
+  // Show the selected section
   const selectedSection = document.getElementById(sectionId);
   if (selectedSection) {
     console.log("Displaying section:", sectionId);
@@ -48,103 +73,170 @@ function showSection(sectionId) {
     // Save the current section in sessionStorage
     sessionStorage.setItem("currentSection", sectionId);
 
-    // Ensure booking page is loaded only when its section is active
-    if (sectionId === "booking-section" && !isBookingPageLoaded) {
-      console.log("Loading booking page for the first time.");
-      bookings.loadBookingPage();
-      isBookingPageLoaded = true;
-    } else {
-      console.log("Booking page already loaded or not applicable.");
-      isBookingPageLoaded = false;
-    }
-  } else {
-    console.error("Failed to find section with ID:", sectionId);
-  }
-
-   if (sectionId === "about-section") {
-     loadAboutPage();
-   }
-
-    if (sectionId === "home-section") {
+    // Load specific content based on section
+    if (sectionId === "about-section") {
+      loadAboutPage();
+    } else if (sectionId === "home-section") {
       loadHomePage();
-    }
-
-    if (sectionId === "pricelist-section") {
-      setupPriceListModal();
-      selectedSection.style.display = "flex";
-    }
+    } else if (sectionId === "booking-section") {
+  console.log("Loading booking page.");
+  // Use requestAnimationFrame to ensure the DOM updates before calling loadBookingPage
+  bookings.loadBookingPage(); 
+}
+  } 
 }
 
+// Close modal when clicking outside
+window.addEventListener("click", (event) => {
+    const priceListModal = document.getElementById('priceListModal');
+    if (event.target === priceListModal) {
+        priceListModal.classList.add("hidden");
+        priceListModal.style.display = 'none'; // Ensure the modal is hidden
+    }
+});
 
+
+// Function to setup navigation links
 function setupNavigation() {
-  document.querySelectorAll("#main-nav a").forEach((link) => {
-    link.addEventListener("click", function (event) {
-      event.preventDefault();
-      const sectionId = this.getAttribute("href").substring(1);
-      console.log("Link clicked. Navigating to section:", sectionId);
-      showSection(sectionId);
+    // Check if navigation is already set up
+    if (navigationInitialized) {
+        return;
+    }
+    navigationInitialized = true;
+
+    const navBar = document.getElementById('main-nav');
+    if (!navBar) {
+        console.error("Navigation bar not found.");
+        return;
+    }
+
+    // Attach a single event listener to the navigation bar
+    navBar.addEventListener('click', navBarClickHandler);
+}
+
+function navBarClickHandler(event) {
+    const link = event.target.closest('a, button');
+    if (link) {
+        event.preventDefault();
+        const href = link.getAttribute('href');
+        let sectionId = href ? href.substring(1) : link.id.replace('Button', '-section');
+
+        console.log("Link clicked. Navigating to section:", sectionId);
+
+        // Handle Price List modal
+        if (sectionId === 'priceList-section') {
+            console.log("Opening price list modal from navigation.");
+            services.openPriceListModal();
+            return;
+        }
+
+        // Show booking section
+        if (sectionId === "booking-section") {
+            console.log("Loading booking page.");
+            bookings.loadBookingPage();
+            showSection(sectionId);
+            return;
+        }
+
+        // Show the selected section
+        showSection(sectionId);
+    }
+}
+
+// Function to setup hamburger menu toggle
+let hamburgerMenuInitialized = false;
+
+function setupHamburgerMenu() {
+    if (hamburgerMenuInitialized) {
+        return;
+    }
+    hamburgerMenuInitialized = true;
+
+    const hamMenu = document.querySelector(".ham-menu");
+    const offScreenMenu = document.querySelector(".off-screen-menu");
+
+    if (!hamMenu || !offScreenMenu) {
+        console.error("Hamburger menu or off-screen menu not found.");
+        return;
+    }
+
+    // Toggle the menu when the hamburger icon is clicked
+    hamMenu.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent event from bubbling up to the document
+        hamMenu.classList.toggle("active");
+        offScreenMenu.classList.toggle("active");
     });
-  });
-  console.log("Navigation setup complete.");
+
+    // Handle clicks on the off-screen menu
+    offScreenMenu.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent clicks inside the menu from closing it
+
+        const link = event.target.closest("a, button");
+        if (link) {
+            event.preventDefault();
+
+            // Close the hamburger menu
+            hamMenu.classList.remove("active");
+            offScreenMenu.classList.remove("active");
+
+            const href = link.getAttribute("href");
+            let sectionId = href ? href.substring(1) : link.id.replace('Button', '-section');
+
+            // Adjust the condition to match the sectionId derived from the button's id
+            if (sectionId === 'priceList-section') {
+                services.openPriceListModal();
+                return;
+            }
+
+            if (sectionId === "booking-section") {
+                bookings.loadBookingPage();
+            }
+
+            showSection(sectionId);
+        }
+    });
+
+    // Close the menu when clicking outside of it
+    document.addEventListener("click", (event) => {
+        if (offScreenMenu.classList.contains("active")) {
+            const isClickInsideMenu = offScreenMenu.contains(event.target) || hamMenu.contains(event.target);
+            if (!isClickInsideMenu) {
+                // Clicked outside the menu, close it
+                hamMenu.classList.remove("active");
+                offScreenMenu.classList.remove("active");
+            }
+        }
+    });
 }
 
-// In script.js
-window.generateAdminNavBar = function() {
-  const navBar = document.getElementById("main-nav");
-  navBar.innerHTML = `
-    <ul>
-      <li><a href="#" id="dashboard-link">Dashboard</a></li>
-      <li><a href="#" id="view-bookings-link">View Bookings</a></li>
-      <li><a href="#" id="edit-availabilities-link">Edit Availabilities</a></li>
-      <li><a href="#" id="update-opening-hours-link">Update Opening Hours</a></li>
-      <li><a href="#" id="admin-logout-link"></a></li>
-    </ul>`;
-
-  // Call the function from admin.js to set up event listeners
-  if (window.setupAdminNavBarListeners) {
-    window.setupAdminNavBarListeners();
-  }
-};
 
 
+// Function to load the Home page content
 function loadHomePage() {
-  console.log("Loading home page content.");
+    console.log("Loading home page content.");
 
-  const homeSection = document.getElementById("home-section");
-  if (!homeSection) {
-    console.error("Home section not found in the document.");
-    return;
-  }
-
-  const homeHtml = `
-    <div class="hero-image">
-    </div>
-    <div class="welcome animated fadeIn" id="welcome-message">
-      <h2>Welcome to The Barber Shop</h2>
-      <p>Discover our world-class services and meet our talented team.</p>
-    </div>`;
-
-  homeSection.innerHTML = homeHtml;
-  console.log("Home page content loaded and set.");
+    const homeSection = document.getElementById("home-section");
+    if (!homeSection) {
+        console.error("Home section not found in the document.");
+        return;
+    }
+    // Otherwise, you can dynamically insert content as needed
+    console.log("Home page content is already set in HTML.");
 }
 
-function loadAboutPage() {
-  console.log("Loading about page content.");
 
-  const aboutSection = document.getElementById("about-section");
-  if (!aboutSection) {
-    console.error("About section not found in the document.");
-    return;
-  }
+// Close all modals with Escape key
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        document.querySelectorAll(".modal").forEach((modal) => {
+            modal.classList.add("hidden");
+        });
+    }
+});
 
-  const aboutHtml = `
-    <div class="about-container">
-      <h2>About Our Barbershop</h2>
-      <p>Welcome to Modern Barbershop, where tradition meets modernity. Established in 1995, we've been providing top-notch grooming services for over two decades. Our skilled barbers are artisans of their craft, dedicated to giving you the best experience and a look you'll love.</p>
-      <p>We believe in the timeless power of a great haircut, the importance of a place for men to feel comfortable and valued, and the simple pleasure of a sharp look for any occasion. We're not just a business; we're a cornerstone of the community, and we're proud to uphold the classic values of quality and service.</p>
-      <p>Whether you're looking for a quick trim, a classic cut, or a complete makeover, we're here for you. Walk-ins are welcome, so come in and experience the difference at Modern Barbershop today!</p>
-    </div>`;
+console.log("Script.js loaded successfully.");
 
-  aboutSection.innerHTML = aboutHtml;
-  console.log("About page content loaded and set.");
-}
+export default {
+setupHamburgerMenu,
+setupNavigation,
+};
