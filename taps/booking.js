@@ -15,7 +15,6 @@ const openingHours = {
   6: { startTime: "10:00", endTime: "15:00" }, // Saturday
 };
 
-
 // Load the booking page with necessary setup
 export function loadBookingPage() {
   if (calendar) {
@@ -43,45 +42,45 @@ function initializeCalendar() {
 
   calendar = new Calendar(calendarEl, {
     plugins: [timeGridPlugin, interactionPlugin],
-    initialView: window.innerWidth <= 768 ? 'timeGridDay' : 'timeGridWeek',
+    initialView: window.innerWidth <= 768 ? "timeGridDay" : "timeGridWeek",
     headerToolbar: {
-      left: window.innerWidth <= 768 ? 'prev,next today' : 'prev,next today', // Show on both mobile and desktop
-      center: 'title',
-      right: '' // Always empty - never show buttons on right side
+      left: window.innerWidth <= 768 ? "prev,next today" : "prev,next today", // Show on both mobile and desktop
+      center: "title",
+      right: "", // Always empty - never show buttons on right side
     },
-    
+
     // Add custom button handlers to prevent past navigation
     customButtons: {
       prev: {
-        click: function() {
+        click: function () {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          
+
           // Calculate what the previous view would be
           const currentStart = new Date(calendar.view.activeStart);
           let prevStart;
-          
-          if (calendar.view.type === 'timeGridWeek') {
+
+          if (calendar.view.type === "timeGridWeek") {
             prevStart = new Date(currentStart);
             prevStart.setDate(currentStart.getDate() - 7);
-          } else if (calendar.view.type === 'timeGridDay') {
+          } else if (calendar.view.type === "timeGridDay") {
             prevStart = new Date(currentStart);
             prevStart.setDate(currentStart.getDate() - 1);
           }
-          
+
           // Only allow navigation if the previous view wouldn't show past dates
           if (prevStart && prevStart.getTime() >= today.getTime()) {
             calendar.prev();
           }
-        }
+        },
       },
       next: {
-        click: function() {
+        click: function () {
           calendar.next();
-        }
-      }
+        },
+      },
     },
-    
+
     slotDuration: "00:10:00",
     slotLabelInterval: "00:15",
     allDaySlot: false,
@@ -98,7 +97,7 @@ function initializeCalendar() {
     dateClick: handleDateClick,
     slotMinTime: "10:00",
     slotMaxTime: "18:00",
-    
+
     slotLabelContent: (arg) => {
       const dayOfWeek = arg.date.getDay();
       const { startTime, endTime } = openingHours[dayOfWeek] || {};
@@ -110,9 +109,9 @@ function initializeCalendar() {
       }
       return "";
     },
-    
+
     firstDay: currentDayOfWeek,
-    
+
     datesSet: function (dateInfo) {
       const barberSelect = document.getElementById("barber-select");
       const barberId = barberSelect.value;
@@ -123,12 +122,12 @@ function initializeCalendar() {
       }
       disablePrevButtonIfNeeded();
     },
-    
+
     // Prevent navigation to past dates entirely
     validRange: {
-      start: today // This prevents any navigation to dates before today
+      start: today, // This prevents any navigation to dates before today
     },
-    
+
     eventSources: [
       {
         events: function (info, successCallback, failureCallback) {
@@ -211,21 +210,20 @@ function disablePrevButtonIfNeeded() {
     // Calculate what the next view would show
     const currentView = calendar.view;
     let nextViewStart;
-    
-    if (currentView.type === 'timeGridWeek') {
+
+    if (currentView.type === "timeGridWeek") {
       nextViewStart = new Date(viewStart);
       nextViewStart.setDate(viewStart.getDate() + 7);
-    } else if (currentView.type === 'timeGridDay') {
+    } else if (currentView.type === "timeGridDay") {
       nextViewStart = new Date(viewStart);
       nextViewStart.setDate(viewStart.getDate() + 1);
     }
-    
+
     // Don't disable next button - users should be able to go forward
     // But you might want to add logic here if needed
     nextButton.disabled = false;
   }
 }
-
 
 function fetchUnavailableTimeslotsForCurrentView(barberId) {
   if (!barberId) {
@@ -234,7 +232,9 @@ function fetchUnavailableTimeslotsForCurrentView(barberId) {
   }
 
   // Fetch unavailable dates and add them to the calendar
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`)
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`
+  )
     .then((response) => response.json())
     .then((unavailableDates) => {
       // Clear previous unavailable dates
@@ -269,20 +269,19 @@ function fetchUnavailableTimeslotsForCurrentView(barberId) {
 
 function formatDate(date) {
   const year = date.getFullYear();
-  const month = ('0' + (date.getMonth() +1)).slice(-2);
-  const day = ('0' + date.getDate()).slice(-2);
+  const month = ("0" + (date.getMonth() + 1)).slice(-2);
+  const day = ("0" + date.getDate()).slice(-2);
   return `${year}-${month}-${day}`;
 }
-
 
 function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
   // Fetch unavailable timeslots for the barber in the given period
   fetch(
-    `http://localhost:3000/api/bookings/unavailable-timeslots?barberId=${barberId}&start=${start}&end=${end}`
+    `https://examproject-barbershop-app-backend.onrender.com/api/bookings/unavailable-timeslots?barberId=${barberId}&start=${start}&end=${end}`
   )
     .then((response) => response.json())
     .then((bookedSlots) => {
-      console.log('bookedSlots:', bookedSlots); // Add this line
+      console.log("bookedSlots:", bookedSlots); // Add this line
       if (!Array.isArray(bookedSlots)) {
         return;
       }
@@ -313,7 +312,6 @@ function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
 
 var renderedUnavailableDates = new Set();
 
-
 function fetchUnavailableTimesForBarber(barberId) {
   if (!barberId) {
     console.error("Error! No barber selected or the value is undefined");
@@ -323,7 +321,9 @@ function fetchUnavailableTimesForBarber(barberId) {
   // We'll store the rendered dates in a set to prevent double rendering
   const renderedDates = new Set();
 
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`)
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`
+  )
     .then((response) => response.json())
     .then((unavailableDates) => {
       // Add new unavailable dates
@@ -333,8 +333,8 @@ function fetchUnavailableTimesForBarber(barberId) {
         const { startTime, endTime } = openingHours[day] || {};
 
         if (startTime && endTime) {
-          const [startHour, startMinute] = startTime.split(':').map(Number);
-          const [endHour, endMinute] = endTime.split(':').map(Number);
+          const [startHour, startMinute] = startTime.split(":").map(Number);
+          const [endHour, endMinute] = endTime.split(":").map(Number);
 
           const startDateTime = new Date(
             dateTime.getFullYear(),
@@ -373,10 +373,9 @@ function fetchUnavailableTimesForBarber(barberId) {
 }
 
 function parseDateString(dateString) {
-  const [year, month, day] = dateString.split('-').map(Number);
+  const [year, month, day] = dateString.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
-
 
 function onBarberChange() {
   const barberSelect = document.getElementById("barber-select");
@@ -397,15 +396,14 @@ function clearUnavailableEvents() {
   renderedUnavailableDates.clear();
 }
 
-
 // Attach this function to the barber-select change event
 document
-.getElementById("barber-select")
-.addEventListener("change", onBarberChange);
+  .getElementById("barber-select")
+  .addEventListener("change", onBarberChange);
 
 // Populate barbers from the API
 function populateBarbers() {
-  fetch("http://localhost:3000/api/barbers")
+  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers")
     .then((response) => response.json())
     .then((barbers) => {
       const barberSelect = document.getElementById("barber-select");
@@ -434,7 +432,7 @@ function populateBarbers() {
 
 // Populate service bubbles from the API
 function populateServices() {
-  fetch("http://localhost:3000/api/services")
+  fetch("https://examproject-barbershop-app-backend.onrender.com/api/services")
     .then((response) => response.json())
     .then((services) => {
       if (!Array.isArray(services)) {
@@ -455,7 +453,6 @@ function populateServices() {
     .catch((error) => console.error("Error fetching services:", error));
 }
 
-
 document.querySelectorAll(".service-button").forEach((button) => {
   button.addEventListener("click", () => {
     // For radio buttons, unselect all first
@@ -475,7 +472,6 @@ document.querySelectorAll(".service-button").forEach((button) => {
       button.classList.contains("selected");
   });
 });
-
 
 // Setup the booking form with event listeners
 function setupBookingForm() {
@@ -532,8 +528,8 @@ function handleDateClick(info) {
     .substring(0, 5);
   const selectedBarberName =
     barberSelect.options[barberSelect.selectedIndex].text;
-  
- openBookingModal(selectedDate, selectedTime, selectedBarberName);
+
+  openBookingModal(selectedDate, selectedTime, selectedBarberName);
 
   // Show the modal
   const modal = document.getElementById("booking-modal");
@@ -557,8 +553,6 @@ function handleDateClick(info) {
   const displayBarberField = modal.querySelector("#selected-barber");
   if (displayBarberField)
     displayBarberField.textContent = `Barber: ${selectedBarberName}`;
-
-
 }
 
 function isClosedDay(date) {
@@ -671,13 +665,16 @@ async function handleBookingSubmit(event) {
 
   // Submit the booking data
   try {
-    const response = await fetch("http://localhost:3000/api/bookings/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(bookingData),
-    });
+    const response = await fetch(
+      "https://examproject-barbershop-app-backend.onrender.com/api/bookings/create",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
+      }
+    );
 
     const data = await response.json();
 
@@ -707,7 +704,6 @@ async function handleBookingSubmit(event) {
   }
 }
 
-
 function clearModalContent() {
   // Reset all input fields in the modal
   const modal = document.getElementById("booking-modal");
@@ -736,7 +732,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function openBookingModal(selectedDate, selectedTime, selectedBarberName) {
   const modal = document.getElementById("booking-modal");
   if (modal) {
-        console.log("Opening booking modal..."); // Add this line
+    console.log("Opening booking modal..."); // Add this line
     modal.classList.add("show");
 
     // Populate hidden input fields or display fields in the modal
@@ -765,7 +761,6 @@ function openBookingModal(selectedDate, selectedTime, selectedBarberName) {
     console.error("Booking modal not found!");
   }
 }
-
 
 function populateServiceBubbles(services, containerId, isMainService) {
   const container = document.getElementById(containerId);

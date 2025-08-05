@@ -2,36 +2,38 @@ let barbersData = {};
 populateBarbers();
 
 export const adminFunctions = {
-    'dashboard-section': loadAdminDashboard,
-    'view-bookings-section': viewBookings,
-    'edit-availabilities-section': displayEditAvailabilityForm,
+  "dashboard-section": loadAdminDashboard,
+  "view-bookings-section": viewBookings,
+  "edit-availabilities-section": displayEditAvailabilityForm,
 };
 
 function setupAdminNavigation() {
-    document.querySelectorAll("#main-nav a, .off-screen-menu a").forEach((link) => {
-        link.addEventListener("click", function (event) {
-            const href = this.getAttribute("href");
-            const sectionId = href ? href.substring(1) : null;
+  document
+    .querySelectorAll("#main-nav a, .off-screen-menu a")
+    .forEach((link) => {
+      link.addEventListener("click", function (event) {
+        const href = this.getAttribute("href");
+        const sectionId = href ? href.substring(1) : null;
 
-            if (adminFunctions.hasOwnProperty(sectionId)) {
-                event.preventDefault();
-                console.log("Admin navigation to section:", sectionId);
-                adminFunctions[sectionId]();
-            }
-        });
+        if (adminFunctions.hasOwnProperty(sectionId)) {
+          event.preventDefault();
+          console.log("Admin navigation to section:", sectionId);
+          adminFunctions[sectionId]();
+        }
+      });
     });
 }
 
 // Expose functions for admin.js if needed
 export function generateAdminNavBar() {
-    const navBar = document.getElementById("main-nav");
-    if (!navBar) {
-        console.error("Main navigation (nav#main-nav) not found.");
-        return;
-    }
+  const navBar = document.getElementById("main-nav");
+  if (!navBar) {
+    console.error("Main navigation (nav#main-nav) not found.");
+    return;
+  }
 
-    // Update the main navigation with admin links
-    navBar.innerHTML = `
+  // Update the main navigation with admin links
+  navBar.innerHTML = `
         <ul>
             <li><a href="#dashboard-section" id="dashboard-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
             <li><a href="#view-bookings-section" id="view-bookings-link"><i class="fas fa-calendar-check"></i> View Bookings</a></li>
@@ -40,27 +42,26 @@ export function generateAdminNavBar() {
             <!-- <li><a href="#" id="admin-logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li> -->
         </ul>
     `;
-    
-    // Update the off-screen menu with admin links
-    updateOffScreenMenuToAdmin();
 
-    // Call the function to set up event listeners for admin links
-    setupAdminNavBarListeners();
-  
-    // Set up admin navigation
-    setupAdminNavigation();
-};
+  // Update the off-screen menu with admin links
+  updateOffScreenMenuToAdmin();
 
+  // Call the function to set up event listeners for admin links
+  setupAdminNavBarListeners();
+
+  // Set up admin navigation
+  setupAdminNavigation();
+}
 
 // Function to update the off-screen menu with admin links
 function updateOffScreenMenuToAdmin() {
-    const offScreenMenu = document.querySelector(".off-screen-menu ul");
-    if (!offScreenMenu) {
-        console.error("Off-screen menu's <ul> not found.");
-        return;
-    }
+  const offScreenMenu = document.querySelector(".off-screen-menu ul");
+  if (!offScreenMenu) {
+    console.error("Off-screen menu's <ul> not found.");
+    return;
+  }
 
-    offScreenMenu.innerHTML = `
+  offScreenMenu.innerHTML = `
         <li><a href="#dashboard-section">Dashboard</a></li>
         <li><a href="#view-bookings-section">View Bookings</a></li>
         <li><a href="#edit-availabilities-section">Edit Availabilities</a></li>
@@ -74,14 +75,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const adminLoginModal = document.getElementById("admin-login-modal");
   const closeButton = adminLoginModal.querySelector(".close-button-admin");
   const adminLoginForm = document.getElementById("admin-login-form");
-  
+
   const adminToken = localStorage.getItem("adminToken");
 
-   if (adminToken) {
+  if (adminToken) {
     // Admin is logged in, adjust UI accordingly
     generateAdminNavBar();
     adminLoginButton.textContent = "Logout";
-    adminLoginButton.onclick = logoutAdmin; 
+    adminLoginButton.onclick = logoutAdmin;
   } else {
     // Admin is not logged in
     adminLoginButton.textContent = "Admin Login";
@@ -119,14 +120,17 @@ function handleAdminLogin(event) {
   const adminLoginButton = document.getElementById("admin-login-button");
   const adminLoginModal = document.getElementById("admin-login-modal"); // Get the login modal
 
-  fetch("http://localhost:3000/api/admin/login", {
-    // Adjust the URL as per your API endpoint
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ username, password }),
-  })
+  fetch(
+    "https://examproject-barbershop-app-backend.onrender.com/api/admin/login",
+    {
+      // Adjust the URL as per your API endpoint
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    }
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error("Login failed");
@@ -178,7 +182,7 @@ function checkAdminLoginStatus() {
     // Admin is logged in, adjust UI accordingly
     generateAdminNavBar();
     adminLoginButton.textContent = "Logout";
-    adminLoginButton.onclick = logoutAdmin; 
+    adminLoginButton.onclick = logoutAdmin;
   } else {
     // Admin is not logged in
     adminLoginButton.textContent = "Admin Login";
@@ -205,48 +209,47 @@ function logoutAdmin() {
 }
 
 export function setupAdminNavBarListeners() {
-    const dashboardLink = document.getElementById("dashboard-link");
-    if (dashboardLink) {
-        dashboardLink.addEventListener("click", (e) => {
-            e.preventDefault();
-            loadAdminDashboard();
-        });
-    } else {
-        console.error("Element with ID 'dashboard-link' not found.");
-    }
+  const dashboardLink = document.getElementById("dashboard-link");
+  if (dashboardLink) {
+    dashboardLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      loadAdminDashboard();
+    });
+  } else {
+    console.error("Element with ID 'dashboard-link' not found.");
+  }
 
-    const viewBookingsLink = document.getElementById("view-bookings-link");
-    if (viewBookingsLink) {
-        viewBookingsLink.addEventListener("click", (e) => {
-            e.preventDefault();
-            viewBookings();
-        });
-    } else {
-        console.error("Element with ID 'view-bookings-link' not found.");
-    }
+  const viewBookingsLink = document.getElementById("view-bookings-link");
+  if (viewBookingsLink) {
+    viewBookingsLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      viewBookings();
+    });
+  } else {
+    console.error("Element with ID 'view-bookings-link' not found.");
+  }
 
-    const editAvailabilitiesLink = document.getElementById("edit-availabilities-link");
-    if (editAvailabilitiesLink) {
-        editAvailabilitiesLink.addEventListener("click", (e) => {
-            e.preventDefault();
-            displayEditAvailabilityForm();
-        });
-    } else {
-        console.error("Element with ID 'edit-availabilities-link' not found.");
-    }
-
-};
-
-
+  const editAvailabilitiesLink = document.getElementById(
+    "edit-availabilities-link"
+  );
+  if (editAvailabilitiesLink) {
+    editAvailabilitiesLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      displayEditAvailabilityForm();
+    });
+  } else {
+    console.error("Element with ID 'edit-availabilities-link' not found.");
+  }
+}
 
 /* Admin dashboard */
 
 export function loadAdminDashboard() {
-      console.log("loadAdminDashboard() called");
+  console.log("loadAdminDashboard() called");
   // Call the function to generate the admin navigation bar
   generateAdminNavBar();
 
-const dashboardHtml = `
+  const dashboardHtml = `
   <div class="dashboard-container">
     <h2>Admin Dashboard</h2>
     <div class="dashboard-card" id="view-bookings-btn">View Bookings</div>
@@ -267,10 +270,8 @@ const dashboardHtml = `
   // Uncomment and implement these functions if needed
   // document.getElementById("update-opening-hours-btn").addEventListener("click", updateOpeningHours);
   // document.getElementById("logout-btn").addEventListener("click", logoutAdmin);
-  
 }
 //window.loadAdminDashboard = loadAdminDashboard;
-
 
 // Define viewBookings, editAvailabilities, updateOpeningHours, and logoutAdmin functions as per your functionality requirements.
 
@@ -314,11 +315,14 @@ export function viewBookings() {
 window.viewBookings = viewBookings;
 
 function fetchBookingsAndDisplay() {
-  fetch("http://localhost:3000/api/bookings", {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-  })
+  fetch(
+    "https://examproject-barbershop-app-backend.onrender.com/api/bookings",
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+    }
+  )
     .then((response) => response.json())
     .then((bookings) => {
       const sortedAndFilteredBookings = sortAndFilterBookings(bookings);
@@ -374,7 +378,7 @@ function displayBookings(bookings) {
   // Attach event listeners to delete buttons
   const deleteButtons = document.querySelectorAll(".delete-booking-button");
   deleteButtons.forEach((button) => {
-    button.addEventListener("click", function() {
+    button.addEventListener("click", function () {
       const bookingId = this.getAttribute("data-booking-id");
       if (confirm("Are you sure you want to delete this booking?")) {
         deleteBooking(bookingId);
@@ -384,34 +388,36 @@ function displayBookings(bookings) {
 }
 
 function deleteBooking(bookingId) {
-  fetch(`http://localhost:3000/api/bookings/delete/${bookingId}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error("Failed to delete booking");
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/bookings/delete/${bookingId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
     }
-    return response.text(); // Adjust based on what your API returns
-  })
-  .then(data => {
-    alert("Booking deleted successfully");
-    // Refresh the bookings list
-    fetchBookingsAndDisplay();
-  })
-  .catch(error => {
-    console.error("Error deleting booking:", error);
-    alert("Error deleting booking");
-  });
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to delete booking");
+      }
+      return response.text(); // Adjust based on what your API returns
+    })
+    .then((data) => {
+      alert("Booking deleted successfully");
+      // Refresh the bookings list
+      fetchBookingsAndDisplay();
+    })
+    .catch((error) => {
+      console.error("Error deleting booking:", error);
+      alert("Error deleting booking");
+    });
 }
-
 
 // Populate filter dropdown with barber options
 function populateFilterBarbers() {
-  fetch("http://localhost:3000/api/barbers", {
+  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
@@ -421,7 +427,7 @@ function populateFilterBarbers() {
       const barberFilterSelect = document.getElementById("filter-barber");
       // Clear existing options first, keeping only the "All Barbers" option
       barberFilterSelect.innerHTML = '<option value="all">All Barbers</option>';
-      
+
       // Add new barber options
       barbers.forEach((barber) => {
         const option = document.createElement("option");
@@ -443,9 +449,8 @@ function formatDate(isoDate) {
   });
 }
 
-
 function fetchAndDisplayBarberAvailabilities() {
-  fetch("http://localhost:3000/api/barbers")
+  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers")
     .then((response) => response.json())
     .then((barbers) => {
       const availabilitiesSection = document.createElement("section");
@@ -454,7 +459,9 @@ function fetchAndDisplayBarberAvailabilities() {
       barbers.forEach((barber) => {
         const barberDiv = document.createElement("div");
         barberDiv.innerHTML = `<h3>Barber ${barber.id}</h3>`;
-        fetch(`http://localhost:3000/api/barbers/${barber.id}/availability`)
+        fetch(
+          `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barber.id}/availability`
+        )
           .then((response) => response.json())
           .then((availabilities) => {
             const availabilityList = document.createElement("ul");
@@ -581,7 +588,7 @@ export function displayEditAvailabilityForm() {
 
   // Add event listeners to close both modals
   const closeButtons = document.querySelectorAll(".close-modal");
-  closeButtons.forEach(button => {
+  closeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       button.closest(".modal").classList.add("hidden");
     });
@@ -589,25 +596,25 @@ export function displayEditAvailabilityForm() {
 }
 window.displayEditAvailabilityForm = displayEditAvailabilityForm;
 
-
-
-
 function createBarberAvailability() {
   const barberId = document.getElementById("barber-select").value;
   const startDate = document.getElementById("unavailable-start-date").value;
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate;
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`, {
-    method: "POST", // or "POST" if you're creating new availability
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-    body: JSON.stringify({
-      start_date: startDate,
-      end_date: endDate,
-    }),
-  })
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    {
+      method: "POST", // or "POST" if you're creating new availability
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify({
+        start_date: startDate,
+        end_date: endDate,
+      }),
+    }
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to update availability");
@@ -624,13 +631,15 @@ function createBarberAvailability() {
     });
 }
 
-
 function fetchCurrentUnavailabilities(barberId) {
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-  })
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+    }
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to fetch current unavailabilities");
@@ -649,25 +658,24 @@ function fetchCurrentUnavailabilities(barberId) {
         return;
       }
 
-      
-  const selectList = document.createElement("select");
-  selectList.id = "current-unavailability-select";
-  unavailabilities.forEach((unavailabilityDate) => {
-    const option = document.createElement("option");
-    option.value = unavailabilityDate; // Store the date string as the value
-    option.textContent = `On ${unavailabilityDate}`;
-    selectList.appendChild(option);
-  });
+      const selectList = document.createElement("select");
+      selectList.id = "current-unavailability-select";
+      unavailabilities.forEach((unavailabilityDate) => {
+        const option = document.createElement("option");
+        option.value = unavailabilityDate; // Store the date string as the value
+        option.textContent = `On ${unavailabilityDate}`;
+        selectList.appendChild(option);
+      });
 
-  selectList.addEventListener("change", function () {
-    const selectedDate = this.value;
-    document.getElementById("old-start-date").value = selectedDate;
-    document.getElementById("old-end-date").value = selectedDate; // If the end date is different, adjust this logic
-  });
+      selectList.addEventListener("change", function () {
+        const selectedDate = this.value;
+        document.getElementById("old-start-date").value = selectedDate;
+        document.getElementById("old-end-date").value = selectedDate; // If the end date is different, adjust this logic
+      });
 
-  container.appendChild(selectList);
-  // Trigger change event to set initial values
-  selectList.dispatchEvent(new Event("change"));
+      container.appendChild(selectList);
+      // Trigger change event to set initial values
+      selectList.dispatchEvent(new Event("change"));
     })
     .catch((error) => {
       console.error("Error fetching current unavailabilities:", error);
@@ -688,20 +696,23 @@ function updateBarberAvailability() {
   console.log(`Old Start Date: ${oldStartDate}, Old End Date: ${oldEndDate}`);
   console.log(`New Start Date: ${newStartDate}, New End Date: ${newEndDate}`);
 
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      // Make sure this is the correct way to include the token
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-    body: JSON.stringify({
-      old_start_date: oldStartDate,
-      old_end_date: oldEndDate,
-      new_start_date: newStartDate,
-      new_end_date: newEndDate,
-    }),
-  })
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        // Make sure this is the correct way to include the token
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify({
+        old_start_date: oldStartDate,
+        old_end_date: oldEndDate,
+        new_start_date: newStartDate,
+        new_end_date: newEndDate,
+      }),
+    }
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error(`Failed to update availability: ${response.status}`);
@@ -719,20 +730,22 @@ function updateBarberAvailability() {
     });
 }
 
-
 function deleteBarberAvailability() {
   const barberId = document.getElementById("barber-select").value;
   const startDate = document.getElementById("unavailable-start-date").value;
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate; // Use single date if end date is not provided
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-    body: JSON.stringify({ start_date: startDate, end_date: endDate }),
-  })
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify({ start_date: startDate, end_date: endDate }),
+    }
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to delete availability");
@@ -750,11 +763,14 @@ function deleteBarberAvailability() {
 }
 
 function fetchCurrentUnavailabilitiesForRemoval(barberId) {
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-  })
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+    }
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to fetch current unavailabilities");
@@ -763,7 +779,9 @@ function fetchCurrentUnavailabilitiesForRemoval(barberId) {
     })
     .then((unavailabilities) => {
       console.log("Unavailabilities for Removal:", unavailabilities); // Debug
-      const container = document.getElementById("remove-unavailabilities-container");
+      const container = document.getElementById(
+        "remove-unavailabilities-container"
+      );
       container.innerHTML = ""; // Clear previous entries
 
       const removeForm = document.getElementById("remove-unavailability-form");
@@ -813,7 +831,9 @@ function fetchCurrentUnavailabilitiesForRemoval(barberId) {
       if (removeForm) {
         // Remove existing event listeners to prevent multiple attachments
         removeForm.replaceWith(removeForm.cloneNode(true));
-        const newRemoveForm = document.getElementById("remove-unavailability-form");
+        const newRemoveForm = document.getElementById(
+          "remove-unavailability-form"
+        );
         newRemoveForm.addEventListener("submit", handleRemoveUnavailability);
       } else {
         console.error("Form 'remove-unavailability-form' not found");
@@ -825,14 +845,16 @@ function fetchCurrentUnavailabilitiesForRemoval(barberId) {
     });
 }
 
-
-
 function handleRemoveUnavailability(event) {
   event.preventDefault(); // Prevent form from submitting normally
 
   const barberId = document.getElementById("barber-select").value;
-  const checkboxes = document.querySelectorAll('input[name="removeDates"]:checked');
-  const selectedDates = Array.from(checkboxes).map(checkbox => checkbox.value);
+  const checkboxes = document.querySelectorAll(
+    'input[name="removeDates"]:checked'
+  );
+  const selectedDates = Array.from(checkboxes).map(
+    (checkbox) => checkbox.value
+  );
 
   if (selectedDates.length === 0) {
     alert("Please select at least one date to remove.");
@@ -840,18 +862,25 @@ function handleRemoveUnavailability(event) {
   }
 
   // Confirmation before deletion
-  if (!confirm(`Are you sure you want to remove unavailability for the selected ${selectedDates.length} date(s)?`)) {
+  if (
+    !confirm(
+      `Are you sure you want to remove unavailability for the selected ${selectedDates.length} date(s)?`
+    )
+  ) {
     return;
   }
 
-  fetch(`http://localhost:3000/api/barbers/${barberId}/unavailable-dates`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-    },
-    body: JSON.stringify({ dates: selectedDates }),
-  })
+  fetch(
+    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+      },
+      body: JSON.stringify({ dates: selectedDates }),
+    }
+  )
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to delete unavailability");
@@ -870,10 +899,9 @@ function handleRemoveUnavailability(event) {
     });
 }
 
-
 // Populate barbers from the API
 function populateBarbers() {
-  fetch("http://localhost:3000/api/barbers", {
+  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
@@ -905,7 +933,8 @@ function loadContent(contentHtml) {
 }
 
 function fetchData(url, callback) {
-  const backendBaseUrl = "http://localhost:3000";
+  const backendBaseUrl =
+    "https://examproject-barbershop-app-backend.onrender.com";
   const fullUrl = backendBaseUrl + url;
 
   fetch(fullUrl)

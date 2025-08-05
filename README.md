@@ -13,7 +13,8 @@ Welcome to the frontend repository of the Barbershop application, a modern platf
 4.  Accessing the App: The app will be accessible at `http://localhost:1234` or the specified port in your terminal.
 
 ## Access to deployed website
-http://localhost:3000/
+
+https://examproject-barbershop-app-backend.onrender.com/
 
 ## Technologies Used
 
@@ -69,6 +70,7 @@ The admin panel of the Barbershop app frontend, as defined in `admin/admin.js`, 
 This admin panel provides comprehensive control over the booking and scheduling aspects of the barbershop, making it a crucial part of the application for administrative tasks.
 
 ## Customer Booking Interface (`taps/booking.js`)
+
 ### Booking Page Initialization
 
 - Load Booking Page: When the booking page is loaded, it initializes the calendar, populates services and barbers, and sets up the booking form.
@@ -100,26 +102,26 @@ This admin panel provides comprehensive control over the booking and scheduling 
 
 ### Handling Store Closed Hours
 
--   Business Hours Configuration: The calendar is configured with business hours for each day of the week. This setup prevents customers from selecting time slots outside of these hours.
--   Dynamic Calendar Updates: The calendar updates dynamically to reflect the specific opening and closing times for each day, including any special hours for weekends.
+- Business Hours Configuration: The calendar is configured with business hours for each day of the week. This setup prevents customers from selecting time slots outside of these hours.
+- Dynamic Calendar Updates: The calendar updates dynamically to reflect the specific opening and closing times for each day, including any special hours for weekends.
 
 ### Preventing Booking During Already Booked Times
 
--   Fetching Booked Slots: The script fetches booked time slots for the selected barber from the backend.
--   Calendar Event Marking: Booked time slots are marked on the calendar as events, typically colored differently (e.g., red) to indicate that they are unavailable.
--   Disabling Selection: Customers cannot select these marked time slots as they are already booked.
+- Fetching Booked Slots: The script fetches booked time slots for the selected barber from the backend.
+- Calendar Event Marking: Booked time slots are marked on the calendar as events, typically colored differently (e.g., red) to indicate that they are unavailable.
+- Disabling Selection: Customers cannot select these marked time slots as they are already booked.
 
 ### Handling Unavailable Barber (Illness, Vacation)
 
--   Fetching Barber Unavailability: The system fetches dates when barbers are unavailable (due to illness, vacation, or other reasons) from the backend.
--   Marking Unavailable Dates: These dates are then marked on the calendar, similar to how booked slots are marked.
--   Preventing Selection: These marked dates are made non-selectable, ensuring customers cannot book appointments with barbers who are not available.
+- Fetching Barber Unavailability: The system fetches dates when barbers are unavailable (due to illness, vacation, or other reasons) from the backend.
+- Marking Unavailable Dates: These dates are then marked on the calendar, similar to how booked slots are marked.
+- Preventing Selection: These marked dates are made non-selectable, ensuring customers cannot book appointments with barbers who are not available.
 
 ### Additional Considerations
 
--   Real-Time Updates: The system should ideally update in real-time or have a mechanism to refresh availability data regularly to ensure accuracy.
--   Clear Indications: The calendar should clearly indicate different states (available, booked, unavailable) for ease of understanding by the customer.
--   Fallbacks and Notifications: In case of any issues with fetching data or unexpected closures, the system should notify the customer appropriately or provide fallback options.
+- Real-Time Updates: The system should ideally update in real-time or have a mechanism to refresh availability data regularly to ensure accuracy.
+- Clear Indications: The calendar should clearly indicate different states (available, booked, unavailable) for ease of understanding by the customer.
+- Fallbacks and Notifications: In case of any issues with fetching data or unexpected closures, the system should notify the customer appropriately or provide fallback options.
 
 ### Additional Functionalities
 
