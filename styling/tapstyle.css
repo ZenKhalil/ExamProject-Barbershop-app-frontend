@@ -2,19 +2,14 @@
    TAP / SECTION STYLES — Salon Sindbad
    ============================================================ */
 
-/* General styles for each section */
 main section {
   display: none;
   padding: 20px;
   overflow-y: auto;
 }
 
-/* Show home section by default */
-#home-section {
-  display: block;
-}
+#home-section { display: block; }
 
-/* Welcome message overrides (tap context) */
 .welcome h2 {
   font-family: var(--font-display, 'Playfair Display', serif);
   font-size: 2em;
@@ -27,7 +22,6 @@ main section {
   color: var(--clr-text-dim, #9a9590);
 }
 
-/* About section */
 #about-section .container {
   overflow-y: auto;
   max-width: 800px;
@@ -67,10 +61,7 @@ main section {
   box-shadow: 0 6px 25px rgba(201,168,76,0.3);
 }
 
-/* Gallery section */
-#gallery-section {
-  padding: 40px 20px;
-}
+#gallery-section { padding: 40px 20px; }
 
 #gallery-section h2 {
   text-align: center;

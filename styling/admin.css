@@ -2,21 +2,28 @@
    ADMIN PANEL — Salon Sindbad
    ============================================================ */
 
-/* Admin Login Modal */
+/* Admin Login Modal — default hidden via display:none
+   admin.js shows it via style.display = "block"
+   We override "block" to "flex" for centering via a separate rule */
 .modal-admin {
   display: none;
   position: fixed;
   z-index: 1050;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
   overflow: auto;
   background-color: var(--clr-overlay, rgba(0,0,0,0.7));
-  align-items: center;
-  justify-content: center;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/* When admin.js sets display:block, we upgrade it to flex for centering.
+   We use the [style] selector to detect inline style being set. */
+.modal-admin[style*="display: block"],
+.modal-admin[style*="display:block"] {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-admin-content {
@@ -29,12 +36,12 @@
   max-width: 340px;
   box-shadow: var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.5));
   border-radius: var(--radius-lg, 20px);
-  animation: modalSlideIn 0.35s ease-out;
+  animation: adminModalIn 0.35s ease-out;
 }
 
-@keyframes modalSlideIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes adminModalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .modal-admin-content h2 {
@@ -63,8 +70,7 @@
 .close-button-admin {
   color: var(--clr-text-dim, #9a9590);
   position: absolute;
-  top: 12px;
-  right: 16px;
+  top: 12px; right: 16px;
   font-size: 24px;
   font-weight: 300;
   cursor: pointer;
@@ -72,9 +78,7 @@
   line-height: 1;
 }
 
-.close-button-admin:hover {
-  color: var(--clr-gold, #c9a84c);
-}
+.close-button-admin:hover { color: var(--clr-gold, #c9a84c); }
 
 /* Change Dates Modal */
 #change-dates-modal .close-modal {
@@ -84,21 +88,17 @@
   font-size: 1.8em;
   background: transparent;
   position: absolute;
-  top: 8px;
-  right: 12px;
+  top: 8px; right: 12px;
   transition: 0.3s ease;
 }
 
-#change-dates-modal .close-modal:hover {
-  color: var(--clr-gold, #c9a84c);
-}
+#change-dates-modal .close-modal:hover { color: var(--clr-gold, #c9a84c); }
 
 #change-dates-modal .modal-content {
   background: var(--clr-surface, #1a1a1a);
   border: 1px solid var(--clr-border, #2e2e2e);
   border-radius: var(--radius-md, 12px);
-  width: 100%;
-  max-width: 340px;
+  width: 100%; max-width: 340px;
   padding: 20px;
   position: relative;
 }
@@ -106,8 +106,7 @@
 /* Admin Login Area */
 #admin-login-area {
   position: absolute;
-  top: 50%;
-  right: 16px;
+  top: 50%; right: 16px;
   transform: translateY(-50%);
   z-index: 2;
 }
@@ -207,8 +206,7 @@
   justify-content: center;
   margin: 10px;
   padding: 20px;
-  width: 220px;
-  height: 100px;
+  width: 220px; height: 100px;
   background: var(--clr-card, #222222);
   border: 1px solid var(--clr-border, #2e2e2e);
   border-radius: var(--radius-md, 12px);
@@ -236,8 +234,7 @@
   display: flex;
   flex-wrap: wrap;
   list-style: none;
-  padding: 0;
-  margin: 0;
+  padding: 0; margin: 0;
   justify-content: center;
   gap: 20px;
 }
@@ -246,8 +243,7 @@
   background: var(--clr-card, #222222);
   border: 1px solid var(--clr-border, #2e2e2e);
   border-radius: var(--radius-md, 12px);
-  width: 100%;
-  max-width: 300px;
+  width: 100%; max-width: 300px;
   padding: 24px;
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.3));
   display: flex;
@@ -288,8 +284,7 @@
 .sort-filter-section {
   display: flex;
   align-items: center;
-  margin: 5px;
-  gap: 8px;
+  margin: 5px; gap: 8px;
 }
 
 .sort-filter-section label {
@@ -331,9 +326,7 @@
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.3));
 }
 
-.form-group {
-  margin-bottom: 16px;
-}
+.form-group { margin-bottom: 16px; }
 
 .form-group label {
   display: block;
@@ -361,10 +354,7 @@
   box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
 }
 
-.form-actions {
-  text-align: center;
-  padding-top: 8px;
-}
+.form-actions { text-align: center; padding-top: 8px; }
 
 .btn {
   padding: 10px 24px;
@@ -400,47 +390,14 @@
 }
 
 /* Responsive booking list */
-@media (min-width: 768px) {
-  .booking-list-item {
-    width: calc(50% - 20px);
-  }
-}
+@media (min-width: 768px)  { .booking-list-item { width: calc(50% - 20px); } }
+@media (min-width: 992px)  { .booking-list-item { width: calc(33.333% - 20px); } }
+@media (min-width: 1200px) { .booking-list-item { width: calc(25% - 20px); } }
 
-@media (min-width: 992px) {
-  .booking-list-item {
-    width: calc(33.333% - 20px);
-  }
-}
-
-@media (min-width: 1200px) {
-  .booking-list-item {
-    width: calc(25% - 20px);
-  }
-}
-
-/* Mobile admin adjustments */
+/* Mobile admin */
 @media (max-width: 768px) {
-  .sort-filter-container {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0 12px;
-  }
-
-  .availability-form {
-    max-width: 100%;
-    margin: 0 12px;
-    padding: 16px;
-  }
-
-  .btn {
-    padding: 10px 16px;
-    margin: 4px;
-    width: auto;
-  }
-
-  .dashboard-card {
-    width: calc(50% - 20px);
-    height: 80px;
-    font-size: 0.85rem;
-  }
+  .sort-filter-container { flex-direction: column; align-items: stretch; padding: 0 12px; }
+  .availability-form { max-width: 100%; margin: 0 12px; padding: 16px; }
+  .btn { padding: 10px 16px; margin: 4px; }
+  .dashboard-card { width: calc(50% - 20px); height: 80px; font-size: 0.85rem; }
 }

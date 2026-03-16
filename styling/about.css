@@ -46,17 +46,7 @@
     border-radius: var(--radius-md, 12px);
   }
 
-  .about-container h1 {
-    font-size: 1.6em;
-  }
-
-  .about-container p {
-    font-size: 0.95em;
-    line-height: 1.7;
-  }
-
-  #map {
-    height: 300px;
-    margin-top: 16px;
-  }
+  .about-container h1 { font-size: 1.6em; }
+  .about-container p { font-size: 0.95em; line-height: 1.7; }
+  #map { height: 300px; margin-top: 16px; }
 }

@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/styling/about.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-    <!-- Google Fonts — Premium Barbershop Typography -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
       integrity="sha256-xodZBntMZQ1Lk3Mpo60IBYbR3v84dYJ5qfCiRPHfs18=" crossorigin="" />
 </head>
-<body>
+<body class="home-active">
     <!-- Price List Modal -->
     <section id="pricelist-section"></section>
     <div id="priceListModal" class="modal-pricelist" style="display: none;">
@@ -97,8 +97,12 @@
         </div>
     </header>
 
-    <!-- Admin Login Modal -->
-    <div id="admin-login-modal" class="modal-admin hidden">
+    <!--
+      Admin Login Modal
+      IMPORTANT: Only ONE instance. No "hidden" class — admin.js toggles via style.display.
+      CSS .modal-admin { display: none } handles the default hidden state.
+    -->
+    <div id="admin-login-modal" class="modal-admin">
         <div class="modal-admin-content">
             <span class="close-button-admin">&times;</span>
             <h2>Admin Login</h2>
@@ -141,7 +145,7 @@
                 <h1>Salon Sindbad</h1>
                 <div class="welcome-divider"></div>
                 <p>Located in the heart of Copenhagen</p>
-                <a href="#booking-section" class="hero-cta" onclick="event.preventDefault();">
+                <a href="#booking-section" class="hero-cta" id="hero-book-now">
                     <i class="fas fa-calendar-alt"></i> Book Now
                 </a>
             </div>
@@ -149,15 +153,17 @@
 
         <!-- Booking Section -->
         <section id="booking-section">
-            <div class="booking-header">
-                <h2>Book Your Appointment</h2>
-                <p>Select a barber, then tap a time slot on the calendar</p>
-            </div>
-            <div class="booking-container">
+            <div class="booking-top-bar">
+                <div class="booking-top-left">
+                    <h2>Book Your Appointment</h2>
+                    <p>Select a barber, then tap a time slot</p>
+                </div>
                 <div class="barber-selection">
-                    <label for="barber-select"><i class="fas fa-user-tie"></i> Select Barber:</label>
+                    <label for="barber-select"><i class="fas fa-user-tie"></i> Barber:</label>
                     <select id="barber-select" name="barber_id"></select>
                 </div>
+            </div>
+            <div class="booking-calendar-wrap">
                 <div id="calendar"></div>
             </div>
             <div class="booking-container">
@@ -219,8 +225,72 @@
     <!-- Tooltip -->
     <div id="tooltip" class="hidden"></div>
 
-    <!-- Scripts -->
+    <!-- Module scripts -->
     <script type="module" src="main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <!--
+      Bridge script — runs AFTER DOMContentLoaded.
+      Handles: hero CTA navigation + scroll-lock when on home page.
+    -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        /* ---- Hero "Book Now" → trigger the real nav link ---- */
+        var heroCta = document.getElementById('hero-book-now');
+        if (heroCta) {
+            heroCta.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Find the booking link inside #main-nav and simulate a click
+                var navBookingLink = document.querySelector('#main-nav a[href="#booking-section"]');
+                if (navBookingLink) {
+                    navBookingLink.click();
+                } else {
+                    // Fallback: try the off-screen menu link
+                    var offScreenLink = document.querySelector('.off-screen-menu a[href="#booking-section"]');
+                    if (offScreenLink) offScreenLink.click();
+                }
+            });
+        }
+
+        /* ---- Scroll-lock + footer hide when home section is active ---- */
+        function updateScrollLock() {
+            var homeSection = document.getElementById('home-section');
+            if (!homeSection) return;
+
+            var style = homeSection.style.display;
+            var isHomeVisible = (style === 'block' || style === '');
+
+            // Also check computed style if no inline style set yet
+            if (style === '') {
+                isHomeVisible = getComputedStyle(homeSection).display !== 'none';
+            }
+
+            if (isHomeVisible) {
+                document.body.classList.add('home-active');
+            } else {
+                document.body.classList.remove('home-active');
+            }
+        }
+
+        // Watch for style changes on all sections
+        var observer = new MutationObserver(function() {
+            updateScrollLock();
+        });
+        document.querySelectorAll('main > section').forEach(function(section) {
+            observer.observe(section, { attributes: true, attributeFilter: ['style'] });
+        });
+
+        // Also listen for clicks on nav links
+        document.querySelectorAll('#main-nav a, #main-nav button, .off-screen-menu a, .off-screen-menu button').forEach(function(el) {
+            el.addEventListener('click', function() {
+                setTimeout(updateScrollLock, 100);
+            });
+        });
+
+        // Initial state
+        updateScrollLock();
+    });
+    </script>
 </body>
 </html>
