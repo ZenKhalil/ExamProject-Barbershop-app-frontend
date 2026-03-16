@@ -57,8 +57,6 @@ body {
   font-family: var(--font-body);
   background-color: var(--clr-bg);
   color: var(--clr-text);
-  display: flex;
-  flex-direction: column;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -512,7 +510,6 @@ nav ul li button:hover {
    ============================================================ */
 
 #main-content {
-  flex-grow: 1;
   padding-bottom: 0;
   margin-top: 0;
 }
