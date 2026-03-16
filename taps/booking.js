@@ -1,803 +1,623 @@
-import { Calendar } from "@fullcalendar/core";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
+// booking.js — Modern barbershop booking with duration-aware slots
+// Flow: pick services → pick date → pick time → fill contact info → book
 
-// Declare calendar as a global variable
-let calendar;
+const SLOT_INTERVAL = 10; // minutes between each slot option
+const DAYS_TO_SHOW = 14;
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const openingHours = {
-  0: null, // Sunday - closed
-  1: { startTime: "10:00", endTime: "18:00" }, // Monday
-  2: { startTime: "10:00", endTime: "18:00" }, // Tuesday
-  3: { startTime: "10:00", endTime: "18:00" }, // Wednesday
-  4: { startTime: "10:00", endTime: "18:00" }, // Thursday
-  5: { startTime: "10:00", endTime: "18:00" }, // Friday
-  6: { startTime: "10:00", endTime: "15:00" }, // Saturday
+  0: null,
+  1: { startTime: "10:00", endTime: "18:00" },
+  2: { startTime: "10:00", endTime: "18:00" },
+  3: { startTime: "10:00", endTime: "18:00" },
+  4: { startTime: "10:00", endTime: "18:00" },
+  5: { startTime: "10:00", endTime: "18:00" },
+  6: { startTime: "10:00", endTime: "15:00" },
 };
 
-// Load the booking page with necessary setup
+// State
+let selectedDate = null;
+let allServices = [];      // full list from API (with duration)
+let unavailableDates = [];
+let bookedSlots = [];
+let formListenerAttached = false;
+
+// ============================================================
+// Entry point
+// ============================================================
+
 export function loadBookingPage() {
-  if (calendar) {
-    calendar.destroy(); // Destroy the previous calendar instance
-  }
-  // Initialize calendar and other components
   populateServices();
   populateBarbers();
   setupBookingForm();
-  initializeCalendar();
+  generateDateStrip();
+
+  // Select today by default
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  selectDate(today);
 }
 
-// Initialize the calendar with weekly view and business hours
-function initializeCalendar() {
-  const calendarEl = document.getElementById("calendar");
-  if (!calendarEl) {
-    console.error("Calendar element not found!");
-    return;
-  }
+// ============================================================
+// Services — loaded first, with duration
+// ============================================================
 
-  const today = new Date();
-  const currentDayOfWeek = today.getDay();
-  const currentWeekStart = new Date(today);
-  currentWeekStart.setDate(today.getDate() - currentDayOfWeek);
-
-  calendar = new Calendar(calendarEl, {
-    plugins: [timeGridPlugin, interactionPlugin],
-    initialView: window.innerWidth <= 768 ? "timeGridDay" : "timeGridWeek",
-    headerToolbar: {
-      left: window.innerWidth <= 768 ? "prev,next today" : "prev,next today", // Show on both mobile and desktop
-      center: "title",
-      right: "", // Always empty - never show buttons on right side
-    },
-
-    // Add custom button handlers to prevent past navigation
-    customButtons: {
-      prev: {
-        click: function () {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          // Calculate what the previous view would be
-          const currentStart = new Date(calendar.view.activeStart);
-          let prevStart;
-
-          if (calendar.view.type === "timeGridWeek") {
-            prevStart = new Date(currentStart);
-            prevStart.setDate(currentStart.getDate() - 7);
-          } else if (calendar.view.type === "timeGridDay") {
-            prevStart = new Date(currentStart);
-            prevStart.setDate(currentStart.getDate() - 1);
-          }
-
-          // Only allow navigation if the previous view wouldn't show past dates
-          if (prevStart && prevStart.getTime() >= today.getTime()) {
-            calendar.prev();
-          }
-        },
-      },
-      next: {
-        click: function () {
-          calendar.next();
-        },
-      },
-    },
-
-    slotDuration: "00:10:00",
-    slotLabelInterval: "00:15",
-    allDaySlot: false,
-    businessHours: {
-      daysOfWeek: [1, 2, 3, 4, 5, 6],
-      startTime: "10:00",
-      endTime: "18:00",
-    },
-    slotLabelFormat: {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    },
-    dateClick: handleDateClick,
-    slotMinTime: "10:00",
-    slotMaxTime: "18:00",
-
-    slotLabelContent: (arg) => {
-      const dayOfWeek = arg.date.getDay();
-      const { startTime, endTime } = openingHours[dayOfWeek] || {};
-      if (startTime && endTime) {
-        const slotTime = arg.text;
-        if (slotTime >= startTime && slotTime < endTime) {
-          return arg.text;
-        }
-      }
-      return "";
-    },
-
-    firstDay: currentDayOfWeek,
-
-    datesSet: function (dateInfo) {
-      const barberSelect = document.getElementById("barber-select");
-      const barberId = barberSelect.value;
-
-      if (barberId) {
-        fetchUnavailableTimeslotsForCurrentView(barberId);
-        fetchUnavailableTimesForBarber(barberId);
-      }
-      disablePrevButtonIfNeeded();
-    },
-
-    // Prevent navigation to past dates entirely
-    validRange: {
-      start: today, // This prevents any navigation to dates before today
-    },
-
-    eventSources: [
-      {
-        events: function (info, successCallback, failureCallback) {
-          var events = [];
-          var startDate = new Date(info.start.valueOf());
-          var endDate = new Date(info.end.valueOf());
-
-          while (startDate < endDate) {
-            if (startDate.getDay() === 6) {
-              events.push({
-                title: "Closed",
-                start: new Date(
-                  startDate.getFullYear(),
-                  startDate.getMonth(),
-                  startDate.getDate(),
-                  15,
-                  0
-                ),
-                end: new Date(
-                  startDate.getFullYear(),
-                  startDate.getMonth(),
-                  startDate.getDate(),
-                  23,
-                  59
-                ),
-                rendering: "background",
-                color: "#cccccc",
-              });
-            }
-
-            if (startDate.getDay() === 0) {
-              events.push({
-                title: "Closed",
-                start: new Date(
-                  startDate.getFullYear(),
-                  startDate.getMonth(),
-                  startDate.getDate()
-                ),
-                end: new Date(
-                  startDate.getFullYear(),
-                  startDate.getMonth(),
-                  startDate.getDate() + 1
-                ),
-                rendering: "background",
-                color: "#cccccc",
-              });
-            }
-
-            startDate.setDate(startDate.getDate() + 1);
-          }
-
-          successCallback(events);
-        },
-      },
-    ],
-  });
-
-  calendar.render();
-}
-
-function disablePrevButtonIfNeeded() {
-  const prevButton = document.querySelector(".fc-prev-button");
-  const nextButton = document.querySelector(".fc-next-button");
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set to start of today
-
-  // Get the start date of the current view
-  const viewStart = new Date(calendar.view.activeStart);
-  const viewEnd = new Date(calendar.view.activeEnd);
-
-  // Disable the previous button if the view start date is today or in the past
-  if (prevButton) {
-    prevButton.disabled = viewStart.getTime() <= today.getTime();
-  }
-
-  // For the next button, we want to prevent going to a view that would show past dates
-  // This is more complex and depends on your business requirements
-  // For now, let's ensure we don't navigate to views that start before today
-  if (nextButton) {
-    // Calculate what the next view would show
-    const currentView = calendar.view;
-    let nextViewStart;
-
-    if (currentView.type === "timeGridWeek") {
-      nextViewStart = new Date(viewStart);
-      nextViewStart.setDate(viewStart.getDate() + 7);
-    } else if (currentView.type === "timeGridDay") {
-      nextViewStart = new Date(viewStart);
-      nextViewStart.setDate(viewStart.getDate() + 1);
-    }
-
-    // Don't disable next button - users should be able to go forward
-    // But you might want to add logic here if needed
-    nextButton.disabled = false;
-  }
-}
-
-function fetchUnavailableTimeslotsForCurrentView(barberId) {
-  if (!barberId) {
-    console.warn("No barber selected.");
-    return;
-  }
-
-  // Fetch unavailable dates and add them to the calendar
-  fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`
-  )
-    .then((response) => response.json())
-    .then((unavailableDates) => {
-      // Clear previous unavailable dates
-      calendar.getEvents().forEach((event) => {
-        if (event.title === "Unavailable" && event.allDay) {
-          event.remove();
-        }
-      });
-
-      // Add new unavailable dates
-      unavailableDates.forEach((dateStr) => {
-        calendar.addEvent({
-          title: "Unavailable",
-          start: dateStr,
-          allDay: true,
-          color: "grey",
-        });
-      });
-    })
-    .catch((error) =>
-      console.error("Error fetching unavailable dates:", error)
-    );
-
-  // Fetch unavailable time slots based on the current view
-  const view = calendar.view;
-  fetchUnavailableTimeslotsForPeriod(
-    formatDate(view.activeStart),
-    formatDate(view.activeEnd),
-    barberId
-  );
-}
-
-function formatDate(date) {
-  const year = date.getFullYear();
-  const month = ("0" + (date.getMonth() + 1)).slice(-2);
-  const day = ("0" + date.getDate()).slice(-2);
-  return `${year}-${month}-${day}`;
-}
-
-function fetchUnavailableTimeslotsForPeriod(start, end, barberId) {
-  // Fetch unavailable timeslots for the barber in the given period
-  fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/bookings/unavailable-timeslots?barberId=${barberId}&start=${start}&end=${end}`
-  )
-    .then((response) => response.json())
-    .then((bookedSlots) => {
-      console.log("bookedSlots:", bookedSlots); // Add this line
-      if (!Array.isArray(bookedSlots)) {
-        return;
-      }
-      // Clear out any existing 'unavailable' events
-      let existingEvents = calendar.getEvents();
-      existingEvents.forEach((event) => {
-        if (event.extendedProps.isUnavailable) {
-          event.remove();
-        }
-      });
-
-      // Add new events for each booked slot
-      bookedSlots.forEach((slot) => {
-        calendar.addEvent({
-          title: "Booked",
-          start: slot.start,
-          end: slot.end,
-          allDay: false,
-          color: "rgb(158 60 60)",
-          extendedProps: { isUnavailable: true },
-        });
-      });
-    })
-    .catch((error) =>
-      console.error("Error fetching unavailable timeslots:", error)
-    );
-}
-
-var renderedUnavailableDates = new Set();
-
-function fetchUnavailableTimesForBarber(barberId) {
-  if (!barberId) {
-    console.error("Error! No barber selected or the value is undefined");
-    return;
-  }
-
-  // We'll store the rendered dates in a set to prevent double rendering
-  const renderedDates = new Set();
-
-  fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`
-  )
-    .then((response) => response.json())
-    .then((unavailableDates) => {
-      // Add new unavailable dates
-      unavailableDates.forEach((date) => {
-        const dateTime = parseDateString(date);
-        const day = dateTime.getDay();
-        const { startTime, endTime } = openingHours[day] || {};
-
-        if (startTime && endTime) {
-          const [startHour, startMinute] = startTime.split(":").map(Number);
-          const [endHour, endMinute] = endTime.split(":").map(Number);
-
-          const startDateTime = new Date(
-            dateTime.getFullYear(),
-            dateTime.getMonth(),
-            dateTime.getDate(),
-            startHour,
-            startMinute
-          );
-
-          const endDateTime = new Date(
-            dateTime.getFullYear(),
-            dateTime.getMonth(),
-            dateTime.getDate(),
-            endHour,
-            endMinute
-          );
-
-          // Check if the event is already rendered
-          if (!renderedUnavailableDates.has(date)) {
-            renderedUnavailableDates.add(date);
-
-            calendar.addEvent({
-              title: "Unavailable",
-              start: startDateTime,
-              end: endDateTime,
-              rendering: "background",
-              color: "rgb(118 129 141)",
-            });
-          }
-        }
-      });
-    })
-    .catch((error) =>
-      console.error("An error has occurred fetching barber dates", error)
-    );
-}
-
-function parseDateString(dateString) {
-  const [year, month, day] = dateString.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
-
-function onBarberChange() {
-  const barberSelect = document.getElementById("barber-select");
-  const newBarberId = barberSelect.value;
-
-  clearUnavailableEvents();
-  renderedUnavailableDates.clear();
-  fetchUnavailableTimesForBarber(newBarberId);
-}
-
-function clearUnavailableEvents() {
-  const events = calendar.getEvents();
-  events.forEach((event) => {
-    if (["Unavailable", "Booked"].includes(event.title)) {
-      event.remove();
-    }
-  });
-  renderedUnavailableDates.clear();
-}
-
-// Attach this function to the barber-select change event
-document
-  .getElementById("barber-select")
-  .addEventListener("change", onBarberChange);
-
-// Populate barbers from the API
-function populateBarbers() {
-  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers")
-    .then((response) => response.json())
-    .then((barbers) => {
-      const barberSelect = document.getElementById("barber-select");
-      barberSelect.innerHTML = barbers
-        .map(
-          (barber) =>
-            `<option value="${barber.barber_id}">${barber.name}</option>`
-        )
-        .join("");
-
-      // Set an initial barber value and fetch their timeslots
-      if (barbers.length > 0) {
-        barberSelect.value = barbers[0].barber_id;
-        fetchUnavailableTimeslotsForCurrentView(barbers[0].barber_id);
-        fetchUnavailableTimesForBarber(barbers[0].barber_id);
-      }
-
-      // Change event to update timeslots when a new barber is selected
-      barberSelect.addEventListener("change", function () {
-        fetchUnavailableTimeslotsForCurrentView(this.value);
-        fetchUnavailableTimesForBarber(this.value);
-      });
-    })
-    .catch((error) => console.error("Error fetching barbers:", error));
-}
-
-// Populate service bubbles from the API
 function populateServices() {
   fetch("https://examproject-barbershop-app-backend.onrender.com/api/services")
-    .then((response) => response.json())
-    .then((services) => {
-      if (!Array.isArray(services)) {
-        throw new Error("Expected services to be an array");
-      }
-      // Now that we have the services, populate the bubbles.
+    .then(function (r) { return r.json(); })
+    .then(function (services) {
+      if (!Array.isArray(services)) throw new Error("Expected array");
+      allServices = services;
+
       populateServiceBubbles(
-        services.filter((s) => s.is_main === 1),
-        "main-services-container", // Updated ID
+        services.filter(function (s) { return s.is_main === 1; }),
+        "main-services-container",
         true
       );
       populateServiceBubbles(
-        services.filter((s) => s.is_main !== 1),
-        "extra-services-container", // Updated ID
+        services.filter(function (s) { return s.is_main !== 1; }),
+        "extra-services-container",
         false
       );
     })
-    .catch((error) => console.error("Error fetching services:", error));
+    .catch(function (err) {
+      console.error("Error fetching services:", err);
+    });
 }
 
-document.querySelectorAll(".service-button").forEach((button) => {
-  button.addEventListener("click", () => {
-    // For radio buttons, unselect all first
-    if (button.querySelector('input[type="radio"]')) {
-      document
-        .querySelectorAll(".service-button.selected")
-        .forEach((selectedButton) => {
-          selectedButton.classList.remove("selected");
-        });
+function populateServiceBubbles(services, containerId, isMainService) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (!Array.isArray(services)) return;
+
+  services.forEach(function (service) {
+    var bubble = document.createElement("div");
+    bubble.classList.add("service-bubble");
+    bubble.dataset.serviceId = service.service_id;
+    bubble.dataset.duration = service.duration || 30;
+    bubble.dataset.price = service.price || 0;
+
+    // Show name, price and duration
+    bubble.innerHTML =
+      '<span class="bubble-name">' + service.service_name + '</span>' +
+      '<span class="bubble-meta">' + service.price + ' kr · ' + (service.duration || 30) + ' min</span>';
+
+    bubble.addEventListener("click", function () {
+      if (isMainService) {
+        var selected = container.querySelector(".selected");
+        if (selected && selected !== bubble) {
+          selected.classList.remove("selected");
+        }
+      }
+      bubble.classList.toggle("selected");
+      onServiceSelectionChanged();
+    });
+
+    container.appendChild(bubble);
+  });
+}
+
+// Called every time service selection changes
+function onServiceSelectionChanged() {
+  var totalDuration = getSelectedDuration();
+  var summary = document.getElementById("duration-summary");
+  var text = document.getElementById("duration-text");
+
+  if (totalDuration > 0) {
+    summary.style.display = "flex";
+    text.textContent = "Total: " + totalDuration + " min";
+  } else {
+    summary.style.display = "none";
+  }
+
+  // Re-render time slots with new duration awareness
+  if (selectedDate) {
+    renderTimeSlots(selectedDate);
+  }
+}
+
+function getSelectedDuration() {
+  var total = 0;
+
+  // Main service
+  var main = document.querySelector("#main-services-container .service-bubble.selected");
+  if (main) {
+    total += parseInt(main.dataset.duration) || 30;
+  }
+
+  // Extra services
+  document.querySelectorAll("#extra-services-container .service-bubble.selected").forEach(function (b) {
+    total += parseInt(b.dataset.duration) || 0;
+  });
+
+  return total;
+}
+
+function getSelectedServiceIds() {
+  var ids = [];
+
+  var main = document.querySelector("#main-services-container .service-bubble.selected");
+  if (main) ids.push(main.dataset.serviceId);
+
+  document.querySelectorAll("#extra-services-container .service-bubble.selected").forEach(function (b) {
+    ids.push(b.dataset.serviceId);
+  });
+
+  return ids;
+}
+
+function getSelectedServiceNames() {
+  var names = [];
+
+  var main = document.querySelector("#main-services-container .service-bubble.selected");
+  if (main) names.push(main.querySelector(".bubble-name").textContent);
+
+  document.querySelectorAll("#extra-services-container .service-bubble.selected").forEach(function (b) {
+    names.push(b.querySelector(".bubble-name").textContent);
+  });
+
+  return names;
+}
+
+
+// ============================================================
+// Date Strip
+// ============================================================
+
+function generateDateStrip() {
+  var strip = document.getElementById("date-strip");
+  if (!strip) return;
+  strip.innerHTML = "";
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (var i = 0; i < DAYS_TO_SHOW; i++) {
+    var date = new Date(today);
+    date.setDate(today.getDate() + i);
+
+    var card = document.createElement("button");
+    card.className = "date-card";
+    card.type = "button";
+
+    var dayOfWeek = date.getDay();
+    var isClosed = openingHours[dayOfWeek] === null;
+
+    if (isClosed) {
+      card.classList.add("closed");
+      card.disabled = true;
     }
 
-    // Toggle 'selected' class
-    button.classList.toggle("selected");
+    if (i === 0) card.classList.add("today");
 
-    // Check the input inside this button
-    button.querySelector("input").checked =
-      button.classList.contains("selected");
-  });
-});
+    card.innerHTML =
+      '<span class="date-card-day">' + DAY_NAMES[dayOfWeek] + '</span>' +
+      '<span class="date-card-num">' + date.getDate() + '</span>' +
+      '<span class="date-card-month">' + MONTH_NAMES[date.getMonth()] + '</span>';
 
-// Setup the booking form with event listeners
-function setupBookingForm() {
-  // This function might be called when the modal is opened
-  const bookingForm = document.getElementById("booking-form");
-  if (bookingForm) {
-    bookingForm.addEventListener("submit", handleBookingSubmit);
+    card.dataset.date = formatDate(date);
+
+    // Use an IIFE to capture the date correctly
+    (function (d) {
+      card.addEventListener("click", function () { selectDate(d); });
+    })(new Date(date));
+
+    strip.appendChild(card);
   }
 
-  const barberSelect = document.getElementById("barber-select");
-  if (barberSelect) {
-    barberSelect.addEventListener("change", handleBarberChange);
-  }
+  // Scroll nav buttons
+  var prevBtn = document.getElementById("date-prev");
+  var nextBtn = document.getElementById("date-next");
+  if (prevBtn) prevBtn.onclick = function () { strip.scrollBy({ left: -200, behavior: "smooth" }); };
+  if (nextBtn) nextBtn.onclick = function () { strip.scrollBy({ left: 200, behavior: "smooth" }); };
 }
 
-function handleBarberChange() {
-  const barberId = this.value || document.getElementById("barber-select").value;
+function selectDate(date) {
+  selectedDate = date;
+  updateDateStripSelection();
+  loadTimeSlotsForDate(date);
+}
+
+function updateDateStripSelection() {
+  var targetStr = formatDate(selectedDate);
+  document.querySelectorAll(".date-card").forEach(function (card) {
+    card.classList.toggle("selected", card.dataset.date === targetStr);
+  });
+}
+
+function updateDateStripAvailability() {
+  document.querySelectorAll(".date-card").forEach(function (card) {
+    var dateStr = card.dataset.date;
+    if (unavailableDates.includes(dateStr) && !card.classList.contains("closed")) {
+      card.classList.add("unavailable");
+    } else {
+      card.classList.remove("unavailable");
+    }
+  });
+}
+
+
+// ============================================================
+// Time Slots — duration-aware
+// ============================================================
+
+function loadTimeSlotsForDate(date) {
+  var container = document.getElementById("time-slots-container");
+  if (!container) return;
+
+  container.innerHTML = '<div class="slots-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading available times...</p></div>';
+
+  var barberId = document.getElementById("barber-select").value;
   if (!barberId) {
-    console.warn("No barber selected.");
+    container.innerHTML = '<div class="slots-empty"><p>Please select a barber first</p></div>';
     return;
   }
 
-  fetchUnavailableTimesForBarber(barberId);
-  fetchUnavailableTimeslotsForCurrentView(barberId);
+  var dateStr = formatDate(date);
+  var nextDay = new Date(date);
+  nextDay.setDate(nextDay.getDate() + 1);
+  var nextDayStr = formatDate(nextDay);
 
-  // Use the calendar instance directly without getApi()
-  fetchUnavailableTimeslotsForPeriod(
-    calendar.view.activeStart,
-    calendar.view.activeEnd
-  );
+  Promise.all([
+    fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers/" + barberId + "/unavailable-dates")
+      .then(function (r) { return r.json(); }).catch(function () { return []; }),
+    fetch("https://examproject-barbershop-app-backend.onrender.com/api/bookings/unavailable-timeslots?barberId=" + barberId + "&start=" + dateStr + "&end=" + nextDayStr)
+      .then(function (r) { return r.json(); }).catch(function () { return []; }),
+  ]).then(function (results) {
+    unavailableDates = results[0] || [];
+    bookedSlots = Array.isArray(results[1]) ? results[1] : [];
+    updateDateStripAvailability();
+    renderTimeSlots(date);
+  });
 }
 
-// Handle date click on the calendar
-function handleDateClick(info) {
-  // Check if the clicked day is a closed day
-  if (isClosedDay(info.date)) {
-    onsole.error("handleDateClick called without valid info object");
-    alert("The barber shop is closed on this day.");
-    return; // Do nothing more
+function renderTimeSlots(date) {
+  var container = document.getElementById("time-slots-container");
+  if (!container) return;
+
+  var dayOfWeek = date.getDay();
+  var hours = openingHours[dayOfWeek];
+  var dateStr = formatDate(date);
+  var totalDuration = getSelectedDuration();
+
+  // No services selected yet
+  if (totalDuration === 0) {
+    container.innerHTML = '<div class="slots-empty"><i class="fas fa-hand-pointer"></i><p>Select your services first to see available times</p></div>';
+    return;
   }
 
-  // Check if a barber is selected in the main barber select dropdown
-  const barberSelect = document.getElementById("barber-select");
-  if (!barberSelect.value) {
+  // Closed day
+  if (!hours) {
+    container.innerHTML = '<div class="slots-empty"><i class="fas fa-door-closed"></i><p>Closed on ' + DAY_NAMES[dayOfWeek] + 's</p></div>';
+    return;
+  }
+
+  // Barber unavailable
+  if (unavailableDates.includes(dateStr)) {
+    container.innerHTML = '<div class="slots-empty"><i class="fas fa-calendar-times"></i><p>Barber is unavailable on this day</p></div>';
+    return;
+  }
+
+  // Generate all possible start times with SLOT_INTERVAL spacing
+  var slots = generateSlots(hours.startTime, hours.endTime);
+  var now = new Date();
+  var closingMinutes = timeToMinutes(hours.endTime);
+
+  var slotData = slots.map(function (time) {
+    var slotStart = new Date(date);
+    var parts = time.split(":");
+    slotStart.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+
+    var slotEnd = new Date(slotStart);
+    slotEnd.setMinutes(slotEnd.getMinutes() + totalDuration);
+
+    // Slot is in the past (for today)
+    var isPast = slotStart < now;
+
+    // Slot + duration would exceed closing time
+    var slotEndMinutes = timeToMinutes(time) + totalDuration;
+    var exceedsClosing = slotEndMinutes > closingMinutes;
+
+    // Check overlap with any booked slot
+    var isBooked = bookedSlots.some(function (booked) {
+      var bStart = new Date(booked.start);
+      var bEnd = new Date(booked.end);
+      return slotStart < bEnd && slotEnd > bStart;
+    });
+
+    return {
+      time: time,
+      isPast: isPast,
+      isBooked: isBooked || exceedsClosing,
+      exceedsClosing: exceedsClosing
+    };
+  });
+
+  // Group into morning / afternoon
+  var morning = slotData.filter(function (s) { return parseInt(s.time.split(":")[0]) < 12; });
+  var afternoon = slotData.filter(function (s) { return parseInt(s.time.split(":")[0]) >= 12; });
+  var available = slotData.filter(function (s) { return !s.isPast && !s.isBooked; });
+
+  if (available.length === 0) {
+    container.innerHTML = '<div class="slots-empty"><i class="fas fa-calendar-check"></i><p>No available slots for ' + totalDuration + ' min on this day</p></div>';
+    return;
+  }
+
+  var html = "";
+  if (morning.length > 0) html += buildSlotGroup("Morning", morning);
+  if (afternoon.length > 0) html += buildSlotGroup("Afternoon", afternoon);
+
+  container.innerHTML = html;
+
+  // Attach click handlers
+  container.querySelectorAll(".time-slot:not(.booked):not(.past)").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      handleSlotClick(btn.dataset.time);
+    });
+  });
+}
+
+function buildSlotGroup(label, slots) {
+  var html = '<div class="slot-group">';
+  html += '<h4 class="slot-group-label">' + label + '</h4>';
+  html += '<div class="slot-grid">';
+
+  slots.forEach(function (slot) {
+    var cls = "time-slot";
+    var disabled = "";
+
+    if (slot.isBooked) {
+      cls += " booked";
+      disabled = "disabled";
+    } else if (slot.isPast) {
+      cls += " past";
+      disabled = "disabled";
+    }
+
+    var label = "";
+    if (slot.isBooked && !slot.exceedsClosing) label = '<span class="slot-label">Booked</span>';
+
+    html += '<button class="' + cls + '" data-time="' + slot.time + '" type="button" ' + disabled + '>' +
+      '<span class="slot-time">' + slot.time + '</span>' +
+      label +
+      '</button>';
+  });
+
+  html += '</div></div>';
+  return html;
+}
+
+function generateSlots(startTime, endTime) {
+  var slots = [];
+  var start = timeToMinutes(startTime);
+  var end = timeToMinutes(endTime);
+  for (var m = start; m < end; m += SLOT_INTERVAL) {
+    slots.push(minutesToTime(m));
+  }
+  return slots;
+}
+
+function handleSlotClick(time) {
+  var barberSelect = document.getElementById("barber-select");
+  if (!barberSelect || !barberSelect.value) {
     alert("Please select a barber first.");
     return;
   }
 
-  const selectedDate = info.date;
-  const formattedDate = selectedDate.toISOString().split("T")[0];
-  const selectedTime = selectedDate
-    .toTimeString()
-    .split(" ")[0]
-    .substring(0, 5);
-  const selectedBarberName =
-    barberSelect.options[barberSelect.selectedIndex].text;
-
-  openBookingModal(selectedDate, selectedTime, selectedBarberName);
-
-  // Show the modal
-  const modal = document.getElementById("booking-modal");
-  modal.classList.remove("hidden");
-
-  // Populate hidden input fields or display fields in the modal
-  const hiddenDateField = modal.querySelector("#hidden-date-field");
-  if (hiddenDateField) hiddenDateField.value = formattedDate;
-
-  const hiddenTimeField = modal.querySelector("#hidden-time-field");
-  if (hiddenTimeField) hiddenTimeField.value = selectedTime;
-
-  // Update the selected date and time display in the modal
-  const displayDateField = modal.querySelector("#selected-date");
-  if (displayDateField) displayDateField.textContent = `Date: ${formattedDate}`;
-
-  const displayTimeField = modal.querySelector("#selected-time");
-  if (displayTimeField) displayTimeField.textContent = `Time: ${selectedTime}`;
-
-  // Display the selected barber's name in the modal
-  const displayBarberField = modal.querySelector("#selected-barber");
-  if (displayBarberField)
-    displayBarberField.textContent = `Barber: ${selectedBarberName}`;
-}
-
-function isClosedDay(date) {
-  const dayOfWeek = date.getDay();
-  const hour = date.getHours();
-
-  // Check if it's Sunday (day 0)
-  if (dayOfWeek === 0) {
-    return true; // Closed all day on Sundays
+  if (getSelectedDuration() === 0) {
+    alert("Please select at least a main service.");
+    return;
   }
 
-  // Check if it's Saturday (day 6) and the time is 15:00 or later
-  if (dayOfWeek === 6 && hour >= 15) {
-    return true; // Closed on Saturdays from 15:00
-  }
-
-  return false; // Open at all other times
+  var barberName = barberSelect.options[barberSelect.selectedIndex].text;
+  openBookingModal(selectedDate, time, barberName);
 }
 
-// Close the modal if clicked outside of the modal content
-window.onclick = function (event) {
-  const modal = document.getElementById("booking-modal");
-  // Check if modal is not null
+
+// ============================================================
+// Booking Modal
+// ============================================================
+
+function openBookingModal(date, time, barberName) {
+  var modal = document.getElementById("booking-modal");
   if (!modal) return;
+  modal.classList.add("show");
 
-  const modalContent = modal.querySelector(".modal-content");
-  // Check if modalContent is not null
-  if (!modalContent) return;
+  var formattedDate = formatDate(date);
+  var duration = getSelectedDuration();
+  var serviceNames = getSelectedServiceNames();
 
-  if (event.target === modal && !modalContent.contains(event.target)) {
-    closeModal();
+  // Hidden fields
+  var hiddenDate = document.getElementById("hidden-date-field");
+  if (hiddenDate) hiddenDate.value = formattedDate;
+  var hiddenTime = document.getElementById("hidden-time-field");
+  if (hiddenTime) hiddenTime.value = time;
+
+  // Display fields
+  var displayDate = document.getElementById("selected-date");
+  if (displayDate) displayDate.textContent = DAY_NAMES[date.getDay()] + " " + date.getDate() + " " + MONTH_NAMES[date.getMonth()];
+  var displayTime = document.getElementById("selected-time");
+  if (displayTime) displayTime.textContent = time + " (" + duration + " min)";
+  var displayBarber = document.getElementById("selected-barber");
+  if (displayBarber) displayBarber.textContent = barberName;
+
+  // Services summary in modal
+  var summaryEl = document.getElementById("selected-services-summary");
+  if (summaryEl) {
+    summaryEl.innerHTML = '<div class="modal-services-list">' +
+      serviceNames.map(function (n) { return '<span class="modal-service-tag">' + n + '</span>'; }).join("") +
+      '</div>';
   }
-};
+}
 
 window.closeModal = function () {
-  const modal = document.getElementById("booking-modal");
-  if (modal) {
-    modal.classList.remove("show");
-  }
+  var modal = document.getElementById("booking-modal");
+  if (modal) modal.classList.remove("show");
 };
 
-// Handle booking form submission
+window.addEventListener("click", function (event) {
+  var modal = document.getElementById("booking-modal");
+  if (!modal) return;
+  if (event.target === modal) closeModal();
+});
+
+
+// ============================================================
+// Barbers
+// ============================================================
+
+function populateBarbers() {
+  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers")
+    .then(function (r) { return r.json(); })
+    .then(function (barbers) {
+      var select = document.getElementById("barber-select");
+      if (!select) return;
+
+      select.innerHTML = barbers.map(function (b) {
+        return '<option value="' + b.barber_id + '">' + b.name + '</option>';
+      }).join("");
+
+      select.addEventListener("change", function () {
+        if (selectedDate) loadTimeSlotsForDate(selectedDate);
+      });
+
+      if (barbers.length > 0 && selectedDate) {
+        loadTimeSlotsForDate(selectedDate);
+      }
+    })
+    .catch(function (err) { console.error("Error fetching barbers:", err); });
+}
+
+function handleBarberChange() {
+  if (selectedDate) loadTimeSlotsForDate(selectedDate);
+}
+
+
+// ============================================================
+// Booking Form Submission
+// ============================================================
+
+function setupBookingForm() {
+  var form = document.getElementById("booking-form");
+  if (form && !formListenerAttached) {
+    form.addEventListener("submit", handleBookingSubmit);
+    formListenerAttached = true;
+  }
+}
+
 async function handleBookingSubmit(event) {
   event.preventDefault();
 
-  // Disable the submit button to prevent multiple submissions
-  const submitButton = event.target.querySelector("button[type='submit']");
-  if (submitButton) {
-    submitButton.disabled = true;
-    submitButton.textContent = "Booking...";
+  var submitBtn = event.target.querySelector("button[type='submit']");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Booking...';
   }
 
-  // Get selected main service ID
-  const selectedMainServiceBubble = document.querySelector(
-    "#main-service-options .service-bubble.selected"
-  );
-  const mainServiceId = selectedMainServiceBubble
-    ? selectedMainServiceBubble.dataset.serviceId
-    : null;
-
-  if (!mainServiceId) {
-    alert("Please select a main service.");
-    if (submitButton) {
-      submitButton.disabled = false;
-      submitButton.textContent = "Book Now";
-    }
-    return; // Stop the form submission if no main service is selected
+  var serviceIds = getSelectedServiceIds();
+  if (serviceIds.length === 0) {
+    alert("Please select at least a main service.");
+    resetSubmitButton(submitBtn);
+    return;
   }
 
-  // Get selected extra services IDs
-  const selectedExtraServiceBubbles = document.querySelectorAll(
-    "#extra-service-options .service-bubble.selected"
-  );
-  const extraServiceIds = Array.from(selectedExtraServiceBubbles).map(
-    (bubble) => bubble.dataset.serviceId
-  );
-
-  // Compile the booking data
-  const bookingData = {
+  var bookingData = {
     customer_name: event.target.elements["customer_name"].value.trim(),
     customer_email: event.target.elements["customer_email"].value.trim(),
     customer_phone: event.target.elements["customer_phone"].value.trim(),
     barber_id: document.getElementById("barber-select").value,
     booking_date: document.getElementById("hidden-date-field").value,
     booking_time: document.getElementById("hidden-time-field").value,
-    services: [mainServiceId, ...extraServiceIds], // Combine main and extra service IDs
+    services: serviceIds,
   };
 
-  // Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(bookingData.customer_email)) {
+  // Validate
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bookingData.customer_email)) {
     alert("Please enter a valid email address.");
-    if (submitButton) {
-      submitButton.disabled = false;
-      submitButton.textContent = "Book Now";
-    }
+    resetSubmitButton(submitBtn);
     return;
   }
-
-  // Optionally, validate phone number format
-  const phoneRegex = /^\d{10,15}$/; // Adjust as needed
-  if (!phoneRegex.test(bookingData.customer_phone)) {
+  if (!/^\d{8,15}$/.test(bookingData.customer_phone)) {
     alert("Please enter a valid phone number.");
-    if (submitButton) {
-      submitButton.disabled = false;
-      submitButton.textContent = "Book Now";
-    }
+    resetSubmitButton(submitBtn);
     return;
   }
 
-  // Submit the booking data
   try {
-    const response = await fetch(
-      "https://examproject-barbershop-app-backend.onrender.com/api/bookings/create",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookingData),
-      }
-    );
+    var response = await fetch("https://examproject-barbershop-app-backend.onrender.com/api/bookings/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingData),
+    });
 
-    const data = await response.json();
+    var data = await response.json();
 
     if (response.ok) {
       alert(data.message);
-      // Close the modal
       closeModal();
-      // Clear the modal content here
       clearModalContent();
-      // Update the calendar view dynamically without reloading the page
-      //updateCalendarView(data.bookingId); // Implement this function as needed
-      // Reload the entire page
-      location.reload();
+      // Wait a moment for backend to commit, then refresh slots
+      setTimeout(function () {
+        if (selectedDate) loadTimeSlotsForDate(selectedDate);
+      }, 500);
     } else {
-      // Display specific error message from backend
-      alert(`Booking failed: ${data.message}`);
+      alert("Booking failed: " + data.message);
     }
-  } catch (error) {
-    console.error("Error creating booking:", error);
-    alert("An unexpected error occurred. Please try again later.");
+  } catch (err) {
+    console.error("Error creating booking:", err);
+    alert("An unexpected error occurred. Please try again.");
   } finally {
-    // Re-enable the submit button
-    if (submitButton) {
-      submitButton.disabled = false;
-      submitButton.textContent = "Book Now";
-    }
+    resetSubmitButton(submitBtn);
+  }
+}
+
+function resetSubmitButton(btn) {
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-calendar-check"></i> Confirm Booking';
   }
 }
 
 function clearModalContent() {
-  // Reset all input fields in the modal
-  const modal = document.getElementById("booking-modal");
+  var modal = document.getElementById("booking-modal");
   if (!modal) return;
-
-  const inputs = modal.querySelectorAll(
-    'input[type="text"], input[type="email"], input[type="tel"]'
-  );
-  inputs.forEach((input) => (input.value = ""));
-
-  // Unselect all service bubbles
-  const serviceBubbles = modal.querySelectorAll(".service-bubble.selected");
-  serviceBubbles.forEach((bubble) => bubble.classList.remove("selected"));
-
-  // Reset any other dynamic elements in the modal as needed
-  // For example, if you have any specific messages or dynamic content, reset them here
-}
-// Make sure to call this function to initialize the form handling
-document.addEventListener("DOMContentLoaded", () => {
-  const bookingForm = document.getElementById("booking-form");
-  if (bookingForm) {
-    bookingForm.addEventListener("submit", handleBookingSubmit);
-  }
-});
-
-function openBookingModal(selectedDate, selectedTime, selectedBarberName) {
-  const modal = document.getElementById("booking-modal");
-  if (modal) {
-    console.log("Opening booking modal..."); // Add this line
-    modal.classList.add("show");
-
-    // Populate hidden input fields or display fields in the modal
-    const formattedDate = selectedDate.toISOString().split("T")[0];
-
-    const hiddenDateField = modal.querySelector("#hidden-date-field");
-    if (hiddenDateField) hiddenDateField.value = formattedDate;
-
-    const hiddenTimeField = modal.querySelector("#hidden-time-field");
-    if (hiddenTimeField) hiddenTimeField.value = selectedTime;
-
-    // Update the selected date and time display in the modal
-    const displayDateField = modal.querySelector("#selected-date");
-    if (displayDateField)
-      displayDateField.textContent = `Date: ${formattedDate}`;
-
-    const displayTimeField = modal.querySelector("#selected-time");
-    if (displayTimeField)
-      displayTimeField.textContent = `Time: ${selectedTime}`;
-
-    // Display the selected barber's name in the modal
-    const displayBarberField = modal.querySelector("#selected-barber");
-    if (displayBarberField)
-      displayBarberField.textContent = `Barber: ${selectedBarberName}`;
-  } else {
-    console.error("Booking modal not found!");
-  }
+  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]')
+    .forEach(function (input) { input.value = ""; });
 }
 
-function populateServiceBubbles(services, containerId, isMainService) {
-  const container = document.getElementById(containerId);
-  // Clear existing content
-  container.innerHTML = "";
 
-  // Ensure services is an array before trying to iterate over it
-  if (Array.isArray(services)) {
-    services.forEach((service) => {
-      // Create a div for each service
-      const bubble = document.createElement("div");
-      bubble.classList.add("service-bubble");
-      bubble.textContent = service.service_name;
-      bubble.dataset.serviceId = service.service_id;
+// ============================================================
+// Utilities
+// ============================================================
 
-      // Handle click event
-      bubble.addEventListener("click", function () {
-        if (isMainService) {
-          // Deselect all other main service bubbles
-          const selected = container.querySelector(".selected");
-          if (selected) {
-            selected.classList.remove("selected");
-          }
-        }
-        // Toggle the selected class
-        bubble.classList.toggle("selected");
-      });
-
-      container.appendChild(bubble);
-    });
-  } else {
-    console.error(
-      "populateServiceBubbles was called with a non-array services argument:",
-      services
-    );
-  }
+function formatDate(date) {
+  var y = date.getFullYear();
+  var m = ("0" + (date.getMonth() + 1)).slice(-2);
+  var d = ("0" + date.getDate()).slice(-2);
+  return y + "-" + m + "-" + d;
 }
+
+function timeToMinutes(timeStr) {
+  var parts = timeStr.split(":");
+  return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+}
+
+function minutesToTime(minutes) {
+  var h = Math.floor(minutes / 60);
+  var m = minutes % 60;
+  return ("0" + h).slice(-2) + ":" + ("0" + m).slice(-2);
+}
+
+// Stubs for backward compatibility
+function initializeCalendar() {}
+function handleDateClick() {}
+
+// ============================================================
+// Exports
+// ============================================================
 
 export default {
   openBookingModal,

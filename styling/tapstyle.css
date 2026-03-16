@@ -22,7 +22,6 @@ main section {
 }
 
 #about-section .container {
-  overflow-y: auto;
   max-width: 800px;
   margin: auto;
   padding: 20px;

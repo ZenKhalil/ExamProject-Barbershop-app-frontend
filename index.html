@@ -58,30 +58,26 @@
     <!-- Overlay for mobile menu -->
     <div class="menu-overlay"></div>
 
-    <!-- Header -->
+    <!-- Header (outside page-wrap so it stays sticky at top) -->
     <header>
         <div class="header-container">
-            <!-- Hamburger Menu -->
             <div class="ham-menu">
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
 
-            <!-- Logo / Brand -->
             <div class="header-brand">
                 <i class="fas fa-cut brand-scissors"></i>
                 <span>Salon Sindbad</span>
             </div>
 
-            <!-- Admin Login Area -->
             <div id="admin-login-area">
                 <button id="admin-login-button" type="button">
                     <i class="fas fa-user-shield"></i> <span class="admin-btn-text">Admin</span>
                 </button>
             </div>
 
-            <!-- Main Navigation (Desktop) -->
             <nav id="main-nav">
                 <ul>
                     <li><a href="#home-section">Home</a></li>
@@ -94,11 +90,7 @@
         </div>
     </header>
 
-    <!--
-      Admin Login Modal
-      IMPORTANT: Only ONE instance. No "hidden" class — admin.js toggles via style.display.
-      CSS .modal-admin { display: none } handles the default hidden state.
-    -->
+    <!-- Admin Login Modal -->
     <div id="admin-login-modal" class="modal-admin">
         <div class="modal-admin-content">
             <span class="close-button-admin">&times;</span>
@@ -111,194 +103,174 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main id="main-content">
-        <!-- About Us Section -->
-        <section id="about-section"></section>
+    <!-- PAGE WRAP: flex column container that pushes footer to bottom -->
+    <div id="page-wrap">
+        <!-- Main Content -->
+        <main id="main-content">
+            <section id="about-section"></section>
 
-        <!-- Gallery Section -->
-        <section id="gallery-section">
-            <div class="gallery-header">
-                <h2>Our Gallery</h2>
-                <p class="gallery-subtitle">Follow our work on Instagram</p>
-            </div>
-            <div class="instagram-feed-container">
-                <script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script>
-                <div class="gallery-placeholder">
-                    <i class="fas fa-camera-retro"></i>
-                    <p>COMING SOON</p>
+            <section id="gallery-section">
+                <div class="gallery-header">
+                    <h2>Our Gallery</h2>
+                    <p class="gallery-subtitle">Follow our work on Instagram</p>
                 </div>
-            </div>
-        </section>
-
-        <!-- Home Section with Hero -->
-        <section id="home-section" class="hero-section">
-            <div class="hero-image">
-                <img src="images/hero.jpg" alt="Salon Sindbad — Modern Barbershop">
-            </div>
-            <div class="hero-overlay"></div>
-            <div class="welcome animated">
-                <div class="welcome-icon"><i class="fas fa-cut"></i></div>
-                <h1>Salon Sindbad</h1>
-                <div class="welcome-divider"></div>
-                <p>Located in the heart of Copenhagen</p>
-                <a href="#booking-section" class="hero-cta" id="hero-book-now">
-                    <i class="fas fa-calendar-alt"></i> Book Now
-                </a>
-            </div>
-        </section>
-
-        <!-- Booking Section -->
-        <section id="booking-section">
-            <div class="booking-top-bar">
-                <div class="booking-top-left">
-                    <h2>Book Your Appointment</h2>
-                    <p>Choose your services, then pick a date and time</p>
-                </div>
-                <div class="barber-selection">
-                    <label for="barber-select"><i class="fas fa-user-tie"></i> Barber:</label>
-                    <select id="barber-select" name="barber_id"></select>
-                </div>
-            </div>
-
-            <!-- Step 1: Service Selection -->
-            <div class="booking-step" id="step-services">
-                <div class="step-header">
-                    <span class="step-number">1</span>
-                    <h3>Choose Your Services</h3>
-                </div>
-                <div class="service-pick-group">
-                    <h4 class="service-pick-label">Main Service <span class="required-dot">*</span></h4>
-                    <div class="service-options" id="main-services-container"></div>
-                </div>
-                <div class="service-pick-group">
-                    <h4 class="service-pick-label">Extra Services</h4>
-                    <div class="service-options" id="extra-services-container"></div>
-                </div>
-                <div class="duration-summary" id="duration-summary" style="display:none;">
-                    <i class="fas fa-clock"></i>
-                    <span id="duration-text">Total: 30 min</span>
-                </div>
-            </div>
-
-            <!-- Step 2: Date Strip -->
-            <div class="booking-step" id="step-date">
-                <div class="step-header">
-                    <span class="step-number">2</span>
-                    <h3>Pick a Date</h3>
-                </div>
-                <div class="date-strip-wrapper">
-                    <button class="date-nav-btn" id="date-prev" type="button"><i class="fas fa-chevron-left"></i></button>
-                    <div class="date-strip" id="date-strip"></div>
-                    <button class="date-nav-btn" id="date-next" type="button"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
-
-            <!-- Step 3: Time Slots -->
-            <div class="booking-step" id="step-time">
-                <div class="step-header">
-                    <span class="step-number">3</span>
-                    <h3>Pick a Time</h3>
-                </div>
-                <div class="time-slots-container" id="time-slots-container">
-                    <div class="slots-empty">
-                        <i class="fas fa-hand-pointer"></i>
-                        <p>Select your services first</p>
+                <div class="instagram-feed-container">
+                    <script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script>
+                    <div class="gallery-placeholder">
+                        <i class="fas fa-camera-retro"></i>
+                        <p>COMING SOON</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Booking Modal (contact info only — services already chosen) -->
-            <div id="booking-modal">
-                <div class="modal-content">
-                    <span class="close-button" onclick="closeModal()">&times;</span>
-                    <h2 class="booking-modal-title">Complete Your Booking</h2>
-                    <div id="selected-datetime">
-                        <div class="datetime-chips">
-                            <p id="selected-date"><i class="fas fa-calendar-day"></i> <span></span></p>
-                            <p id="selected-time"><i class="fas fa-clock"></i> <span></span></p>
-                            <p id="selected-barber"><i class="fas fa-user-tie"></i> <span></span></p>
+            <section id="home-section" class="hero-section">
+                <div class="hero-image">
+                    <img src="images/hero.jpg" alt="Salon Sindbad — Modern Barbershop">
+                </div>
+                <div class="hero-overlay"></div>
+                <div class="welcome animated">
+                    <div class="welcome-icon"><i class="fas fa-cut"></i></div>
+                    <h1>Salon Sindbad</h1>
+                    <div class="welcome-divider"></div>
+                    <p>Located in the heart of Copenhagen</p>
+                    <a href="#booking-section" class="hero-cta" id="hero-book-now">
+                        <i class="fas fa-calendar-alt"></i> Book Now
+                    </a>
+                </div>
+            </section>
+
+            <section id="booking-section">
+                <div class="booking-top-bar">
+                    <div class="booking-top-left">
+                        <h2>Book Your Appointment</h2>
+                        <p>Choose your services, then pick a date and time</p>
+                    </div>
+                    <div class="barber-selection">
+                        <label for="barber-select"><i class="fas fa-user-tie"></i> Barber:</label>
+                        <select id="barber-select" name="barber_id"></select>
+                    </div>
+                </div>
+
+                <div class="booking-step" id="step-services">
+                    <div class="step-header">
+                        <span class="step-number">1</span>
+                        <h3>Choose Your Services</h3>
+                    </div>
+                    <div class="service-pick-group">
+                        <h4 class="service-pick-label">Main Service <span class="required-dot">*</span></h4>
+                        <div class="service-options" id="main-services-container"></div>
+                    </div>
+                    <div class="service-pick-group">
+                        <h4 class="service-pick-label">Extra Services</h4>
+                        <div class="service-options" id="extra-services-container"></div>
+                    </div>
+                    <div class="duration-summary" id="duration-summary" style="display:none;">
+                        <i class="fas fa-clock"></i>
+                        <span id="duration-text">Total: 30 min</span>
+                    </div>
+                </div>
+
+                <div class="booking-step" id="step-date">
+                    <div class="step-header">
+                        <span class="step-number">2</span>
+                        <h3>Pick a Date</h3>
+                    </div>
+                    <div class="date-strip-wrapper">
+                        <button class="date-nav-btn" id="date-prev" type="button"><i class="fas fa-chevron-left"></i></button>
+                        <div class="date-strip" id="date-strip"></div>
+                        <button class="date-nav-btn" id="date-next" type="button"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="booking-step" id="step-time">
+                    <div class="step-header">
+                        <span class="step-number">3</span>
+                        <h3>Pick a Time</h3>
+                    </div>
+                    <div class="time-slots-container" id="time-slots-container">
+                        <div class="slots-empty">
+                            <i class="fas fa-hand-pointer"></i>
+                            <p>Select your services first</p>
                         </div>
                     </div>
-                    <div id="selected-services-summary"></div>
-                    <form id="booking-form">
-                        <input type="hidden" id="hidden-date-field" name="booking_date">
-                        <input type="hidden" id="hidden-time-field" name="booking_time">
-                        <div class="form-group">
-                            <label for="customer-name"><i class="fas fa-user"></i> Name</label>
-                            <input type="text" id="customer-name" name="customer_name" placeholder="Your full name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="customer-email"><i class="fas fa-envelope"></i> Email</label>
-                            <input type="email" id="customer-email" name="customer_email" placeholder="your@email.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="customer-phone"><i class="fas fa-phone"></i> Phone</label>
-                            <input type="tel" id="customer-phone" name="customer_phone" placeholder="Your phone number">
-                        </div>
-                        <button type="submit" class="btn-book">
-                            <i class="fas fa-calendar-check"></i> Confirm Booking
-                        </button>
-                    </form>
                 </div>
-            </div>
-        </section>
-    </main>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-brand">
-                <i class="fas fa-cut"></i> Salon Sindbad
-            </div>
-            <p>&copy; 2026 Salon Sindbad. All rights reserved.</p>
-        </div>
-    </footer>
+                <div id="booking-modal">
+                    <div class="modal-content">
+                        <span class="close-button" onclick="closeModal()">&times;</span>
+                        <h2 class="booking-modal-title">Complete Your Booking</h2>
+                        <div id="selected-datetime">
+                            <div class="datetime-chips">
+                                <p id="selected-date"><i class="fas fa-calendar-day"></i> <span></span></p>
+                                <p id="selected-time"><i class="fas fa-clock"></i> <span></span></p>
+                                <p id="selected-barber"><i class="fas fa-user-tie"></i> <span></span></p>
+                            </div>
+                        </div>
+                        <div id="selected-services-summary"></div>
+                        <form id="booking-form">
+                            <input type="hidden" id="hidden-date-field" name="booking_date">
+                            <input type="hidden" id="hidden-time-field" name="booking_time">
+                            <div class="form-group">
+                                <label for="customer-name"><i class="fas fa-user"></i> Name</label>
+                                <input type="text" id="customer-name" name="customer_name" placeholder="Your full name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-email"><i class="fas fa-envelope"></i> Email</label>
+                                <input type="email" id="customer-email" name="customer_email" placeholder="your@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-phone"><i class="fas fa-phone"></i> Phone</label>
+                                <input type="tel" id="customer-phone" name="customer_phone" placeholder="Your phone number">
+                            </div>
+                            <button type="submit" class="btn-book">
+                                <i class="fas fa-calendar-check"></i> Confirm Booking
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
 
-    <!-- Tooltip -->
+        <!-- Footer — inside page-wrap so flex pushes it down -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-cut"></i> Salon Sindbad
+                </div>
+                <p>&copy; 2026 Salon Sindbad. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
     <div id="tooltip" class="hidden"></div>
 
-    <!-- Module scripts -->
     <script type="module" src="main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-    <!--
-      Bridge script — runs AFTER DOMContentLoaded.
-      Handles: hero CTA navigation + scroll-lock when on home page.
-    -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-
-        /* ---- Hero "Book Now" → trigger the real nav link ---- */
         var heroCta = document.getElementById('hero-book-now');
         if (heroCta) {
             heroCta.addEventListener('click', function(e) {
                 e.preventDefault();
-                // Find the booking link inside #main-nav and simulate a click
                 var navBookingLink = document.querySelector('#main-nav a[href="#booking-section"]');
                 if (navBookingLink) {
                     navBookingLink.click();
                 } else {
-                    // Fallback: try the off-screen menu link
                     var offScreenLink = document.querySelector('.off-screen-menu a[href="#booking-section"]');
                     if (offScreenLink) offScreenLink.click();
                 }
             });
         }
 
-        /* ---- Scroll-lock + footer hide when home section is active ---- */
         function updateScrollLock() {
             var homeSection = document.getElementById('home-section');
             if (!homeSection) return;
-
             var style = homeSection.style.display;
             var isHomeVisible = (style === 'block' || style === '');
-
-            // Also check computed style if no inline style set yet
             if (style === '') {
                 isHomeVisible = getComputedStyle(homeSection).display !== 'none';
             }
-
             if (isHomeVisible) {
                 document.body.classList.add('home-active');
             } else {
@@ -306,22 +278,15 @@
             }
         }
 
-        // Watch for style changes on all sections
-        var observer = new MutationObserver(function() {
-            updateScrollLock();
-        });
+        var observer = new MutationObserver(function() { updateScrollLock(); });
         document.querySelectorAll('main > section').forEach(function(section) {
             observer.observe(section, { attributes: true, attributeFilter: ['style'] });
         });
 
-        // Also listen for clicks on nav links
         document.querySelectorAll('#main-nav a, #main-nav button, .off-screen-menu a, .off-screen-menu button').forEach(function(el) {
-            el.addEventListener('click', function() {
-                setTimeout(updateScrollLock, 100);
-            });
+            el.addEventListener('click', function() { setTimeout(updateScrollLock, 100); });
         });
 
-        // Initial state
         updateScrollLock();
     });
     </script>
