@@ -1,4 +1,8 @@
-/* Style for the modal */
+/* ============================================================
+   ADMIN PANEL — Salon Sindbad
+   ============================================================ */
+
+/* Admin Login Modal */
 .modal-admin {
   display: none;
   position: fixed;
@@ -8,324 +12,435 @@
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0,0,0,0.5);
+  background-color: var(--clr-overlay, rgba(0,0,0,0.7));
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-
-/* Modal Content/Box */
 .modal-admin-content {
-    padding: 1.5rem; /* Padding inside the modal content */
-    padding-top: 0;
-    position: relative;
-    background-color: #fff;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: auto; /* This allows it to grow according to content up to max-width */
-    max-width: 250px; /* Set a max-width that suits your design */
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-    animation-name: animatetop;
-    animation-duration: 0.4s;
-    border-radius: 10px;
+  position: relative;
+  background: var(--clr-surface, #1a1a1a);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  margin: auto;
+  padding: 32px 24px;
+  width: auto;
+  max-width: 340px;
+  box-shadow: var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.5));
+  border-radius: var(--radius-lg, 20px);
+  animation: modalSlideIn 0.35s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-admin-content h2 {
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-size: 1.5rem;
+  color: var(--clr-gold, #c9a84c);
+  text-align: center;
+  margin-bottom: 24px;
 }
 
 .modal-header-admin h2 {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Modern, sans-serif font */
-    font-size: 2rem; /* 32px font size for prominence */
-    color: #333; /* Dark grey for a strong contrast */
-    margin-bottom: 1rem; /* Spacing below the title */
-    text-transform: uppercase; /* UPPERCASE text for a more styled look */
-    letter-spacing: 1px; /* Space out the letters slightly */
-    text-align: center; /* Center align the text */
-    font-weight: bold; /* Bold font for emphasis */
-    line-height: 1.2; /* Adjust line height for better readability */
-    border-bottom: 2px solid #eaeaea; /* Subtle bottom border */
-    padding-bottom: 0.5rem; /* Padding below the text, above the border */
-}
-
-#change-dates-modal .close-modal {
-    cursor: pointer;
-    color: #000000;
-    border: none;
-    font-size: 2em;
-    background-color: rgba(68, 157, 68, 0);
-    position: absolute;
-    top: -5px;
-    right: 7px;
-}
-
-#change-dates-modal .modal-content{
-    background: #fff;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 305px;
-    padding: 13px;
-    position: relative;
-}
-
-
-/* The Close Button */
-.close-button-admin {
-  color: #aaa;
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 25px;
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-size: 1.8rem;
+  color: var(--clr-gold, #c9a84c);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
   font-weight: bold;
+  line-height: 1.2;
+  border-bottom: 1px solid var(--clr-border, #2e2e2e);
+  padding-bottom: 0.5rem;
 }
 
-.close-button-admin:hover,
-.close-button-admin:focus {
-  color: black;
-  text-decoration: none;
+/* Close Buttons */
+.close-button-admin {
+  color: var(--clr-text-dim, #9a9590);
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  font-weight: 300;
   cursor: pointer;
+  transition: 0.3s ease;
+  line-height: 1;
 }
 
-@keyframes animatetop {
-  from {top: -300px; opacity: 0}
-  to {top: 0; opacity: 1}
+.close-button-admin:hover {
+  color: var(--clr-gold, #c9a84c);
 }
 
-/* Style adjustments for admin login */
+/* Change Dates Modal */
+#change-dates-modal .close-modal {
+  cursor: pointer;
+  color: var(--clr-text-dim, #9a9590);
+  border: none;
+  font-size: 1.8em;
+  background: transparent;
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  transition: 0.3s ease;
+}
+
+#change-dates-modal .close-modal:hover {
+  color: var(--clr-gold, #c9a84c);
+}
+
+#change-dates-modal .modal-content {
+  background: var(--clr-surface, #1a1a1a);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-md, 12px);
+  width: 100%;
+  max-width: 340px;
+  padding: 20px;
+  position: relative;
+}
+
+/* Admin Login Area */
 #admin-login-area {
-  position: absolute; /* Position the login area absolutely within its relative parent */
-  top: 10px; /* 10px from the top of the header */
-  right: 10px; /* 10px from the right side of the header */
-  z-index: 2; /* Ensure it's above other content */
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
 #admin-login-button {
-    color: #fff;
-    background: none;
-    border: 2px solid #fff;
-    border-radius: 5px;
-    padding: 5px 15px;
-    transition: all .3s;
-    margin: -3px;
+  color: var(--clr-text-dim, #9a9590);
+  background: none;
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-pill, 50px);
+  padding: 8px 16px;
+  transition: 0.3s ease;
+  cursor: pointer;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 #admin-login-button:hover {
-  background: #fff; /* Background color on hover */
-  color: #0275d8; /* Text color on hover to match the header */
-  border-color: #0275d8; /* Border color on hover to match the header */
+  background: var(--clr-card, #222222);
+  color: var(--clr-gold, #c9a84c);
+  border-color: var(--clr-gold, #c9a84c);
 }
 
-/* Style for the admin login form */
+/* Admin Login Form */
 #admin-login-form {
-    flex-direction: column; /* Stack the fields vertically */
-    gap: 10px; /* Spacing between each field */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 #admin-login-form input[type="text"],
 #admin-login-form input[type="password"] {
-    padding: 10px;
-    margin: 5px 0; /* Spacing above and below */
-    border: 1px solid #ddd;
-    border-radius: 4px; /* Rounded corners */
-    font-size: 16px; /* Larger font size for better readability */
+  padding: 12px 16px;
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-sm, 6px);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.95rem;
+  background: var(--clr-card, #222222);
+  color: var(--clr-text, #e8e4de);
+  transition: 0.3s ease;
+}
+
+#admin-login-form input:focus {
+  outline: none;
+  border-color: var(--clr-gold, #c9a84c);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+}
+
+#admin-login-form input::placeholder {
+  color: var(--clr-text-dim, #9a9590);
+  opacity: 0.6;
 }
 
 #admin-login-form button[type="submit"] {
-    padding: 10px;
-    background-color: #5cb85c; /* Bootstrap's btn-success color */
-    color: white;
-    border: none;
-    border-radius: 4px; /* Rounded corners */
-    font-size: 16px; /* Matching the input field font size */
-    cursor: pointer;
-    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  padding: 12px;
+  background: linear-gradient(135deg, var(--clr-gold, #c9a84c), var(--clr-gold-dark, #a68a3a));
+  color: var(--clr-bg, #0f0f0f);
+  border: none;
+  border-radius: var(--radius-sm, 6px);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 #admin-login-form button[type="submit"]:hover {
-    background-color: #4cae4c; /* A darker shade when hovered */
-}
-
-/* Style for the bookings list */
-.booking-list {
-    display: flex;
-    flex-wrap: wrap;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    justify-content: space-around;
-}
-
-.booking-list-item {
-    background-color: #f9f9f9;
-    border-radius: 5px;
-    width: 100%; /* Default to full width on small screens */
-    max-width: 300px; /* Prevent boxes from getting too wide */
-    margin: 24px;
-    padding: 26px;
-    box-shadow: 0 2px 4px #0000001a;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(201,168,76,0.3);
 }
 
 
-
-.booking-detail {
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-.booking-detail strong {
-  color: #333;
-  font-weight: 600;
-}
-
-
-/*Dashboard admin style*/
+/* ============================================================
+   ADMIN DASHBOARD
+   ============================================================ */
 
 .dashboard-container {
   text-align: center;
-  padding: 20px;
-}
-
-.dashboard-card {
-  display: inline-block;
-  margin: 10px;
-  padding: 20px;
-  width: 200px;
-  height: 100px;
-  background-color: #f7f7f7;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-  line-height: 100px;
-  vertical-align: middle;
-}
-
-.dashboard-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  padding: 40px 20px;
 }
 
 .dashboard-container h2 {
   margin-bottom: 30px;
-  color: #333;
+  color: var(--clr-gold, #c9a84c);
+  font-family: var(--font-display, 'Playfair Display', serif);
   font-size: 2rem;
 }
 
-/* Style the container for sort and filter options */
+.dashboard-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+  padding: 20px;
+  width: 220px;
+  height: 100px;
+  background: var(--clr-card, #222222);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.3));
+  transition: 0.3s ease;
+  cursor: pointer;
+  color: var(--clr-text, #e8e4de);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--clr-gold, #c9a84c);
+  box-shadow: 0 8px 30px rgba(201,168,76,0.15);
+}
+
+
+/* ============================================================
+   BOOKING LIST (Admin View)
+   ============================================================ */
+
+.booking-list {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  justify-content: center;
+  gap: 20px;
+}
+
+.booking-list-item {
+  background: var(--clr-card, #222222);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-md, 12px);
+  width: 100%;
+  max-width: 300px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.3));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: 0.3s ease;
+}
+
+.booking-list-item:hover {
+  border-color: var(--clr-gold, #c9a84c);
+  transform: translateY(-2px);
+}
+
+.booking-detail {
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: var(--clr-text-dim, #9a9590);
+}
+
+.booking-detail strong {
+  color: var(--clr-text, #e8e4de);
+  font-weight: 600;
+}
+
+
+/* ============================================================
+   SORT & FILTER
+   ============================================================ */
+
 .sort-filter-container {
   display: flex;
   margin-bottom: 20px;
   padding: 0 15px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-/* Style each sort and filter section */
 .sort-filter-section {
   display: flex;
   align-items: center;
   margin: 5px;
+  gap: 8px;
 }
 
-/* Style the labels */
 .sort-filter-section label {
-  margin-right: 10px;
-  font-weight: bold;
+  font-weight: 600;
+  color: var(--clr-text-dim, #9a9590);
+  font-size: 0.85rem;
 }
 
-/* Style the select elements */
 .sort-filter-section select {
-  padding: 5px 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: white;
+  padding: 8px 12px;
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--clr-card, #222222);
+  color: var(--clr-text, #e8e4de);
   cursor: pointer;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.85rem;
+  transition: 0.3s ease;
 }
 
-/* Add hover and focus styles for the select elements */
 .sort-filter-section select:hover,
 .sort-filter-section select:focus {
-  border-color: #888;
+  border-color: var(--clr-gold, #c9a84c);
   outline: none;
 }
 
-/* Style for the booking list */
-.booking-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
 
+/* ============================================================
+   AVAILABILITY FORM
+   ============================================================ */
 
 .availability-form {
-    background: #fff;
-    border-radius: 8px;
-    max-width: 547px;
-    margin: 0 auto;
-    padding: 14px;
-    box-shadow: 0 2px 4px #0000001a;
+  background: var(--clr-card, #222222);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-md, 12px);
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.3));
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--clr-text-dim, #9a9590);
+  font-size: 0.85rem;
 }
 
 .form-control {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 80%;
-    padding: 8px;
-    font-size: 16px;
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-sm, 6px);
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  background: var(--clr-surface, #1a1a1a);
+  color: var(--clr-text, #e8e4de);
+  transition: 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--clr-gold, #c9a84c);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
 }
 
 .form-actions {
-    text-align: center;
-    padding-top: 0px;
+  text-align: center;
+  padding-top: 8px;
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 10px 24px;
   border: none;
-  border-radius: 4px;
-  background-color: #5cb85c;
-  color: white;
+  border-radius: var(--radius-sm, 6px);
+  background: linear-gradient(135deg, var(--clr-gold, #c9a84c), var(--clr-gold-dark, #a68a3a));
+  color: var(--clr-bg, #0f0f0f);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-weight: 700;
+  font-size: 0.9rem;
   cursor: pointer;
-  margin-left: 10px;
+  margin: 4px;
+  transition: 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .btn:hover {
-  background-color: #449d44;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(201,168,76,0.3);
 }
 
 #main-content h3 {
-    text-align: center;
+  text-align: center;
+  font-family: var(--font-display, 'Playfair Display', serif);
+  color: var(--clr-text, #e8e4de);
+  margin: 16px 0;
 }
 
 .unavailability-item.selected {
-  background-color: #e0e0e0; /* or any highlight color */
+  background-color: rgba(201,168,76,0.15);
+  border-color: var(--clr-gold, #c9a84c);
 }
 
-/* For tablets and small desktops */
+/* Responsive booking list */
 @media (min-width: 768px) {
-    .booking-list-item {
-        width: calc(50% - 48px); /* 2 items per row */
-    }
+  .booking-list-item {
+    width: calc(50% - 20px);
+  }
 }
 
-/* For large desktops */
 @media (min-width: 992px) {
-    .booking-list-item {
-        width: calc(33.333% - 48px); /* 3 items per row */
-    }
+  .booking-list-item {
+    width: calc(33.333% - 20px);
+  }
 }
 
-/* For extra large screens */
 @media (min-width: 1200px) {
-    .booking-list-item {
-        width: calc(25% - 48px); /* 4 items per row */
-    }
+  .booking-list-item {
+    width: calc(25% - 20px);
+  }
+}
+
+/* Mobile admin adjustments */
+@media (max-width: 768px) {
+  .sort-filter-container {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 12px;
+  }
+
+  .availability-form {
+    max-width: 100%;
+    margin: 0 12px;
+    padding: 16px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    margin: 4px;
+    width: auto;
+  }
+
+  .dashboard-card {
+    width: calc(50% - 20px);
+    height: 80px;
+    font-size: 0.85rem;
+  }
 }

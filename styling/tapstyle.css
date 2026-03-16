@@ -1,84 +1,81 @@
+/* ============================================================
+   TAP / SECTION STYLES — Salon Sindbad
+   ============================================================ */
+
 /* General styles for each section */
 main section {
+  display: none;
+  padding: 20px;
   overflow-y: auto;
-  display: none; /* Hide all sections by default */
-  padding: 20px; /* Add some padding around the content */
 }
 
-/* Specific styles for the home section */
+/* Show home section by default */
 #home-section {
-  display: block; /* Show the home section by default */
+  display: block;
 }
 
-/* Welcome message styles */
-.welcome {
-  text-align: center; /* Center-align text */
-  margin: 50px 0; /* Add some vertical space around the welcome message */
-}
-
+/* Welcome message overrides (tap context) */
 .welcome h2 {
-  font-size: 2em; /* Make the welcome message larger */
-  color: #6d7548; /* A blue color for the heading */
-  margin-bottom: 20px; /* Space below the heading */
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-size: 2em;
+  color: var(--clr-gold, #c9a84c);
+  margin-bottom: 20px;
 }
 
 .welcome p {
-  font-size: 1.2em; /* A slightly larger font size for the paragraph */
-  color: #666; /* A darker grey for the paragraph text */
+  font-size: 1.2em;
+  color: var(--clr-text-dim, #9a9590);
 }
 
-/* About section styles */
+/* About section */
 #about-section .container {
   overflow-y: auto;
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    text-align: center;
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
 }
 
 #about-section h2 {
-    color: #333;
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+  color: var(--clr-gold, #c9a84c);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-family: var(--font-display, 'Playfair Display', serif);
 }
 
 #about-section p {
-    color: #666;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 1rem;
+  color: var(--clr-text-dim, #9a9590);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
 }
 
 #about-section button {
-    padding: 10px 20px;
-    background-color: #0275d8;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--clr-gold, #c9a84c), var(--clr-gold-dark, #a68a3a));
+  color: var(--clr-bg, #0f0f0f);
+  border: none;
+  border-radius: var(--radius-pill, 50px);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: var(--transition, 0.3s ease);
 }
 
 #about-section button:hover {
-    background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(201,168,76,0.3);
 }
 
-
-/* Gallery section styles */
+/* Gallery section */
 #gallery-section {
-  padding: 20px;
+  padding: 40px 20px;
 }
 
 #gallery-section h2 {
-    text-align: center;
-    font-size: 2em;
-    color: #333333;
-    margin-bottom: 20px;
-    font-family: 'Montserrat';
-    top: -20px;
-    position: relative;
+  text-align: center;
+  font-size: 2em;
+  color: var(--clr-gold, #c9a84c);
+  margin-bottom: 20px;
+  font-family: var(--font-display, 'Playfair Display', serif);
 }
-
-
-/* Add any additional styles you want for buttons, links, etc., here */
