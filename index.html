@@ -22,8 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-      integrity="sha256-xodZBntMZQ1Lk3Mpo60IBYbR3v84dYJ5qfCiRPHfs18=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossorigin="" />
 </head>
 <body class="home-active">
     <!-- Price List Modal -->
@@ -53,12 +52,18 @@
             <li><a href="#about-section"><i class="fas fa-info-circle"></i> About Us</a></li>
             <li><a href="#gallery-section"><i class="fas fa-images"></i> Gallery</a></li>
         </ul>
+        <!-- Admin link at bottom of mobile menu -->
+        <div class="mobile-admin-area">
+            <button class="mobile-admin-btn" type="button">
+                <i class="fas fa-lock"></i> Staff Login
+            </button>
+        </div>
     </div>
 
     <!-- Overlay for mobile menu -->
     <div class="menu-overlay"></div>
 
-    <!-- Header (outside page-wrap so it stays sticky at top) -->
+    <!-- Header -->
     <header>
         <div class="header-container">
             <div class="ham-menu">
@@ -72,9 +77,10 @@
                 <span>Salon Sindbad</span>
             </div>
 
-            <div id="admin-login-area">
-                <button id="admin-login-button" type="button">
-                    <i class="fas fa-user-shield"></i> <span class="admin-btn-text">Admin</span>
+            <!-- Desktop admin link — subtle, top right. Hidden on mobile. -->
+            <div class="desktop-admin-area" id="admin-login-area">
+                <button id="admin-login-button" class="desktop-admin-btn" type="button">
+                    <i class="fas fa-lock"></i> <span class="admin-btn-label">Staff Login</span>
                 </button>
             </div>
 
@@ -103,9 +109,8 @@
         </div>
     </div>
 
-    <!-- PAGE WRAP: flex column container that pushes footer to bottom -->
+    <!-- PAGE WRAP -->
     <div id="page-wrap">
-        <!-- Main Content -->
         <main id="main-content">
             <section id="about-section"></section>
 
@@ -231,7 +236,6 @@
             </section>
         </main>
 
-        <!-- Footer — inside page-wrap so flex pushes it down -->
         <footer>
             <div class="footer-content">
                 <div class="footer-brand">
@@ -249,6 +253,8 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        /* ---- Hero "Book Now" → trigger the real nav link ---- */
         var heroCta = document.getElementById('hero-book-now');
         if (heroCta) {
             heroCta.addEventListener('click', function(e) {
@@ -263,6 +269,59 @@
             });
         }
 
+        /* ---- Mobile admin button → opens same modal ---- */
+        var mobileAdminBtn = document.querySelector('.mobile-admin-btn');
+        if (mobileAdminBtn) {
+            mobileAdminBtn.addEventListener('click', function() {
+                var token = localStorage.getItem('adminToken');
+                if (token) {
+                    // Already logged in — logout
+                    localStorage.removeItem('adminToken');
+                    sessionStorage.removeItem('currentSection');
+                    window.location.reload();
+                } else {
+                    // Open admin login modal
+                    var modal = document.getElementById('admin-login-modal');
+                    if (modal) modal.style.display = 'block';
+                    // Close the hamburger menu
+                    var hamMenu = document.querySelector('.ham-menu');
+                    var offScreen = document.querySelector('.off-screen-menu');
+                    if (hamMenu) hamMenu.classList.remove('active');
+                    if (offScreen) offScreen.classList.remove('active');
+                }
+            });
+        }
+
+        /* ---- Keep mobile admin button in sync with desktop (admin.js changes) ---- */
+        var desktopAdminBtn = document.getElementById('admin-login-button');
+        var mobileAdminObserver = new MutationObserver(function() {
+            var mobileBtn = document.querySelector('.mobile-admin-btn');
+            if (!mobileBtn || !desktopAdminBtn) return;
+            var text = desktopAdminBtn.textContent.trim();
+            if (text === 'Logout') {
+                mobileBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            } else {
+                mobileBtn.innerHTML = '<i class="fas fa-lock"></i> Staff Login';
+            }
+        });
+        if (desktopAdminBtn) {
+            mobileAdminObserver.observe(desktopAdminBtn, { childList: true, characterData: true, subtree: true });
+        }
+
+        /* ---- Sync admin state to mobile button ---- */
+        function syncMobileAdminState() {
+            var mobileBtn = document.querySelector('.mobile-admin-btn');
+            if (!mobileBtn) return;
+            var token = localStorage.getItem('adminToken');
+            if (token) {
+                mobileBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+            } else {
+                mobileBtn.innerHTML = '<i class="fas fa-lock"></i> Staff Login';
+            }
+        }
+        syncMobileAdminState();
+
+        /* ---- Scroll-lock + footer hide when home section is active ---- */
         function updateScrollLock() {
             var homeSection = document.getElementById('home-section');
             if (!homeSection) return;

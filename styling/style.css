@@ -209,8 +209,8 @@ nav ul li button:hover {
   box-shadow: var(--shadow-gold);
 }
 
-/* Admin Login Area */
-#admin-login-area {
+/* Admin — Desktop: subtle lock icon, top right */
+.desktop-admin-area {
   position: absolute;
   top: 50%;
   right: 20px;
@@ -218,26 +218,32 @@ nav ul li button:hover {
   z-index: 2;
 }
 
-#admin-login-button {
-  color: var(--clr-text-dim);
+.desktop-admin-btn {
   background: none;
   border: 1px solid var(--clr-border);
-  border-radius: var(--radius-pill);
-  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  color: var(--clr-text-dim);
   font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 500;
   cursor: pointer;
+  padding: 8px 14px;
   transition: var(--transition);
+  opacity: 0.6;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-#admin-login-button:hover {
-  background: var(--clr-card);
-  color: var(--clr-gold);
-  border-color: var(--clr-gold);
+.desktop-admin-btn:hover {
+  border-color: var(--clr-text-dim);
+  color: var(--clr-text);
+  opacity: 1;
+}
+
+/* Admin — Mobile: hidden on desktop */
+.mobile-admin-area {
+  display: none;
 }
 
 
@@ -263,8 +269,6 @@ nav ul li button:hover {
   }
 
   #main-nav { display: none; }
-  .admin-btn-text { display: none; }
-  #admin-login-button { padding: 8px 12px; font-size: 0.75rem; }
 
   .ham-menu {
     display: flex;
@@ -392,6 +396,42 @@ nav ul li button:hover {
   .off-screen-menu ul li a:hover i,
   .off-screen-menu ul li button:hover i {
     color: var(--clr-gold);
+  }
+
+  /* Hide desktop admin on mobile */
+  .desktop-admin-area { display: none; }
+
+  /* Show mobile admin at bottom of menu */
+  .mobile-admin-area {
+    display: block;
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid var(--clr-border);
+  }
+
+  .mobile-admin-btn {
+    background: none;
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-md);
+    color: var(--clr-text-dim);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 10px 16px;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition);
+    opacity: 0.6;
+  }
+
+  .mobile-admin-btn:hover {
+    border-color: var(--clr-text-dim);
+    color: var(--clr-text);
+    opacity: 1;
   }
 }
 
