@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
     adminLoginButton.onclick = logoutAdmin;
   } else {
     // Admin is not logged in
-    adminLoginButton.textContent = "Admin Login";
+    adminLoginButton.textContent = "Staff Login";
     adminLoginButton.onclick = showAdminLoginModal;
   }
 
@@ -121,7 +121,7 @@ function handleAdminLogin(event) {
   const adminLoginModal = document.getElementById("admin-login-modal"); // Get the login modal
 
   fetch(
-    "https://examproject-barbershop-app-backend.onrender.com/api/admin/login",
+    "https://salonsindbad-api.duckdns.org/api/admin/login",
     {
       // Adjust the URL as per your API endpoint
       method: "POST",
@@ -185,7 +185,7 @@ function checkAdminLoginStatus() {
     adminLoginButton.onclick = logoutAdmin;
   } else {
     // Admin is not logged in
-    adminLoginButton.textContent = "Admin Login";
+    adminLoginButton.textContent = "Staff Login";
     adminLoginButton.onclick = showAdminLoginModal;
   }
 }
@@ -316,7 +316,7 @@ window.viewBookings = viewBookings;
 
 function fetchBookingsAndDisplay() {
   fetch(
-    "https://examproject-barbershop-app-backend.onrender.com/api/bookings",
+    "https://salonsindbad-api.duckdns.org/api/bookings",
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -389,7 +389,7 @@ function displayBookings(bookings) {
 
 function deleteBooking(bookingId) {
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/bookings/delete/${bookingId}`,
+    `https://salonsindbad-api.duckdns.org/api/bookings/delete/${bookingId}`,
     {
       method: "DELETE",
       headers: {
@@ -417,7 +417,7 @@ function deleteBooking(bookingId) {
 
 // Populate filter dropdown with barber options
 function populateFilterBarbers() {
-  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers", {
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
@@ -450,7 +450,7 @@ function formatDate(isoDate) {
 }
 
 function fetchAndDisplayBarberAvailabilities() {
-  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers")
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers")
     .then((response) => response.json())
     .then((barbers) => {
       const availabilitiesSection = document.createElement("section");
@@ -460,7 +460,7 @@ function fetchAndDisplayBarberAvailabilities() {
         const barberDiv = document.createElement("div");
         barberDiv.innerHTML = `<h3>Barber ${barber.id}</h3>`;
         fetch(
-          `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barber.id}/availability`
+          `https://salonsindbad-api.duckdns.org/api/barbers/${barber.id}/availability`
         )
           .then((response) => response.json())
           .then((availabilities) => {
@@ -602,7 +602,7 @@ function createBarberAvailability() {
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate;
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "POST", // or "POST" if you're creating new availability
       headers: {
@@ -633,7 +633,7 @@ function createBarberAvailability() {
 
 function fetchCurrentUnavailabilities(barberId) {
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -697,7 +697,7 @@ function updateBarberAvailability() {
   console.log(`New Start Date: ${newStartDate}, New End Date: ${newEndDate}`);
 
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "PUT",
       headers: {
@@ -736,7 +736,7 @@ function deleteBarberAvailability() {
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate; // Use single date if end date is not provided
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "DELETE",
       headers: {
@@ -764,7 +764,7 @@ function deleteBarberAvailability() {
 
 function fetchCurrentUnavailabilitiesForRemoval(barberId) {
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -871,7 +871,7 @@ function handleRemoveUnavailability(event) {
   }
 
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "DELETE",
       headers: {
@@ -901,7 +901,7 @@ function handleRemoveUnavailability(event) {
 
 // Populate barbers from the API
 function populateBarbers() {
-  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers", {
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
@@ -934,7 +934,7 @@ function loadContent(contentHtml) {
 
 function fetchData(url, callback) {
   const backendBaseUrl =
-    "https://examproject-barbershop-app-backend.onrender.com";
+    "https://salonsindbad-api.duckdns.org";
   const fullUrl = backendBaseUrl + url;
 
   fetch(fullUrl)

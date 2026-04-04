@@ -14,7 +14,7 @@ Welcome to the frontend repository of the Barbershop application, a modern platf
 
 ## Access to deployed website
 
-https://examproject-barbershop-app-backend.onrender.com/
+https://salonsindbad-api.duckdns.org/
 
 ## Technologies Used
 

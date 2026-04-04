@@ -44,7 +44,7 @@ export function loadBookingPage() {
 // ============================================================
 
 function populateServices() {
-  fetch("https://examproject-barbershop-app-backend.onrender.com/api/services")
+  fetch("https://salonsindbad-api.duckdns.org/api/services")
     .then(function (r) { return r.json(); })
     .then(function (services) {
       if (!Array.isArray(services)) throw new Error("Expected array");
@@ -262,9 +262,9 @@ function loadTimeSlotsForDate(date) {
   var nextDayStr = formatDate(nextDay);
 
   Promise.all([
-    fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers/" + barberId + "/unavailable-dates")
+    fetch("https://salonsindbad-api.duckdns.org/api/barbers/" + barberId + "/unavailable-dates")
       .then(function (r) { return r.json(); }).catch(function () { return []; }),
-    fetch("https://examproject-barbershop-app-backend.onrender.com/api/bookings/unavailable-timeslots?barberId=" + barberId + "&start=" + dateStr + "&end=" + nextDayStr)
+    fetch("https://salonsindbad-api.duckdns.org/api/bookings/unavailable-timeslots?barberId=" + barberId + "&start=" + dateStr + "&end=" + nextDayStr)
       .then(function (r) { return r.json(); }).catch(function () { return []; }),
   ]).then(function (results) {
     unavailableDates = results[0] || [];
@@ -470,7 +470,7 @@ window.addEventListener("click", function (event) {
 // ============================================================
 
 function populateBarbers() {
-  fetch("https://examproject-barbershop-app-backend.onrender.com/api/barbers")
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers")
     .then(function (r) { return r.json(); })
     .then(function (barbers) {
       var select = document.getElementById("barber-select");
@@ -547,7 +547,7 @@ async function handleBookingSubmit(event) {
   }
 
   try {
-    var response = await fetch("https://examproject-barbershop-app-backend.onrender.com/api/bookings/create", {
+    var response = await fetch("https://salonsindbad-api.duckdns.org/api/bookings/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bookingData),

@@ -57,7 +57,7 @@ function setupPriceListModal() {
 
 // Function to load the price list from the server
 function loadPriceList() {
-  fetch("https://examproject-barbershop-app-backend.onrender.com/api/services")
+  fetch("https://salonsindbad-api.duckdns.org/api/services")
     .then((response) => response.json())
     .then((services) => {
       const priceListHtml = services
@@ -82,7 +82,7 @@ function loadPriceList() {
 
 // Function to populate service options in a select dropdown
 function populateServices(selectElementId) {
-  fetch("https://examproject-barbershop-app-backend.onrender.com/api/services")
+  fetch("https://salonsindbad-api.duckdns.org/api/services")
     .then((response) => response.json())
     .then((services) => {
       const selectElement = document.getElementById(selectElementId);
@@ -119,7 +119,7 @@ function deleteService(serviceId) {
   if (!confirm("Are you sure you want to delete this service?")) return;
 
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/services/${serviceId}`,
+    `https://salonsindbad-api.duckdns.org/api/services/${serviceId}`,
     {
       method: "DELETE",
       headers: {
@@ -143,7 +143,7 @@ function editService(serviceId) {
   const newPrice = prompt("Enter the new service price:");
 
   fetch(
-    `https://examproject-barbershop-app-backend.onrender.com/api/services/${serviceId}`,
+    `https://salonsindbad-api.duckdns.org/api/services/${serviceId}`,
     {
       method: "PUT",
       headers: {
