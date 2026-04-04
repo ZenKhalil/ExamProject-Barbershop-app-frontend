@@ -85,8 +85,7 @@ export function showSection(sectionId) {
 window.addEventListener("click", (event) => {
     const priceListModal = document.getElementById('priceListModal');
     if (event.target === priceListModal) {
-        priceListModal.classList.add("hidden");
-        priceListModal.style.display = 'none'; // Ensure the modal is hidden
+        priceListModal.style.display = 'none';
     }
 });
 

@@ -1261,6 +1261,21 @@ div#selected-datetime { margin-bottom: 0; }
   box-shadow: 0 6px 25px rgba(201,168,76,0.3);
 }
 
+#booking-form input[type="text"],
+#booking-form input[type="email"],
+#booking-form input[type="tel"] {
+  padding: 12px 16px;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  background: var(--clr-card);
+  color: var(--clr-text);
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 @media (max-width: 768px) {
   #booking-modal.show {
     padding: 0;
@@ -1282,6 +1297,21 @@ div#selected-datetime { margin-bottom: 0; }
 
   .datetime-chips { gap: 6px; }
   #selected-datetime p { font-size: 0.78rem; padding: 6px 10px; }
+
+  #booking-form input[type="text"],
+  #booking-form input[type="email"],
+  #booking-form input[type="tel"] {
+  padding: 12px 16px;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  background: var(--clr-card);
+  color: var(--clr-text);
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
 }
 
 
