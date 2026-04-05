@@ -120,7 +120,7 @@ function handleAdminLogin(event) {
   const adminLoginModal = document.getElementById("admin-login-modal"); // Get the login modal
 
   fetch(
-    "http://localhost:3000/api/admin/login",
+    "http://https://salonsindbad-api.duckdns.org/api/admin/login",
     {
       // Adjust the URL as per your API endpoint
       method: "POST",
@@ -322,7 +322,7 @@ window.viewBookings = viewBookings;
 
 function fetchBookingsAndDisplay() {
   fetch(
-    "http://localhost:3000/api/bookings",
+    "http://https://salonsindbad-api.duckdns.org/api/bookings",
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -395,7 +395,7 @@ function displayBookings(bookings) {
 
 function deleteBooking(bookingId) {
   fetch(
-    `http://localhost:3000/api/bookings/delete/${bookingId}`,
+    `http://https://salonsindbad-api.duckdns.org/api/bookings/delete/${bookingId}`,
     {
       method: "DELETE",
       headers: {
@@ -423,7 +423,7 @@ function deleteBooking(bookingId) {
 
 // Populate filter dropdown with barber options
 function populateFilterBarbers() {
-  fetch("http://localhost:3000/api/barbers", {
+  fetch("http://https://salonsindbad-api.duckdns.org/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
@@ -456,7 +456,7 @@ function formatDate(isoDate) {
 }
 
 function fetchAndDisplayBarberAvailabilities() {
-  fetch("http://localhost:3000/api/barbers")
+  fetch("http://https://salonsindbad-api.duckdns.org/api/barbers")
     .then((response) => response.json())
     .then((barbers) => {
       const availabilitiesSection = document.createElement("section");
@@ -466,7 +466,7 @@ function fetchAndDisplayBarberAvailabilities() {
         const barberDiv = document.createElement("div");
         barberDiv.innerHTML = `<h3>Barber ${barber.id}</h3>`;
         fetch(
-          `http://localhost:3000/api/barbers/${barber.id}/availability`
+          `http://https://salonsindbad-api.duckdns.org/api/barbers/${barber.id}/availability`
         )
           .then((response) => response.json())
           .then((availabilities) => {
@@ -608,7 +608,7 @@ function createBarberAvailability() {
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate;
   fetch(
-    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
+    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "POST", // or "POST" if you're creating new availability
       headers: {
@@ -639,7 +639,7 @@ function createBarberAvailability() {
 
 function fetchCurrentUnavailabilities(barberId) {
   fetch(
-    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
+    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -703,7 +703,7 @@ function updateBarberAvailability() {
   console.log(`New Start Date: ${newStartDate}, New End Date: ${newEndDate}`);
 
   fetch(
-    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
+    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "PUT",
       headers: {
@@ -742,7 +742,7 @@ function deleteBarberAvailability() {
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate; // Use single date if end date is not provided
   fetch(
-    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
+    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "DELETE",
       headers: {
@@ -770,7 +770,7 @@ function deleteBarberAvailability() {
 
 function fetchCurrentUnavailabilitiesForRemoval(barberId) {
   fetch(
-    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
+    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -877,7 +877,7 @@ function handleRemoveUnavailability(event) {
   }
 
   fetch(
-    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
+    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "DELETE",
       headers: {
@@ -907,7 +907,7 @@ function handleRemoveUnavailability(event) {
 
 // Populate barbers from the API
 function populateBarbers() {
-  fetch("http://localhost:3000/api/barbers", {
+  fetch("http://https://salonsindbad-api.duckdns.org/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
