@@ -2,7 +2,7 @@
 // Flow: pick services → pick date → pick time → fill contact info → book
 
 const SLOT_INTERVAL = 10; // minutes between each slot option
-const DAYS_TO_SHOW = 14;
+const DAYS_TO_SHOW = 90;
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
