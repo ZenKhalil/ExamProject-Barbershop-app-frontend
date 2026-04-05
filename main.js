@@ -2,7 +2,6 @@
 
 // CSS imports — Parcel bundles these in order
 import './styling/style.css';
-import './admin/admin.css';
 import './styling/tapstyle.css';
 import './styling/about.css';
 

@@ -3,6 +3,8 @@
    Aesthetic: Dark luxury, warm gold accents, mobile-first
    ============================================================ */
 
+@import url('../admin/admin.css');
+
 /* CSS Reset */
 *,
 *::before,
@@ -1577,17 +1579,3 @@ footer p { font-size: 0.85rem; font-weight: 400; color: var(--clr-text-dim); }
   .welcome h1 { font-size: 2rem; }
 }
 
-/* Admin login form inputs — high specificity to survive bundling */
-#admin-login-modal #admin-login-form input[type="text"],
-#admin-login-modal #admin-login-form input[type="password"] {
-  padding: 12px 16px;
-  border: 1px solid var(--clr-border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  background: var(--clr-card);
-  color: var(--clr-text);
-  width: 100%;
-  -webkit-appearance: none;
-  appearance: none;
-}
