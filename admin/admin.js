@@ -29,6 +29,9 @@ function setupAdminNavigation() {
 
 // Expose functions for admin.js if needed
 export function generateAdminNavBar() {
+  // Unlock scrolling (home page locks it)
+  document.body.classList.remove("home-active");
+
   const navBar = document.getElementById("main-nav");
   if (!navBar) {
     console.error("Main navigation (nav#main-nav) not found.");
@@ -1589,36 +1592,37 @@ function renderServiceItem(s) {
 }
 
 function editService(serviceId) {
-  var token = localStorage.getItem("adminToken");
-  // Get current values
   fetch(API_BASE + "/api/services")
     .then(function(r) { return r.json(); })
     .then(function(services) {
       var service = services.find(function(s) { return s.service_id == serviceId; });
       if (!service) { alert("Service not found"); return; }
 
-      var newName = prompt("Service name:", service.service_name);
-      if (newName === null) return;
-      var newPrice = prompt("Price (kr):", service.price);
-      if (newPrice === null) return;
-      var newDuration = prompt("Duration (min):", service.duration || 30);
-      if (newDuration === null) return;
-      var newIsMain = confirm("Is this a main service?");
-
-      fetch(API_BASE + "/api/services/" + serviceId, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-        body: JSON.stringify({
-          service_name: newName, price: parseFloat(newPrice),
-          duration: parseInt(newDuration), is_main: newIsMain,
-        }),
-      })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (data.error) { alert(data.error); return; }
-          loadServicesList();
+      showEditModal("Edit Service", [
+        { label: "Name", id: "edit-svc-name", type: "text", value: service.service_name },
+        { label: "Price (kr)", id: "edit-svc-price", type: "number", value: service.price },
+        { label: "Duration (min)", id: "edit-svc-duration", type: "number", value: service.duration || 30 },
+        { label: "Main service", id: "edit-svc-main", type: "checkbox", value: service.is_main === 1 },
+      ], function() {
+        var token = localStorage.getItem("adminToken");
+        fetch(API_BASE + "/api/services/" + serviceId, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+          body: JSON.stringify({
+            service_name: document.getElementById("edit-svc-name").value.trim(),
+            price: parseFloat(document.getElementById("edit-svc-price").value),
+            duration: parseInt(document.getElementById("edit-svc-duration").value),
+            is_main: document.getElementById("edit-svc-main").checked,
+          }),
         })
-        .catch(function(err) { alert("Failed to update service"); });
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.error) { alert(data.error); return; }
+            closeEditModal();
+            loadServicesList();
+          })
+          .catch(function(err) { alert("Failed to update service"); });
+      });
     });
 }
 
@@ -1658,6 +1662,10 @@ export function displayManageBarbers() {
               <label>Name</label>
               <input type="text" id="new-barber-name" class="form-control" placeholder="e.g. Ahmed">
             </div>
+            <div class="form-group" style="flex:1;">
+              <label>Email (optional)</label>
+              <input type="email" id="new-barber-email" class="form-control" placeholder="e.g. ahmed@mail.com">
+            </div>
           </div>
           <button class="btn" id="add-barber-btn"><i class="fas fa-plus"></i> Add Barber</button>
         </div>
@@ -1673,18 +1681,20 @@ export function displayManageBarbers() {
 
   document.getElementById("add-barber-btn").addEventListener("click", function() {
     var name = document.getElementById("new-barber-name").value.trim();
+    var email = document.getElementById("new-barber-email").value.trim();
     if (!name) { alert("Please enter a barber name"); return; }
 
     var token = localStorage.getItem("adminToken");
     fetch(API_BASE + "/api/barbers", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-      body: JSON.stringify({ name: name }),
+      body: JSON.stringify({ name: name, email: email || null }),
     })
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.error) { alert(data.error); return; }
         document.getElementById("new-barber-name").value = "";
+        document.getElementById("new-barber-email").value = "";
         loadBarbersList();
       })
       .catch(function(err) { alert("Failed to add barber"); console.error(err); });
@@ -1704,13 +1714,14 @@ function loadBarbersList() {
       }
 
       container.innerHTML = barbers.map(function(b) {
+        var emailInfo = b.email ? '<i class="fas fa-envelope" style="color:var(--clr-gold);font-size:0.7rem;margin-right:4px;"></i>' + b.email : '<span style="opacity:0.4;">No email set</span>';
         return '<div class="manage-item">' +
           '<div class="manage-item-info">' +
             '<span class="manage-item-name"><i class="fas fa-user-tie" style="color:var(--clr-gold);margin-right:8px;font-size:0.85rem;"></i>' + b.name + '</span>' +
-            '<span class="manage-item-meta">ID: ' + b.barber_id + '</span>' +
+            '<span class="manage-item-meta">' + emailInfo + '</span>' +
           '</div>' +
           '<div class="manage-item-actions">' +
-            '<button class="manage-edit-btn" data-id="' + b.barber_id + '" data-name="' + b.name + '" title="Edit"><i class="fas fa-pen"></i></button>' +
+            '<button class="manage-edit-btn" data-id="' + b.barber_id + '" data-name="' + b.name + '" data-email="' + (b.email || '') + '" title="Edit"><i class="fas fa-pen"></i></button>' +
             '<button class="manage-delete-btn" data-id="' + b.barber_id + '" title="Delete"><i class="fas fa-trash-alt"></i></button>' +
           '</div>' +
         '</div>';
@@ -1718,20 +1729,27 @@ function loadBarbersList() {
 
       container.querySelectorAll(".manage-edit-btn").forEach(function(btn) {
         btn.addEventListener("click", function() {
-          var newName = prompt("New name for barber:", btn.dataset.name);
-          if (newName === null || !newName.trim()) return;
-          var token = localStorage.getItem("adminToken");
-          fetch(API_BASE + "/api/barbers/" + btn.dataset.id, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-            body: JSON.stringify({ name: newName.trim() }),
-          })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-              if (data.error) { alert(data.error); return; }
-              loadBarbersList();
+          showEditModal("Edit Barber", [
+            { label: "Name", id: "edit-barber-name", type: "text", value: btn.dataset.name },
+            { label: "Email", id: "edit-barber-email", type: "email", value: btn.dataset.email },
+          ], function() {
+            var token = localStorage.getItem("adminToken");
+            var newName = document.getElementById("edit-barber-name").value.trim();
+            var newEmail = document.getElementById("edit-barber-email").value.trim();
+            if (!newName) { alert("Name is required"); return; }
+            fetch(API_BASE + "/api/barbers/" + btn.dataset.id, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+              body: JSON.stringify({ name: newName, email: newEmail || null }),
             })
-            .catch(function(err) { alert("Failed to update barber"); });
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                if (data.error) { alert(data.error); return; }
+                closeEditModal();
+                loadBarbersList();
+              })
+              .catch(function(err) { alert("Failed to update barber"); });
+          });
         });
       });
 
@@ -1753,6 +1771,56 @@ function loadBarbersList() {
       });
     })
     .catch(function(err) { console.error("Error loading barbers:", err); });
+}
+
+
+// ============================================================
+// REUSABLE EDIT MODAL
+// ============================================================
+
+function showEditModal(title, fields, onSave) {
+  // Remove existing modal if any
+  closeEditModal();
+
+  var fieldsHtml = fields.map(function(f) {
+    if (f.type === "checkbox") {
+      return '<label class="manage-checkbox" style="margin:8px 0;">' +
+        '<input type="checkbox" id="' + f.id + '"' + (f.value ? ' checked' : '') + '> ' + f.label +
+        '</label>';
+    }
+    return '<div class="form-group">' +
+      '<label>' + f.label + '</label>' +
+      '<input type="' + f.type + '" id="' + f.id + '" class="form-control" value="' + (f.value || '') + '">' +
+      '</div>';
+  }).join("");
+
+  var modalHtml = '<div id="edit-modal-overlay" class="edit-modal-overlay">' +
+    '<div class="edit-modal-box">' +
+      '<div class="edit-modal-header">' +
+        '<h3>' + title + '</h3>' +
+        '<button class="edit-modal-close" id="edit-modal-close"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="edit-modal-body">' + fieldsHtml + '</div>' +
+      '<div class="edit-modal-footer">' +
+        '<button class="btn btn-secondary" id="edit-modal-cancel">Cancel</button>' +
+        '<button class="btn" id="edit-modal-save"><i class="fas fa-check"></i> Save</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+  document.getElementById("edit-modal-save").addEventListener("click", onSave);
+  document.getElementById("edit-modal-cancel").addEventListener("click", closeEditModal);
+  document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
+  document.getElementById("edit-modal-overlay").addEventListener("click", function(e) {
+    if (e.target === this) closeEditModal();
+  });
+}
+
+function closeEditModal() {
+  var modal = document.getElementById("edit-modal-overlay");
+  if (modal) modal.remove();
 }
 
 

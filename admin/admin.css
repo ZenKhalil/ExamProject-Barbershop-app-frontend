@@ -1227,6 +1227,83 @@
 
 
 /* ============================================================
+   EDIT MODAL — Reusable inline edit
+   ============================================================ */
+
+.edit-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--clr-overlay, rgba(0,0,0,0.7));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInOpacity 0.2s ease;
+}
+
+@keyframes fadeInOpacity {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.edit-modal-box {
+  background: var(--clr-surface, #1a1a1a);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-lg, 20px);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 16px;
+  box-shadow: var(--shadow-lg, 0 8px 40px rgba(0,0,0,0.5));
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.edit-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--clr-border, #2e2e2e);
+}
+
+.edit-modal-header h3 {
+  font-family: var(--font-display, 'Playfair Display', serif);
+  font-size: 1.1rem;
+  color: var(--clr-gold, #c9a84c);
+}
+
+.edit-modal-close {
+  background: none;
+  border: none;
+  color: var(--clr-text-dim, #9a9590);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+  transition: 0.3s ease;
+}
+
+.edit-modal-close:hover { color: var(--clr-gold, #c9a84c); }
+
+.edit-modal-body {
+  padding: 20px 22px;
+}
+
+.edit-modal-body .form-group {
+  margin-bottom: 14px;
+}
+
+.edit-modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 22px;
+  border-top: 1px solid var(--clr-border, #2e2e2e);
+}
+
+
+/* ============================================================
    SETTINGS PAGE
    ============================================================ */
 
