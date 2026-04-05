@@ -1208,7 +1208,7 @@ div#selected-datetime { margin-bottom: 0; }
   font-family: var(--font-display);
 }
 
-#booking-form .form-group input[type="text"],
+#customer-name,
 #booking-form .form-group input[type="email"],
 #booking-form .form-group input[type="tel"] {
   flex: none;

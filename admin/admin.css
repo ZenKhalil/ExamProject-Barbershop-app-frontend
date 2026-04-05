@@ -94,7 +94,7 @@
   opacity: 0.6;
 }
 
-#admin-login-form button[type="submit"] {
+#admin-button {
   padding: 12px;
   background: linear-gradient(135deg, var(--clr-gold, #c9a84c), var(--clr-gold-dark, #a68a3a));
   color: var(--clr-bg, #0f0f0f);
@@ -109,7 +109,7 @@
   letter-spacing: 0.04em;
 }
 
-#admin-login-form button[type="submit"]:hover {
+#admin-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 25px rgba(201,168,76,0.3);
 }
