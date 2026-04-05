@@ -5,6 +5,7 @@ export const adminFunctions = {
   "dashboard-section": loadAdminDashboard,
   "view-bookings-section": viewBookings,
   "edit-availabilities-section": displayEditAvailabilityForm,
+  "settings-section": displaySettings,
 };
 
 function setupAdminNavigation() {
@@ -38,8 +39,7 @@ export function generateAdminNavBar() {
             <li><a href="#dashboard-section" id="dashboard-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
             <li><a href="#view-bookings-section" id="view-bookings-link"><i class="fas fa-calendar-check"></i> View Bookings</a></li>
             <li><a href="#edit-availabilities-section" id="edit-availabilities-link"><i class="fas fa-edit"></i> Edit Availabilities</a></li>
-            <!-- <li><a href="#update-opening-hours-section" id="update-opening-hours-link"><i class="fas fa-clock"></i> Update Opening Hours</a></li> -->
-            <!-- <li><a href="#" id="admin-logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li> -->
+            <li><a href="#settings-section" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
         </ul>
     `;
 
@@ -65,8 +65,7 @@ function updateOffScreenMenuToAdmin() {
         <li><a href="#dashboard-section">Dashboard</a></li>
         <li><a href="#view-bookings-section">View Bookings</a></li>
         <li><a href="#edit-availabilities-section">Edit Availabilities</a></li>
-        <!-- <li><a href="#update-opening-hours-section">Update Opening Hours</a></li> -->
-        <!-- <li><a href="#" id="admin-logout-link">Logout</a></li> -->
+        <li><a href="#settings-section">Settings</a></li>
     `;
 }
 
@@ -121,7 +120,7 @@ function handleAdminLogin(event) {
   const adminLoginModal = document.getElementById("admin-login-modal"); // Get the login modal
 
   fetch(
-    "https://salonsindbad-api.duckdns.org/api/admin/login",
+    "http://localhost:3000/api/admin/login",
     {
       // Adjust the URL as per your API endpoint
       method: "POST",
@@ -240,6 +239,14 @@ export function setupAdminNavBarListeners() {
   } else {
     console.error("Element with ID 'edit-availabilities-link' not found.");
   }
+
+  const settingsLink = document.getElementById("settings-link");
+  if (settingsLink) {
+    settingsLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      displaySettings();
+    });
+  }
 }
 
 /* Admin dashboard */
@@ -252,24 +259,23 @@ export function loadAdminDashboard() {
   const dashboardHtml = `
   <div class="dashboard-container">
     <h2>Admin Dashboard</h2>
-    <div class="dashboard-card" id="view-bookings-btn">View Bookings</div>
-    <div class="dashboard-card" id="edit-availabilities-btn">Edit Availabilities</div>
-    <!-- <div class="dashboard-card" id="update-opening-hours-btn">Update Opening Hours</div> -->
+    <div class="dashboard-card" id="view-bookings-btn"><i class="fas fa-calendar-check"></i> View Bookings</div>
+    <div class="dashboard-card" id="edit-availabilities-btn"><i class="fas fa-edit"></i> Edit Availabilities</div>
+    <div class="dashboard-card" id="settings-btn"><i class="fas fa-cog"></i> Settings</div>
   </div>
 `;
 
   const mainContent = document.getElementById("main-content");
   mainContent.innerHTML = dashboardHtml;
-  // Attach event listeners after adding the buttons to the DOM
   document
     .getElementById("view-bookings-btn")
     .addEventListener("click", viewBookings);
   document
     .getElementById("edit-availabilities-btn")
     .addEventListener("click", displayEditAvailabilityForm);
-  // Uncomment and implement these functions if needed
-  // document.getElementById("update-opening-hours-btn").addEventListener("click", updateOpeningHours);
-  // document.getElementById("logout-btn").addEventListener("click", logoutAdmin);
+  document
+    .getElementById("settings-btn")
+    .addEventListener("click", displaySettings);
 }
 //window.loadAdminDashboard = loadAdminDashboard;
 
@@ -316,7 +322,7 @@ window.viewBookings = viewBookings;
 
 function fetchBookingsAndDisplay() {
   fetch(
-    "https://salonsindbad-api.duckdns.org/api/bookings",
+    "http://localhost:3000/api/bookings",
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -389,7 +395,7 @@ function displayBookings(bookings) {
 
 function deleteBooking(bookingId) {
   fetch(
-    `https://salonsindbad-api.duckdns.org/api/bookings/delete/${bookingId}`,
+    `http://localhost:3000/api/bookings/delete/${bookingId}`,
     {
       method: "DELETE",
       headers: {
@@ -417,7 +423,7 @@ function deleteBooking(bookingId) {
 
 // Populate filter dropdown with barber options
 function populateFilterBarbers() {
-  fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
+  fetch("http://localhost:3000/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
@@ -450,7 +456,7 @@ function formatDate(isoDate) {
 }
 
 function fetchAndDisplayBarberAvailabilities() {
-  fetch("https://salonsindbad-api.duckdns.org/api/barbers")
+  fetch("http://localhost:3000/api/barbers")
     .then((response) => response.json())
     .then((barbers) => {
       const availabilitiesSection = document.createElement("section");
@@ -460,7 +466,7 @@ function fetchAndDisplayBarberAvailabilities() {
         const barberDiv = document.createElement("div");
         barberDiv.innerHTML = `<h3>Barber ${barber.id}</h3>`;
         fetch(
-          `https://salonsindbad-api.duckdns.org/api/barbers/${barber.id}/availability`
+          `http://localhost:3000/api/barbers/${barber.id}/availability`
         )
           .then((response) => response.json())
           .then((availabilities) => {
@@ -602,7 +608,7 @@ function createBarberAvailability() {
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate;
   fetch(
-    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "POST", // or "POST" if you're creating new availability
       headers: {
@@ -633,7 +639,7 @@ function createBarberAvailability() {
 
 function fetchCurrentUnavailabilities(barberId) {
   fetch(
-    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -697,7 +703,7 @@ function updateBarberAvailability() {
   console.log(`New Start Date: ${newStartDate}, New End Date: ${newEndDate}`);
 
   fetch(
-    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "PUT",
       headers: {
@@ -736,7 +742,7 @@ function deleteBarberAvailability() {
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate; // Use single date if end date is not provided
   fetch(
-    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "DELETE",
       headers: {
@@ -764,7 +770,7 @@ function deleteBarberAvailability() {
 
 function fetchCurrentUnavailabilitiesForRemoval(barberId) {
   fetch(
-    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -871,7 +877,7 @@ function handleRemoveUnavailability(event) {
   }
 
   fetch(
-    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `http://localhost:3000/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "DELETE",
       headers: {
@@ -901,7 +907,7 @@ function handleRemoveUnavailability(event) {
 
 // Populate barbers from the API
 function populateBarbers() {
-  fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
+  fetch("http://localhost:3000/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
@@ -926,6 +932,192 @@ function populateBarbers() {
     })
     .catch((error) => console.error("Error fetching barbers:", error));
 }
+
+// ============================================================
+// SETTINGS — Email configuration
+// ============================================================
+
+export function displaySettings() {
+  const mainContent = document.getElementById("main-content");
+  mainContent.innerHTML = `
+    <div class="settings-container">
+      <h2><i class="fas fa-cog"></i> Settings</h2>
+
+      <div class="settings-card">
+        <div class="settings-card-header">
+          <h3><i class="fas fa-envelope"></i> Email Configuration</h3>
+          <span class="settings-status" id="email-status">Loading...</span>
+        </div>
+
+        <div class="settings-form" id="email-settings-form">
+          <div class="form-group">
+            <label for="settings-email-service">Email Service</label>
+            <select id="settings-email-service" class="form-control">
+              <option value="gmail">Gmail</option>
+              <option value="outlook">Outlook</option>
+              <option value="yahoo">Yahoo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="settings-email-username">Email Address</label>
+            <input type="email" id="settings-email-username" class="form-control" placeholder="your@email.com">
+          </div>
+
+          <div class="form-group">
+            <label for="settings-email-password">App Password</label>
+            <div class="input-with-hint">
+              <input type="password" id="settings-email-password" class="form-control" placeholder="Leave empty to keep current">
+              <small class="form-hint">For Gmail: generate at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a></small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="settings-owner-email">Owner Notification Email</label>
+            <input type="email" id="settings-owner-email" class="form-control" placeholder="Where booking notifications are sent">
+          </div>
+
+          <div class="settings-actions">
+            <button type="button" id="save-email-settings" class="btn"><i class="fas fa-save"></i> Save Settings</button>
+            <button type="button" id="test-email-settings" class="btn btn-secondary"><i class="fas fa-paper-plane"></i> Send Test Email</button>
+          </div>
+
+          <div id="settings-message" class="settings-message" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Load current settings
+  loadEmailSettings();
+
+  // Attach event listeners
+  document.getElementById("save-email-settings").addEventListener("click", saveEmailSettings);
+  document.getElementById("test-email-settings").addEventListener("click", testEmailSettings);
+}
+
+function loadEmailSettings() {
+  const token = localStorage.getItem("adminToken");
+  const statusEl = document.getElementById("email-status");
+
+  fetch("https://salonsindbad-api.duckdns.org/api/admin/settings/email", {
+    headers: { Authorization: "Bearer " + token },
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.error) {
+        statusEl.textContent = "Error";
+        statusEl.className = "settings-status status-error";
+        return;
+      }
+
+      document.getElementById("settings-email-service").value = data.email_service || "gmail";
+      document.getElementById("settings-email-username").value = data.email_username || "";
+      document.getElementById("settings-owner-email").value = data.owner_email || "";
+      document.getElementById("settings-email-password").placeholder =
+        data.has_password ? "Current: " + data.email_password_masked + " (leave empty to keep)" : "Enter app password";
+
+      statusEl.textContent = data.has_password ? "Configured" : "Not configured";
+      statusEl.className = "settings-status " + (data.has_password ? "status-ok" : "status-warn");
+    })
+    .catch((err) => {
+      console.error("Error loading email settings:", err);
+      statusEl.textContent = "Error";
+      statusEl.className = "settings-status status-error";
+    });
+}
+
+function saveEmailSettings() {
+  const token = localStorage.getItem("adminToken");
+  const saveBtn = document.getElementById("save-email-settings");
+  const msgEl = document.getElementById("settings-message");
+
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+  const body = {
+    email_service: document.getElementById("settings-email-service").value,
+    email_username: document.getElementById("settings-email-username").value,
+    email_password: document.getElementById("settings-email-password").value,
+    owner_email: document.getElementById("settings-owner-email").value,
+  };
+
+  fetch("https://salonsindbad-api.duckdns.org/api/admin/settings/email", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify(body),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.error) {
+        showSettingsMessage(msgEl, data.error, "error");
+      } else {
+        showSettingsMessage(msgEl, "Email settings saved successfully!", "success");
+        // Clear the password field and reload to show updated masked password
+        document.getElementById("settings-email-password").value = "";
+        loadEmailSettings();
+      }
+    })
+    .catch((err) => {
+      showSettingsMessage(msgEl, "Failed to save settings: " + err.message, "error");
+    })
+    .finally(() => {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
+    });
+}
+
+function testEmailSettings() {
+  const token = localStorage.getItem("adminToken");
+  const testBtn = document.getElementById("test-email-settings");
+  const msgEl = document.getElementById("settings-message");
+
+  testBtn.disabled = true;
+  testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+  fetch("https://salonsindbad-api.duckdns.org/api/admin/settings/email/test", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify({}),
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.error) {
+        showSettingsMessage(msgEl, "Test failed: " + (data.details || data.error), "error");
+      } else {
+        showSettingsMessage(msgEl, "Test email sent to " + data.recipient + "!", "success");
+        // Update status
+        const statusEl = document.getElementById("email-status");
+        if (statusEl) {
+          statusEl.textContent = "Working";
+          statusEl.className = "settings-status status-ok";
+        }
+      }
+    })
+    .catch((err) => {
+      showSettingsMessage(msgEl, "Test failed: " + err.message, "error");
+    })
+    .finally(() => {
+      testBtn.disabled = false;
+      testBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Test Email';
+    });
+}
+
+function showSettingsMessage(el, message, type) {
+  el.style.display = "block";
+  el.textContent = message;
+  el.className = "settings-message settings-msg-" + type;
+  setTimeout(() => {
+    el.style.display = "none";
+  }, 5000);
+}
+
 
 // Utility Functions
 function loadContent(contentHtml) {
