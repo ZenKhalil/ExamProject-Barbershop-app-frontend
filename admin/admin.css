@@ -1076,6 +1076,157 @@
 
 
 /* ============================================================
+   MANAGE SERVICES & BARBERS
+   ============================================================ */
+
+.manage-add-card {
+  background: var(--clr-card, #222222);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-md, 12px);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.manage-add-card h3 {
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--clr-text, #e8e4de);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.manage-add-card h3 i {
+  color: var(--clr-gold, #c9a84c);
+}
+
+.manage-form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.manage-form-row .form-group {
+  flex: 1;
+  margin-bottom: 12px;
+}
+
+.manage-form-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.manage-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--clr-text-dim, #9a9590);
+  cursor: pointer;
+}
+
+.manage-checkbox input[type="checkbox"] {
+  accent-color: var(--clr-gold, #c9a84c);
+  width: 16px;
+  height: 16px;
+}
+
+.manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--clr-card, #222222);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+}
+
+.manage-group-label {
+  padding: 10px 18px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--clr-text-dim, #9a9590);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(201,168,76,0.04);
+  border-bottom: 1px solid var(--clr-border, #2e2e2e);
+}
+
+.manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--clr-border, #2e2e2e);
+  transition: 0.2s ease;
+}
+
+.manage-item:last-child {
+  border-bottom: none;
+}
+
+.manage-item:hover {
+  background: rgba(201,168,76,0.03);
+}
+
+.manage-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.manage-item-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--clr-text, #e8e4de);
+}
+
+.manage-item-meta {
+  font-size: 0.75rem;
+  color: var(--clr-text-dim, #9a9590);
+}
+
+.manage-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.manage-edit-btn,
+.manage-delete-btn {
+  background: none;
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: var(--radius-sm, 6px);
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-size: 0.75rem;
+}
+
+.manage-edit-btn {
+  color: var(--clr-text-dim, #9a9590);
+}
+
+.manage-edit-btn:hover {
+  color: var(--clr-gold, #c9a84c);
+  border-color: var(--clr-gold, #c9a84c);
+}
+
+.manage-delete-btn {
+  color: var(--clr-text-dim, #9a9590);
+}
+
+.manage-delete-btn:hover {
+  color: var(--clr-danger, #c44e4e);
+  border-color: var(--clr-danger, #c44e4e);
+  background: rgba(196,78,78,0.08);
+}
+
+
+/* ============================================================
    SETTINGS PAGE
    ============================================================ */
 
@@ -1354,6 +1505,14 @@
     margin: auto 4%;
   }
 }
+
+  /* Manage services/barbers */
+  .manage-form-row { flex-direction: column; gap: 0; }
+  .manage-add-card { padding: 16px; }
+  .manage-form-bottom { flex-direction: column; align-items: stretch; }
+  .manage-form-bottom .btn { width: 100%; justify-content: center; }
+  .manage-item { padding: 12px 14px; }
+  .manage-item-name { font-size: 0.85rem; }
 
 /* Extra small screens */
 @media (max-width: 380px) {

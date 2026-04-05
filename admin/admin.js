@@ -5,6 +5,8 @@ export const adminFunctions = {
   "dashboard-section": loadAdminDashboard,
   "view-bookings-section": viewBookings,
   "edit-availabilities-section": displayEditAvailabilityForm,
+  "manage-services-section": displayManageServices,
+  "manage-barbers-section": displayManageBarbers,
   "settings-section": displaySettings,
 };
 
@@ -37,8 +39,10 @@ export function generateAdminNavBar() {
   navBar.innerHTML = `
         <ul>
             <li><a href="#dashboard-section" id="dashboard-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-            <li><a href="#view-bookings-section" id="view-bookings-link"><i class="fas fa-calendar-check"></i> View Bookings</a></li>
-            <li><a href="#edit-availabilities-section" id="edit-availabilities-link"><i class="fas fa-edit"></i> Edit Availabilities</a></li>
+            <li><a href="#view-bookings-section" id="view-bookings-link"><i class="fas fa-calendar-check"></i> Bookings</a></li>
+            <li><a href="#manage-services-section" id="manage-services-link"><i class="fas fa-cut"></i> Services</a></li>
+            <li><a href="#manage-barbers-section" id="manage-barbers-link"><i class="fas fa-user-tie"></i> Barbers</a></li>
+            <li><a href="#edit-availabilities-section" id="edit-availabilities-link"><i class="fas fa-clock"></i> Schedule</a></li>
             <li><a href="#settings-section" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
         </ul>
     `;
@@ -63,8 +67,10 @@ function updateOffScreenMenuToAdmin() {
 
   offScreenMenu.innerHTML = `
         <li><a href="#dashboard-section">Dashboard</a></li>
-        <li><a href="#view-bookings-section">View Bookings</a></li>
-        <li><a href="#edit-availabilities-section">Edit Availabilities</a></li>
+        <li><a href="#view-bookings-section">Bookings</a></li>
+        <li><a href="#manage-services-section">Services</a></li>
+        <li><a href="#manage-barbers-section">Barbers</a></li>
+        <li><a href="#edit-availabilities-section">Schedule</a></li>
         <li><a href="#settings-section">Settings</a></li>
     `;
 }
@@ -245,6 +251,22 @@ export function setupAdminNavBarListeners() {
     settingsLink.addEventListener("click", (e) => {
       e.preventDefault();
       displaySettings();
+    });
+  }
+
+  const manageServicesLink = document.getElementById("manage-services-link");
+  if (manageServicesLink) {
+    manageServicesLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      displayManageServices();
+    });
+  }
+
+  const manageBarbersLink = document.getElementById("manage-barbers-link");
+  if (manageBarbersLink) {
+    manageBarbersLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      displayManageBarbers();
     });
   }
 }
@@ -1436,6 +1458,301 @@ function showSettingsMessage(el, message, type) {
   setTimeout(() => {
     el.style.display = "none";
   }, 5000);
+}
+
+
+// ============================================================
+// MANAGE SERVICES
+// ============================================================
+
+const API_BASE = "https://salonsindbad-api.duckdns.org";
+
+export function displayManageServices() {
+  const mainContent = document.getElementById("main-content");
+  mainContent.innerHTML = `
+    <div class="admin-page">
+      <div class="admin-page-header">
+        <h2><i class="fas fa-cut"></i> Manage Services</h2>
+      </div>
+
+      <div class="manage-add-card">
+        <h3><i class="fas fa-plus-circle"></i> Add New Service</h3>
+        <div class="manage-add-form">
+          <div class="manage-form-row">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="new-service-name" class="form-control" placeholder="e.g. Beard Trim">
+            </div>
+            <div class="form-group">
+              <label>Price (kr)</label>
+              <input type="number" id="new-service-price" class="form-control" placeholder="100" min="0">
+            </div>
+            <div class="form-group">
+              <label>Duration (min)</label>
+              <input type="number" id="new-service-duration" class="form-control" placeholder="30" min="5" step="5">
+            </div>
+          </div>
+          <div class="manage-form-bottom">
+            <label class="manage-checkbox">
+              <input type="checkbox" id="new-service-main"> Main service
+            </label>
+            <button class="btn" id="add-service-btn"><i class="fas fa-plus"></i> Add Service</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="manage-list" id="services-list">
+        <div class="avail-loading"><i class="fas fa-spinner fa-spin"></i></div>
+      </div>
+    </div>
+  `;
+
+  loadServicesList();
+
+  document.getElementById("add-service-btn").addEventListener("click", function() {
+    var name = document.getElementById("new-service-name").value.trim();
+    var price = parseFloat(document.getElementById("new-service-price").value);
+    var duration = parseInt(document.getElementById("new-service-duration").value) || 30;
+    var isMain = document.getElementById("new-service-main").checked;
+
+    if (!name) { alert("Please enter a service name"); return; }
+    if (isNaN(price) || price < 0) { alert("Please enter a valid price"); return; }
+
+    var token = localStorage.getItem("adminToken");
+    fetch(API_BASE + "/api/services", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ service_name: name, price: price, duration: duration, is_main: isMain }),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) { alert(data.error); return; }
+        document.getElementById("new-service-name").value = "";
+        document.getElementById("new-service-price").value = "";
+        document.getElementById("new-service-duration").value = "";
+        document.getElementById("new-service-main").checked = false;
+        loadServicesList();
+      })
+      .catch(function(err) { alert("Failed to add service"); console.error(err); });
+  });
+}
+
+function loadServicesList() {
+  var container = document.getElementById("services-list");
+  if (!container) return;
+
+  var token = localStorage.getItem("adminToken");
+  fetch(API_BASE + "/api/services")
+    .then(function(r) { return r.json(); })
+    .then(function(services) {
+      if (!Array.isArray(services) || services.length === 0) {
+        container.innerHTML = '<div class="dash-empty"><i class="fas fa-cut"></i> No services yet</div>';
+        return;
+      }
+
+      var mainServices = services.filter(function(s) { return s.is_main === 1; });
+      var extraServices = services.filter(function(s) { return s.is_main !== 1; });
+
+      var html = "";
+      if (mainServices.length > 0) {
+        html += '<div class="manage-group-label">Main Services</div>';
+        html += mainServices.map(function(s) { return renderServiceItem(s); }).join("");
+      }
+      if (extraServices.length > 0) {
+        html += '<div class="manage-group-label">Extra Services</div>';
+        html += extraServices.map(function(s) { return renderServiceItem(s); }).join("");
+      }
+      container.innerHTML = html;
+
+      // Attach edit/delete handlers
+      container.querySelectorAll(".manage-edit-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() { editService(btn.dataset.id); });
+      });
+      container.querySelectorAll(".manage-delete-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() { deleteService(btn.dataset.id); });
+      });
+    })
+    .catch(function(err) { console.error("Error loading services:", err); });
+}
+
+function renderServiceItem(s) {
+  return '<div class="manage-item">' +
+    '<div class="manage-item-info">' +
+      '<span class="manage-item-name">' + s.service_name + '</span>' +
+      '<span class="manage-item-meta">' + s.price + ' kr · ' + (s.duration || 30) + ' min' + (s.is_main ? ' · Main' : '') + '</span>' +
+    '</div>' +
+    '<div class="manage-item-actions">' +
+      '<button class="manage-edit-btn" data-id="' + s.service_id + '" title="Edit"><i class="fas fa-pen"></i></button>' +
+      '<button class="manage-delete-btn" data-id="' + s.service_id + '" title="Delete"><i class="fas fa-trash-alt"></i></button>' +
+    '</div>' +
+  '</div>';
+}
+
+function editService(serviceId) {
+  var token = localStorage.getItem("adminToken");
+  // Get current values
+  fetch(API_BASE + "/api/services")
+    .then(function(r) { return r.json(); })
+    .then(function(services) {
+      var service = services.find(function(s) { return s.service_id == serviceId; });
+      if (!service) { alert("Service not found"); return; }
+
+      var newName = prompt("Service name:", service.service_name);
+      if (newName === null) return;
+      var newPrice = prompt("Price (kr):", service.price);
+      if (newPrice === null) return;
+      var newDuration = prompt("Duration (min):", service.duration || 30);
+      if (newDuration === null) return;
+      var newIsMain = confirm("Is this a main service?");
+
+      fetch(API_BASE + "/api/services/" + serviceId, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify({
+          service_name: newName, price: parseFloat(newPrice),
+          duration: parseInt(newDuration), is_main: newIsMain,
+        }),
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.error) { alert(data.error); return; }
+          loadServicesList();
+        })
+        .catch(function(err) { alert("Failed to update service"); });
+    });
+}
+
+function deleteService(serviceId) {
+  if (!confirm("Are you sure you want to delete this service?")) return;
+  var token = localStorage.getItem("adminToken");
+  fetch(API_BASE + "/api/services/" + serviceId, {
+    method: "DELETE",
+    headers: { Authorization: "Bearer " + token },
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) { alert(data.error); return; }
+      loadServicesList();
+    })
+    .catch(function(err) { alert("Failed to delete service"); });
+}
+
+
+// ============================================================
+// MANAGE BARBERS
+// ============================================================
+
+export function displayManageBarbers() {
+  const mainContent = document.getElementById("main-content");
+  mainContent.innerHTML = `
+    <div class="admin-page">
+      <div class="admin-page-header">
+        <h2><i class="fas fa-user-tie"></i> Manage Barbers</h2>
+      </div>
+
+      <div class="manage-add-card">
+        <h3><i class="fas fa-plus-circle"></i> Add New Barber</h3>
+        <div class="manage-add-form">
+          <div class="manage-form-row">
+            <div class="form-group" style="flex:1;">
+              <label>Name</label>
+              <input type="text" id="new-barber-name" class="form-control" placeholder="e.g. Ahmed">
+            </div>
+          </div>
+          <button class="btn" id="add-barber-btn"><i class="fas fa-plus"></i> Add Barber</button>
+        </div>
+      </div>
+
+      <div class="manage-list" id="barbers-list">
+        <div class="avail-loading"><i class="fas fa-spinner fa-spin"></i></div>
+      </div>
+    </div>
+  `;
+
+  loadBarbersList();
+
+  document.getElementById("add-barber-btn").addEventListener("click", function() {
+    var name = document.getElementById("new-barber-name").value.trim();
+    if (!name) { alert("Please enter a barber name"); return; }
+
+    var token = localStorage.getItem("adminToken");
+    fetch(API_BASE + "/api/barbers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ name: name }),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) { alert(data.error); return; }
+        document.getElementById("new-barber-name").value = "";
+        loadBarbersList();
+      })
+      .catch(function(err) { alert("Failed to add barber"); console.error(err); });
+  });
+}
+
+function loadBarbersList() {
+  var container = document.getElementById("barbers-list");
+  if (!container) return;
+
+  fetch(API_BASE + "/api/barbers")
+    .then(function(r) { return r.json(); })
+    .then(function(barbers) {
+      if (!Array.isArray(barbers) || barbers.length === 0) {
+        container.innerHTML = '<div class="dash-empty"><i class="fas fa-user-tie"></i> No barbers yet</div>';
+        return;
+      }
+
+      container.innerHTML = barbers.map(function(b) {
+        return '<div class="manage-item">' +
+          '<div class="manage-item-info">' +
+            '<span class="manage-item-name"><i class="fas fa-user-tie" style="color:var(--clr-gold);margin-right:8px;font-size:0.85rem;"></i>' + b.name + '</span>' +
+            '<span class="manage-item-meta">ID: ' + b.barber_id + '</span>' +
+          '</div>' +
+          '<div class="manage-item-actions">' +
+            '<button class="manage-edit-btn" data-id="' + b.barber_id + '" data-name="' + b.name + '" title="Edit"><i class="fas fa-pen"></i></button>' +
+            '<button class="manage-delete-btn" data-id="' + b.barber_id + '" title="Delete"><i class="fas fa-trash-alt"></i></button>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+
+      container.querySelectorAll(".manage-edit-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          var newName = prompt("New name for barber:", btn.dataset.name);
+          if (newName === null || !newName.trim()) return;
+          var token = localStorage.getItem("adminToken");
+          fetch(API_BASE + "/api/barbers/" + btn.dataset.id, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+            body: JSON.stringify({ name: newName.trim() }),
+          })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (data.error) { alert(data.error); return; }
+              loadBarbersList();
+            })
+            .catch(function(err) { alert("Failed to update barber"); });
+        });
+      });
+
+      container.querySelectorAll(".manage-delete-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          if (!confirm("Delete this barber? This will also remove their availability data.")) return;
+          var token = localStorage.getItem("adminToken");
+          fetch(API_BASE + "/api/barbers/" + btn.dataset.id, {
+            method: "DELETE",
+            headers: { Authorization: "Bearer " + token },
+          })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (data.error) { alert(data.error); return; }
+              loadBarbersList();
+            })
+            .catch(function(err) { alert("Failed to delete barber"); });
+        });
+      });
+    })
+    .catch(function(err) { console.error("Error loading barbers:", err); });
 }
 
 
