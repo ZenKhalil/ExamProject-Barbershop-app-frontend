@@ -120,7 +120,7 @@ function handleAdminLogin(event) {
   const adminLoginModal = document.getElementById("admin-login-modal"); // Get the login modal
 
   fetch(
-    "http://https://salonsindbad-api.duckdns.org/api/admin/login",
+    "https://salonsindbad-api.duckdns.org/api/admin/login",
     {
       // Adjust the URL as per your API endpoint
       method: "POST",
@@ -259,9 +259,24 @@ export function loadAdminDashboard() {
   const dashboardHtml = `
   <div class="dashboard-container">
     <h2>Admin Dashboard</h2>
-    <div class="dashboard-card" id="view-bookings-btn"><i class="fas fa-calendar-check"></i> View Bookings</div>
-    <div class="dashboard-card" id="edit-availabilities-btn"><i class="fas fa-edit"></i> Edit Availabilities</div>
-    <div class="dashboard-card" id="settings-btn"><i class="fas fa-cog"></i> Settings</div>
+    <p class="dashboard-subtitle">Manage your barbershop</p>
+    <div class="dashboard-grid">
+      <div class="dashboard-card" id="view-bookings-btn">
+        <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
+        <div class="card-label">View Bookings</div>
+        <div class="card-desc">See all appointments</div>
+      </div>
+      <div class="dashboard-card" id="edit-availabilities-btn">
+        <div class="card-icon"><i class="fas fa-clock"></i></div>
+        <div class="card-label">Availability</div>
+        <div class="card-desc">Manage barber schedules</div>
+      </div>
+      <div class="dashboard-card" id="settings-btn">
+        <div class="card-icon"><i class="fas fa-cog"></i></div>
+        <div class="card-label">Settings</div>
+        <div class="card-desc">Email &amp; configuration</div>
+      </div>
+    </div>
   </div>
 `;
 
@@ -285,23 +300,27 @@ export function viewBookings() {
   // Create the sorting and filtering UI
   const mainContent = document.getElementById("main-content");
   mainContent.innerHTML = `
-    <div class="sort-filter-container">
-      <div class="sort-filter-section">
-        <label for="sort-bookings">Sort by:</label>
-        <select id="sort-bookings">
-          <option value="dateAsc">Date Ascending</option>
-          <option value="dateDesc">Date Descending</option>
-        </select>
+    <div class="admin-page">
+      <div class="admin-page-header">
+        <h2><i class="fas fa-calendar-check"></i> Bookings</h2>
       </div>
-      <div class="sort-filter-section">
-        <label for="filter-barber">Filter by Barber:</label>
-        <select id="filter-barber">
-          <option value="all">All Barbers</option>
-          <!-- Barber options will be populated -->
-        </select>
+      <div class="sort-filter-container">
+        <div class="sort-filter-section">
+          <label for="sort-bookings"><i class="fas fa-sort"></i> Sort:</label>
+          <select id="sort-bookings" class="form-control">
+            <option value="dateAsc">Date Ascending</option>
+            <option value="dateDesc">Date Descending</option>
+          </select>
+        </div>
+        <div class="sort-filter-section">
+          <label for="filter-barber"><i class="fas fa-user-tie"></i> Barber:</label>
+          <select id="filter-barber" class="form-control">
+            <option value="all">All Barbers</option>
+          </select>
+        </div>
       </div>
+      <ul id="bookings-list" class="booking-list"></ul>
     </div>
-    <ul id="bookings-list" class="booking-list"></ul>
   `;
 
   // Populate the filter dropdown with barbers
@@ -322,7 +341,7 @@ window.viewBookings = viewBookings;
 
 function fetchBookingsAndDisplay() {
   fetch(
-    "http://https://salonsindbad-api.duckdns.org/api/bookings",
+    "https://salonsindbad-api.duckdns.org/api/bookings",
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -369,14 +388,20 @@ function displayBookings(bookings) {
     const listItem = document.createElement("li");
     listItem.className = "booking-list-item";
     listItem.innerHTML = `
-      <div class="booking-detail"><strong>Customer Name:</strong> ${booking.customer_name}</div>
-      <div class="booking-detail"><strong>Email:</strong> ${booking.customer_email}</div>
-      <div class="booking-detail"><strong>Phone:</strong> ${booking.customer_phone}</div>
-      <div class="booking-detail"><strong>Preferred Haircut:</strong> ${booking.preferred_haircut}</div>
-      <div class="booking-detail"><strong>Date:</strong> ${formattedDate}</div>
-      <div class="booking-detail"><strong>Time:</strong> ${booking.booking_time}</div>
-      <div class="booking-detail"><strong>Barber:</strong> ${barberName}</div>
-      <button class="delete-booking-button" data-booking-id="${booking.booking_id}">Delete Booking</button>
+      <div class="booking-card-header">
+        <span class="booking-customer"><i class="fas fa-user"></i> ${booking.customer_name}</span>
+        <span class="booking-barber-tag">${barberName}</span>
+      </div>
+      <div class="booking-card-body">
+        <div class="booking-detail"><i class="fas fa-calendar-day"></i> ${formattedDate}</div>
+        <div class="booking-detail"><i class="fas fa-clock"></i> ${booking.booking_time}</div>
+        <div class="booking-detail"><i class="fas fa-envelope"></i> ${booking.customer_email}</div>
+        <div class="booking-detail"><i class="fas fa-phone"></i> ${booking.customer_phone || 'N/A'}</div>
+        ${booking.preferred_haircut ? '<div class="booking-detail"><i class="fas fa-cut"></i> ' + booking.preferred_haircut + '</div>' : ''}
+      </div>
+      <button class="delete-booking-button" data-booking-id="${booking.booking_id}">
+        <i class="fas fa-trash-alt"></i> Delete
+      </button>
     `;
     bookingsList.appendChild(listItem);
   });
@@ -395,7 +420,7 @@ function displayBookings(bookings) {
 
 function deleteBooking(bookingId) {
   fetch(
-    `http://https://salonsindbad-api.duckdns.org/api/bookings/delete/${bookingId}`,
+    `https://salonsindbad-api.duckdns.org/api/bookings/delete/${bookingId}`,
     {
       method: "DELETE",
       headers: {
@@ -423,7 +448,7 @@ function deleteBooking(bookingId) {
 
 // Populate filter dropdown with barber options
 function populateFilterBarbers() {
-  fetch("http://https://salonsindbad-api.duckdns.org/api/barbers", {
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
@@ -456,7 +481,7 @@ function formatDate(isoDate) {
 }
 
 function fetchAndDisplayBarberAvailabilities() {
-  fetch("http://https://salonsindbad-api.duckdns.org/api/barbers")
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers")
     .then((response) => response.json())
     .then((barbers) => {
       const availabilitiesSection = document.createElement("section");
@@ -466,7 +491,7 @@ function fetchAndDisplayBarberAvailabilities() {
         const barberDiv = document.createElement("div");
         barberDiv.innerHTML = `<h3>Barber ${barber.id}</h3>`;
         fetch(
-          `http://https://salonsindbad-api.duckdns.org/api/barbers/${barber.id}/availability`
+          `https://salonsindbad-api.duckdns.org/api/barbers/${barber.id}/availability`
         )
           .then((response) => response.json())
           .then((availabilities) => {
@@ -494,35 +519,39 @@ function fetchAndDisplayBarberAvailabilities() {
 
 export function displayEditAvailabilityForm() {
   const formHtml = `
-    <h3>Barber Schedule Management</h3>
-    <form id="edit-availability-form" class="availability-form">
-      <!-- Select Barber Dropdown -->
-      <div class="form-group">
-        <label for="barber-select">Barber:</label>
-        <select id="barber-select" class="barber-select form-control"></select>
+    <div class="admin-page">
+      <div class="admin-page-header">
+        <h2><i class="fas fa-clock"></i> Barber Schedule</h2>
       </div>
-      
-      <!-- Add Unavailability Section -->
-      <div class="form-group">
-        <label for="unavailable-start-date">Start of Unavailability:</label>
-        <input type="date" id="unavailable-start-date" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="unavailable-end-date">End of Unavailability:</label>
-        <input type="date" id="unavailable-end-date" class="form-control">
-      </div>
-      <div class="form-actions">
-        <button type="button" id="add-unavailability-btn" class="btn">Mark as Unavailable</button>
-        <button type="button" id="show-change-dates-modal" class="btn">Change Dates</button>
-        <button type="button" id="show-remove-unavailability-modal" class="btn">Remove Unavailability</button>
-      </div>
-    </form>
 
-    <!-- Hidden Inputs for Existing Unavailability -->
-      <input type="hidden" id="old-start-date" value="">
-      <input type="hidden" id="old-end-date" value="">
+      <div class="availability-form">
+        <div class="form-group">
+          <label for="barber-select"><i class="fas fa-user-tie"></i> Barber</label>
+          <select id="barber-select" class="barber-select form-control"></select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="unavailable-start-date"><i class="fas fa-calendar"></i> Start Date</label>
+            <input type="date" id="unavailable-start-date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="unavailable-end-date"><i class="fas fa-calendar"></i> End Date</label>
+            <input type="date" id="unavailable-end-date" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="add-unavailability-btn" class="btn"><i class="fas fa-ban"></i> Mark Unavailable</button>
+          <button type="button" id="show-change-dates-modal" class="btn btn-secondary"><i class="fas fa-exchange-alt"></i> Change Dates</button>
+          <button type="button" id="show-remove-unavailability-modal" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Remove</button>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="old-start-date" value="">
+    <input type="hidden" id="old-end-date" value="">
     
-    <!-- Modal for Changing Dates -->
     <div id="change-dates-modal" class="modal hidden">
       <div class="modal-content">
         <span class="close-modal">&times;</span>
@@ -540,7 +569,6 @@ export function displayEditAvailabilityForm() {
       </div>
     </div>
     
-    <!-- Modal for Removing Unavailability -->
     <div id="remove-unavailability-modal" class="modal hidden">
       <div class="modal-content">
         <span class="close-modal">&times;</span>
@@ -608,7 +636,7 @@ function createBarberAvailability() {
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate;
   fetch(
-    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "POST", // or "POST" if you're creating new availability
       headers: {
@@ -639,7 +667,7 @@ function createBarberAvailability() {
 
 function fetchCurrentUnavailabilities(barberId) {
   fetch(
-    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -703,7 +731,7 @@ function updateBarberAvailability() {
   console.log(`New Start Date: ${newStartDate}, New End Date: ${newEndDate}`);
 
   fetch(
-    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "PUT",
       headers: {
@@ -742,7 +770,7 @@ function deleteBarberAvailability() {
   const endDate =
     document.getElementById("unavailable-end-date").value || startDate; // Use single date if end date is not provided
   fetch(
-    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "DELETE",
       headers: {
@@ -770,7 +798,7 @@ function deleteBarberAvailability() {
 
 function fetchCurrentUnavailabilitiesForRemoval(barberId) {
   fetch(
-    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -877,7 +905,7 @@ function handleRemoveUnavailability(event) {
   }
 
   fetch(
-    `http://https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
+    `https://salonsindbad-api.duckdns.org/api/barbers/${barberId}/unavailable-dates`,
     {
       method: "DELETE",
       headers: {
@@ -907,7 +935,7 @@ function handleRemoveUnavailability(event) {
 
 // Populate barbers from the API
 function populateBarbers() {
-  fetch("http://https://salonsindbad-api.duckdns.org/api/barbers", {
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
     },
