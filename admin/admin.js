@@ -253,28 +253,48 @@ export function setupAdminNavBarListeners() {
 
 export function loadAdminDashboard() {
   console.log("loadAdminDashboard() called");
-  // Call the function to generate the admin navigation bar
   generateAdminNavBar();
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 
   const dashboardHtml = `
   <div class="dashboard-container">
-    <h2>Admin Dashboard</h2>
-    <p class="dashboard-subtitle">Manage your barbershop</p>
-    <div class="dashboard-grid">
-      <div class="dashboard-card" id="view-bookings-btn">
-        <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
-        <div class="card-label">View Bookings</div>
-        <div class="card-desc">See all appointments</div>
+    <div class="dash-welcome">
+      <h2>Welcome back</h2>
+      <p class="dash-date"><i class="fas fa-calendar-day"></i> ${dateStr}</p>
+    </div>
+
+    <div class="dash-stats" id="dash-stats">
+      <div class="stat-card active" data-view="today">
+        <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-today">—</span>
+          <span class="stat-label">Today</span>
+        </div>
       </div>
-      <div class="dashboard-card" id="edit-availabilities-btn">
-        <div class="card-icon"><i class="fas fa-clock"></i></div>
-        <div class="card-label">Availability</div>
-        <div class="card-desc">Manage barber schedules</div>
+      <div class="stat-card" data-view="upcoming">
+        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-upcoming">—</span>
+          <span class="stat-label">Upcoming</span>
+        </div>
       </div>
-      <div class="dashboard-card" id="settings-btn">
-        <div class="card-icon"><i class="fas fa-cog"></i></div>
-        <div class="card-label">Settings</div>
-        <div class="card-desc">Email &amp; configuration</div>
+      <div class="stat-card" data-view="daysoff">
+        <div class="stat-icon"><i class="fas fa-calendar-times"></i></div>
+        <div class="stat-info">
+          <span class="stat-value" id="stat-daysoff">—</span>
+          <span class="stat-label">Days Off</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section-header" id="dash-section-title">
+        <h3><i class="fas fa-clock"></i> Today's Appointments</h3>
+      </div>
+      <div id="dash-content" class="dash-content">
+        <div class="avail-loading"><i class="fas fa-spinner fa-spin"></i></div>
       </div>
     </div>
   </div>
@@ -282,15 +302,183 @@ export function loadAdminDashboard() {
 
   const mainContent = document.getElementById("main-content");
   mainContent.innerHTML = dashboardHtml;
-  document
-    .getElementById("view-bookings-btn")
-    .addEventListener("click", viewBookings);
-  document
-    .getElementById("edit-availabilities-btn")
-    .addEventListener("click", displayEditAvailabilityForm);
-  document
-    .getElementById("settings-btn")
-    .addEventListener("click", displaySettings);
+
+  // Data storage
+  let allBookings = [];
+  let allDaysOff = {};
+  const token = localStorage.getItem("adminToken");
+  const todayStr = today.toISOString().split("T")[0];
+
+  // Make stat cards clickable
+  document.querySelectorAll(".stat-card").forEach(function(card) {
+    card.addEventListener("click", function() {
+      document.querySelectorAll(".stat-card").forEach(function(c) { c.classList.remove("active"); });
+      card.classList.add("active");
+      var view = card.dataset.view;
+      renderDashView(view);
+    });
+  });
+
+  function renderDashView(view) {
+    var titleEl = document.getElementById("dash-section-title");
+    var content = document.getElementById("dash-content");
+    if (!titleEl || !content) return;
+
+    if (view === "today") {
+      titleEl.innerHTML = '<h3><i class="fas fa-clock"></i> Today\'s Appointments</h3>';
+      var todayBookings = allBookings.filter(function(b) {
+        return b.booking_date && b.booking_date.substring(0, 10) === todayStr;
+      }).sort(function(a, b) {
+        return (a.booking_time || "").localeCompare(b.booking_time || "");
+      });
+
+      if (todayBookings.length === 0) {
+        content.innerHTML = '<div class="dash-empty"><i class="fas fa-couch"></i> No appointments today</div>';
+        return;
+      }
+      content.innerHTML = todayBookings.map(function(b) {
+        var barberName = barbersData[b.barber_id] || "—";
+        return '<div class="dash-booking-row">' +
+          '<span class="dash-time">' + (b.booking_time || "—") + '</span>' +
+          '<span class="dash-customer">' + b.customer_name + '</span>' +
+          '<span class="dash-barber-tag">' + barberName + '</span>' +
+          '</div>';
+      }).join("");
+
+    } else if (view === "upcoming") {
+      titleEl.innerHTML = '<h3><i class="fas fa-calendar-check"></i> Upcoming Appointments</h3>';
+      var upcoming = allBookings.filter(function(b) {
+        return b.booking_date && b.booking_date.substring(0, 10) >= todayStr;
+      }).sort(function(a, b) {
+        var dateComp = (a.booking_date || "").localeCompare(b.booking_date || "");
+        if (dateComp !== 0) return dateComp;
+        return (a.booking_time || "").localeCompare(b.booking_time || "");
+      });
+
+      if (upcoming.length === 0) {
+        content.innerHTML = '<div class="dash-empty"><i class="fas fa-calendar"></i> No upcoming appointments</div>';
+        return;
+      }
+
+      var grouped = {};
+      upcoming.forEach(function(b) {
+        var dateKey = b.booking_date.substring(0, 10);
+        if (!grouped[dateKey]) grouped[dateKey] = [];
+        grouped[dateKey].push(b);
+      });
+
+      var html = "";
+      Object.keys(grouped).sort().forEach(function(dateKey) {
+        var d = new Date(dateKey + "T00:00:00");
+        var label = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+        var isToday = dateKey === todayStr;
+        html += '<div class="dash-date-group">';
+        html += '<div class="dash-date-label">' + label + (isToday ? ' <span class="today-badge">Today</span>' : '') + '</div>';
+        grouped[dateKey].forEach(function(b) {
+          var barberName = barbersData[b.barber_id] || "—";
+          html += '<div class="dash-booking-row">' +
+            '<span class="dash-time">' + (b.booking_time || "—") + '</span>' +
+            '<span class="dash-customer">' + b.customer_name + '</span>' +
+            '<span class="dash-barber-tag">' + barberName + '</span>' +
+            '</div>';
+        });
+        html += '</div>';
+      });
+      content.innerHTML = html;
+
+    } else if (view === "daysoff") {
+      titleEl.innerHTML = '<h3><i class="fas fa-calendar-times"></i> Barber Days Off</h3>';
+
+      var barberIds = Object.keys(allDaysOff);
+      if (barberIds.length === 0) {
+        content.innerHTML = '<div class="dash-empty"><i class="fas fa-check-circle"></i> No days off set</div>';
+        return;
+      }
+
+      var html = "";
+      barberIds.forEach(function(bid) {
+        var name = barbersData[bid] || "Barber " + bid;
+        var dates = allDaysOff[bid] || [];
+        html += '<div class="dash-daysoff-barber">';
+        html += '<div class="dash-daysoff-name"><i class="fas fa-user-tie"></i> ' + name + ' <span class="avail-count">' + dates.length + '</span></div>';
+        if (dates.length === 0) {
+          html += '<div class="dash-daysoff-none">No days off</div>';
+        } else {
+          html += '<div class="dash-daysoff-tags">';
+          dates.sort().forEach(function(date) {
+            var d = new Date(date + "T00:00:00");
+            var dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+            var monthDay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            html += '<span class="dash-daysoff-tag"><span class="tag-day">' + dayName + '</span> ' + monthDay + '</span>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+      content.innerHTML = html;
+    }
+  }
+
+  // Fetch bookings
+  fetch("https://salonsindbad-api.duckdns.org/api/bookings", {
+    headers: { Authorization: "Bearer " + token },
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(bookings) {
+      if (!Array.isArray(bookings)) { bookings = []; }
+      allBookings = bookings;
+
+      var todayBookings = bookings.filter(function(b) {
+        return b.booking_date && b.booking_date.substring(0, 10) === todayStr;
+      });
+      var upcomingBookings = bookings.filter(function(b) {
+        return b.booking_date && b.booking_date.substring(0, 10) >= todayStr;
+      });
+
+      var statToday = document.getElementById("stat-today");
+      var statUpcoming = document.getElementById("stat-upcoming");
+      if (statToday) statToday.textContent = todayBookings.length;
+      if (statUpcoming) statUpcoming.textContent = upcomingBookings.length;
+
+      // Render default view (today)
+      renderDashView("today");
+    })
+    .catch(function(err) {
+      console.error("Error loading dashboard:", err);
+      var content = document.getElementById("dash-content");
+      if (content) content.innerHTML = '<div class="dash-empty">Could not load bookings</div>';
+    });
+
+  // Fetch days off for all barbers
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
+    headers: { Authorization: "Bearer " + token },
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(barbers) {
+      if (!Array.isArray(barbers)) return;
+      var totalDaysOff = 0;
+      var pending = barbers.length;
+
+      barbers.forEach(function(barber) {
+        fetch("https://salonsindbad-api.duckdns.org/api/barbers/" + barber.barber_id + "/unavailable-dates", {
+          headers: { Authorization: "Bearer " + token },
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(dates) {
+            if (Array.isArray(dates)) {
+              totalDaysOff += dates.length;
+              allDaysOff[barber.barber_id] = dates;
+            }
+            pending--;
+            if (pending === 0) {
+              var statDaysOff = document.getElementById("stat-daysoff");
+              if (statDaysOff) statDaysOff.textContent = totalDaysOff;
+            }
+          })
+          .catch(function() { pending--; });
+      });
+    })
+    .catch(function() {});
 }
 //window.loadAdminDashboard = loadAdminDashboard;
 
@@ -517,34 +705,45 @@ function fetchAndDisplayBarberAvailabilities() {
     .catch((error) => console.error("Error fetching barbers:", error));
 }
 
+
 export function displayEditAvailabilityForm() {
   const formHtml = `
-    <div class="admin-page">
+    <div class="admin-page avail-page">
       <div class="admin-page-header">
         <h2><i class="fas fa-clock"></i> Barber Schedule</h2>
       </div>
 
-      <div class="availability-form">
-        <div class="form-group">
-          <label for="barber-select"><i class="fas fa-user-tie"></i> Barber</label>
-          <select id="barber-select" class="barber-select form-control"></select>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label for="unavailable-start-date"><i class="fas fa-calendar"></i> Start Date</label>
-            <input type="date" id="unavailable-start-date" class="form-control">
+      <div class="avail-barber-select">
+        <label><i class="fas fa-user-tie"></i> Barber</label>
+        <select id="barber-select" class="barber-select form-control"></select>
+      </div>
+
+      <div class="avail-grid">
+        <div class="avail-card">
+          <div class="avail-card-header">
+            <h3><i class="fas fa-calendar-times"></i> Current Days Off</h3>
+            <span class="avail-count" id="avail-count">0 days</span>
           </div>
-          <div class="form-group">
-            <label for="unavailable-end-date"><i class="fas fa-calendar"></i> End Date</label>
-            <input type="date" id="unavailable-end-date" class="form-control">
+          <div class="avail-dates-list" id="current-dates-list">
+            <div class="avail-empty"><i class="fas fa-check-circle"></i> No days off scheduled</div>
           </div>
         </div>
 
-        <div class="form-actions">
-          <button type="button" id="add-unavailability-btn" class="btn"><i class="fas fa-ban"></i> Mark Unavailable</button>
-          <button type="button" id="show-change-dates-modal" class="btn btn-secondary"><i class="fas fa-exchange-alt"></i> Change Dates</button>
-          <button type="button" id="show-remove-unavailability-modal" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Remove</button>
+        <div class="avail-card">
+          <div class="avail-card-header">
+            <h3><i class="fas fa-plus-circle"></i> Add Days Off</h3>
+          </div>
+          <div class="avail-add-form">
+            <div class="form-group">
+              <label for="unavailable-start-date">From</label>
+              <input type="date" id="unavailable-start-date" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="unavailable-end-date">To</label>
+              <input type="date" id="unavailable-end-date" class="form-control">
+            </div>
+            <button type="button" id="add-unavailability-btn" class="btn btn-full"><i class="fas fa-plus"></i> Add Unavailability</button>
+          </div>
         </div>
       </div>
     </div>
@@ -555,17 +754,17 @@ export function displayEditAvailabilityForm() {
     <div id="change-dates-modal" class="modal hidden">
       <div class="modal-content">
         <span class="close-modal">&times;</span>
-        <h4>Select Unavailability to Change</h4>
+        <h4>Change Date</h4>
         <div id="current-unavailabilities-container"></div>
         <div class="form-group">
-          <label for="new-start-date">New Start Date:</label>
+          <label for="new-start-date">New Start Date</label>
           <input type="date" id="new-start-date" class="form-control">
         </div>
         <div class="form-group">
-          <label for="new-end-date">New End Date:</label>
+          <label for="new-end-date">New End Date</label>
           <input type="date" id="new-end-date" class="form-control">
         </div>
-        <button type="button" id="submit-change-dates" class="btn">Submit Changes</button>
+        <button type="button" id="submit-change-dates" class="btn btn-full">Update Date</button>
       </div>
     </div>
     
@@ -575,7 +774,7 @@ export function displayEditAvailabilityForm() {
         <h4>Remove Unavailability</h4>
         <form id="remove-unavailability-form">
           <div id="remove-unavailabilities-container"></div>
-          <button type="submit" class="btn">Confirm Removal</button>
+          <button type="submit" class="btn btn-full">Confirm Removal</button>
         </form>
       </div>
     </div>
@@ -585,48 +784,141 @@ export function displayEditAvailabilityForm() {
   mainContent.innerHTML = formHtml;
   populateBarbers();
 
+  const barberSelect = document.getElementById("barber-select");
+  barberSelect.addEventListener("change", () => {
+    loadCurrentDaysOff(barberSelect.value);
+  });
+
+  setTimeout(() => {
+    if (barberSelect.value) loadCurrentDaysOff(barberSelect.value);
+  }, 500);
+
   document
     .getElementById("add-unavailability-btn")
-    .addEventListener("click", createBarberAvailability);
-  document
-    .getElementById("show-change-dates-modal")
     .addEventListener("click", () => {
-      const barberId = document.getElementById("barber-select").value;
-      if (barberId) {
-        fetchCurrentUnavailabilities(barberId);
-        document
-          .getElementById("change-dates-modal")
-          .classList.remove("hidden");
-      } else {
-        alert("Please select a barber first.");
-      }
+      createBarberAvailability();
+      setTimeout(() => {
+        const barberId = document.getElementById("barber-select").value;
+        if (barberId) loadCurrentDaysOff(barberId);
+      }, 800);
     });
-  document
-    .getElementById("show-remove-unavailability-modal")
-    .addEventListener("click", () => {
-      const barberId = document.getElementById("barber-select").value;
-      if (barberId) {
-        fetchCurrentUnavailabilitiesForRemoval(barberId);
-        document
-          .getElementById("remove-unavailability-modal")
-          .classList.remove("hidden");
-      } else {
-        alert("Please select a barber first.");
-      }
-    });
+
   document
     .getElementById("submit-change-dates")
     .addEventListener("click", () => {
       updateBarberAvailability();
     });
 
-  // Add event listeners to close both modals
   const closeButtons = document.querySelectorAll(".close-modal");
   closeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       button.closest(".modal").classList.add("hidden");
     });
   });
+}
+
+function loadCurrentDaysOff(barberId) {
+  const container = document.getElementById("current-dates-list");
+  const countEl = document.getElementById("avail-count");
+  if (!container) return;
+
+  container.innerHTML = '<div class="avail-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers/" + barberId + "/unavailable-dates", {
+    headers: { Authorization: "Bearer " + localStorage.getItem("adminToken") },
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(dates) {
+      if (!Array.isArray(dates) || dates.length === 0) {
+        container.innerHTML = '<div class="avail-empty"><i class="fas fa-check-circle"></i> No days off scheduled</div>';
+        if (countEl) countEl.textContent = "0 days";
+        return;
+      }
+
+      if (countEl) countEl.textContent = dates.length + (dates.length === 1 ? " day" : " days");
+      dates.sort();
+
+      var tagsHtml = dates.map(function(date) {
+        var d = new Date(date + "T00:00:00");
+        var dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+        var monthDay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        return '<div class="avail-date-tag" data-date="' + date + '">' +
+          '<span class="tag-day">' + dayName + '</span>' +
+          '<span class="tag-date">' + monthDay + '</span>' +
+          '</div>';
+      }).join("");
+
+      container.innerHTML = tagsHtml +
+        '<div class="avail-bulk-actions" id="bulk-actions" style="display:none;">' +
+          '<button class="btn-bulk-remove" id="bulk-remove-btn"><i class="fas fa-trash-alt"></i> Remove <span id="bulk-count">0</span> selected</button>' +
+          '<button class="btn-deselect" id="deselect-btn">Deselect all</button>' +
+        '</div>';
+
+      // Click tags to toggle selection
+      container.querySelectorAll(".avail-date-tag").forEach(function(tag) {
+        tag.addEventListener("click", function() {
+          tag.classList.toggle("selected");
+          updateBulkActions();
+        });
+      });
+
+      // Bulk remove button
+      var bulkBtn = document.getElementById("bulk-remove-btn");
+      if (bulkBtn) {
+        bulkBtn.addEventListener("click", function() {
+          var selected = container.querySelectorAll(".avail-date-tag.selected");
+          var datesToRemove = Array.from(selected).map(function(t) { return t.dataset.date; });
+          if (datesToRemove.length === 0) return;
+          if (confirm("Remove " + datesToRemove.length + " date(s)?")) {
+            removeMultipleDates(barberId, datesToRemove);
+          }
+        });
+      }
+
+      // Deselect all button
+      var deselectBtn = document.getElementById("deselect-btn");
+      if (deselectBtn) {
+        deselectBtn.addEventListener("click", function() {
+          container.querySelectorAll(".avail-date-tag.selected").forEach(function(t) {
+            t.classList.remove("selected");
+          });
+          updateBulkActions();
+        });
+      }
+
+      function updateBulkActions() {
+        var selected = container.querySelectorAll(".avail-date-tag.selected");
+        var bulkActions = document.getElementById("bulk-actions");
+        var bulkCount = document.getElementById("bulk-count");
+        if (bulkActions) {
+          bulkActions.style.display = selected.length > 0 ? "flex" : "none";
+        }
+        if (bulkCount) {
+          bulkCount.textContent = selected.length;
+        }
+      }
+    })
+    .catch(function(err) {
+      console.error("Error loading days off:", err);
+      container.innerHTML = '<div class="avail-empty">Error loading dates</div>';
+    });
+}
+
+function removeMultipleDates(barberId, datesArray) {
+  fetch("https://salonsindbad-api.duckdns.org/api/barbers/" + barberId + "/unavailable-dates", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + localStorage.getItem("adminToken"),
+    },
+    body: JSON.stringify({ dates: datesArray }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function() { loadCurrentDaysOff(barberId); })
+    .catch(function(err) {
+      console.error("Error removing dates:", err);
+      alert("Failed to remove dates");
+    });
 }
 window.displayEditAvailabilityForm = displayEditAvailabilityForm;
 
