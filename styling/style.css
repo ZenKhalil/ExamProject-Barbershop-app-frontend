@@ -859,6 +859,7 @@ nav ul li button:hover {
 .date-card.selected {
   background: linear-gradient(var(--clr-gold), var(--clr-gold-dark));
   border-color: var(--clr-gold);
+  pointer-events: none;
 }
 
 .date-card.selected .date-card-day,
