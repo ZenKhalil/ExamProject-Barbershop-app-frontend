@@ -158,7 +158,25 @@ function handleAdminLogin(event) {
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("Login failed: Invalid credentials");
+      // Show inline error instead of alert
+      var errorEl = document.getElementById("login-error-msg");
+      if (!errorEl) {
+        errorEl = document.createElement("div");
+        errorEl.id = "login-error-msg";
+        errorEl.style.cssText = "color:#c44e4e;font-size:0.85rem;text-align:center;padding:8px 12px;margin-top:4px;background:rgba(196,78,78,0.1);border:1px solid rgba(196,78,78,0.25);border-radius:6px;";
+        var form = document.getElementById("admin-login-form");
+        if (form) form.appendChild(errorEl);
+      }
+      errorEl.textContent = "Invalid username or password";
+      errorEl.style.display = "block";
+      // Clear error when user starts typing
+      var inputs = document.querySelectorAll("#admin-login-form input");
+      inputs.forEach(function(inp) {
+        inp.addEventListener("input", function clearErr() {
+          if (errorEl) errorEl.style.display = "none";
+          inp.removeEventListener("input", clearErr);
+        });
+      });
     });
 }
 
@@ -1322,15 +1340,24 @@ export function displaySettings() {
         <div class="settings-form">
           <div class="form-group">
             <label for="settings-current-pw">Current Password</label>
-            <input type="password" id="settings-current-pw" class="form-control" placeholder="Enter current password">
+            <div class="pw-input-wrap">
+              <input type="password" id="settings-current-pw" class="form-control" placeholder="Enter current password">
+              <button type="button" class="pw-toggle" data-target="settings-current-pw"><i class="fas fa-eye"></i></button>
+            </div>
           </div>
           <div class="form-group">
             <label for="settings-new-pw">New Password</label>
-            <input type="password" id="settings-new-pw" class="form-control" placeholder="Enter new password">
+            <div class="pw-input-wrap">
+              <input type="password" id="settings-new-pw" class="form-control" placeholder="Enter new password">
+              <button type="button" class="pw-toggle" data-target="settings-new-pw"><i class="fas fa-eye"></i></button>
+            </div>
           </div>
           <div class="form-group">
             <label for="settings-confirm-pw">Confirm New Password</label>
-            <input type="password" id="settings-confirm-pw" class="form-control" placeholder="Repeat new password">
+            <div class="pw-input-wrap">
+              <input type="password" id="settings-confirm-pw" class="form-control" placeholder="Repeat new password">
+              <button type="button" class="pw-toggle" data-target="settings-confirm-pw"><i class="fas fa-eye"></i></button>
+            </div>
           </div>
           <div class="settings-actions">
             <button type="button" id="change-password-btn" class="btn"><i class="fas fa-lock"></i> Update Password</button>
@@ -1391,6 +1418,22 @@ export function displaySettings() {
   document.getElementById("save-email-settings").addEventListener("click", saveEmailSettings);
   document.getElementById("test-email-settings").addEventListener("click", testEmailSettings);
   document.getElementById("change-password-btn").addEventListener("click", changePassword);
+
+  // Password visibility toggles
+  document.querySelectorAll(".pw-toggle").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var input = document.getElementById(btn.dataset.target);
+      if (!input) return;
+      var icon = btn.querySelector("i");
+      if (input.type === "password") {
+        input.type = "text";
+        icon.className = "fas fa-eye-slash";
+      } else {
+        input.type = "password";
+        icon.className = "fas fa-eye";
+      }
+    });
+  });
 }
 
 function changePassword() {

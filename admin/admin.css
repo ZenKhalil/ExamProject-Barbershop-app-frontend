@@ -1227,6 +1227,39 @@
 
 
 /* ============================================================
+   PASSWORD TOGGLE
+   ============================================================ */
+
+.pw-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pw-input-wrap .form-control {
+  padding-right: 44px;
+}
+
+.pw-toggle {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--clr-text-dim, #9a9590);
+  cursor: pointer;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  transition: 0.3s ease;
+  opacity: 0.5;
+}
+
+.pw-toggle:hover {
+  color: var(--clr-gold, #c9a84c);
+  opacity: 1;
+}
+
+
+/* ============================================================
    EDIT MODAL — Reusable inline edit
    ============================================================ */
 
