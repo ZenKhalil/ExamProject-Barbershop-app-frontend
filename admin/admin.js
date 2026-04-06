@@ -1315,6 +1315,30 @@ export function displaySettings() {
     <div class="settings-container">
       <h2><i class="fas fa-cog"></i> Settings</h2>
 
+      <div class="settings-card" style="margin-bottom:20px;">
+        <div class="settings-card-header">
+          <h3><i class="fas fa-key"></i> Change Password</h3>
+        </div>
+        <div class="settings-form">
+          <div class="form-group">
+            <label for="settings-current-pw">Current Password</label>
+            <input type="password" id="settings-current-pw" class="form-control" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label for="settings-new-pw">New Password</label>
+            <input type="password" id="settings-new-pw" class="form-control" placeholder="Enter new password">
+          </div>
+          <div class="form-group">
+            <label for="settings-confirm-pw">Confirm New Password</label>
+            <input type="password" id="settings-confirm-pw" class="form-control" placeholder="Repeat new password">
+          </div>
+          <div class="settings-actions">
+            <button type="button" id="change-password-btn" class="btn"><i class="fas fa-lock"></i> Update Password</button>
+          </div>
+          <div id="password-message" class="settings-message" style="display:none;"></div>
+        </div>
+      </div>
+
       <div class="settings-card">
         <div class="settings-card-header">
           <h3><i class="fas fa-envelope"></i> Email Configuration</h3>
@@ -1366,6 +1390,70 @@ export function displaySettings() {
   // Attach event listeners
   document.getElementById("save-email-settings").addEventListener("click", saveEmailSettings);
   document.getElementById("test-email-settings").addEventListener("click", testEmailSettings);
+  document.getElementById("change-password-btn").addEventListener("click", changePassword);
+}
+
+function changePassword() {
+  var currentPw = document.getElementById("settings-current-pw").value;
+  var newPw = document.getElementById("settings-new-pw").value;
+  var confirmPw = document.getElementById("settings-confirm-pw").value;
+  var msgEl = document.getElementById("password-message");
+  var btn = document.getElementById("change-password-btn");
+
+  // Validate
+  if (!currentPw) {
+    showPasswordMsg("Please enter your current password", false);
+    return;
+  }
+  if (!newPw || newPw.length < 4) {
+    showPasswordMsg("New password must be at least 4 characters", false);
+    return;
+  }
+  if (newPw !== confirmPw) {
+    showPasswordMsg("New passwords do not match", false);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+  var token = localStorage.getItem("adminToken");
+  fetch(API_BASE + "/api/admin/change-password", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify({ current_password: currentPw, new_password: newPw }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-lock"></i> Update Password';
+
+      if (data.error) {
+        showPasswordMsg(data.error, false);
+      } else {
+        showPasswordMsg("Password updated successfully!", true);
+        document.getElementById("settings-current-pw").value = "";
+        document.getElementById("settings-new-pw").value = "";
+        document.getElementById("settings-confirm-pw").value = "";
+      }
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-lock"></i> Update Password';
+      showPasswordMsg("Failed to update password", false);
+      console.error(err);
+    });
+}
+
+function showPasswordMsg(text, isSuccess) {
+  var msgEl = document.getElementById("password-message");
+  if (!msgEl) return;
+  msgEl.style.display = "block";
+  msgEl.textContent = text;
+  msgEl.className = "settings-message " + (isSuccess ? "settings-msg-success" : "settings-msg-error");
 }
 
 function loadEmailSettings() {
