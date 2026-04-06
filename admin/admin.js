@@ -21,6 +21,7 @@ function setupAdminNavigation() {
         if (adminFunctions.hasOwnProperty(sectionId)) {
           event.preventDefault();
           console.log("Admin navigation to section:", sectionId);
+          sessionStorage.setItem("adminSection", sectionId);
           adminFunctions[sectionId]();
         }
       });
@@ -87,8 +88,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const adminToken = localStorage.getItem("adminToken");
 
   if (adminToken) {
-    // Admin is logged in, adjust UI accordingly
-    generateAdminNavBar();
+    // Admin is logged in — restore last section or go to dashboard
+    var savedSection = sessionStorage.getItem("adminSection");
+    if (savedSection && adminFunctions[savedSection]) {
+      adminFunctions[savedSection]();
+    } else {
+      loadAdminDashboard();
+    }
     adminLoginButton.textContent = "Logout";
     adminLoginButton.onclick = logoutAdmin;
   } else {
@@ -99,11 +105,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Check if the admin is already logged in
   checkAdminLoginStatus();
-
-  // Show the modal
-  adminLoginButton.addEventListener("click", function () {
-    adminLoginModal.style.display = "block";
-  });
 
   // Hide the modal
   closeButton.addEventListener("click", function () {
@@ -147,6 +148,7 @@ function handleAdminLogin(event) {
     })
     .then((data) => {
       localStorage.setItem("adminToken", data.token);
+      sessionStorage.setItem("adminSection", "dashboard-section");
       console.log("Logged in successfully");
       adminLoginModal.style.display = "none"; // Hide the modal
       displayLoginSuccessMessage(); // Display a success message
@@ -211,6 +213,7 @@ function logoutAdmin() {
 
   // Clear the saved section in sessionStorage
   sessionStorage.removeItem("currentSection");
+  sessionStorage.removeItem("adminSection");
 
   // Reload the page to trigger the `DOMContentLoaded` event in script.js
   window.location.reload();
@@ -444,45 +447,57 @@ export function loadAdminDashboard() {
     }
   }
 
-  // Fetch bookings
-  fetch("https://salonsindbad-api.duckdns.org/api/bookings", {
-    headers: { Authorization: "Bearer " + token },
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(bookings) {
-      if (!Array.isArray(bookings)) { bookings = []; }
-      allBookings = bookings;
-
-      var todayBookings = bookings.filter(function(b) {
-        return b.booking_date && b.booking_date.substring(0, 10) === todayStr;
-      });
-      var upcomingBookings = bookings.filter(function(b) {
-        return b.booking_date && b.booking_date.substring(0, 10) >= todayStr;
-      });
-
-      var statToday = document.getElementById("stat-today");
-      var statUpcoming = document.getElementById("stat-upcoming");
-      if (statToday) statToday.textContent = todayBookings.length;
-      if (statUpcoming) statUpcoming.textContent = upcomingBookings.length;
-
-      // Render default view (today)
-      renderDashView("today");
-    })
-    .catch(function(err) {
-      console.error("Error loading dashboard:", err);
-      var content = document.getElementById("dash-content");
-      if (content) content.innerHTML = '<div class="dash-empty">Could not load bookings</div>';
-    });
-
-  // Fetch days off for all barbers
+  // Fetch barbers first (populates barbersData), then bookings and days off
   fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
     headers: { Authorization: "Bearer " + token },
   })
     .then(function(r) { return r.json(); })
     .then(function(barbers) {
-      if (!Array.isArray(barbers)) return;
+      if (!Array.isArray(barbers)) barbers = [];
+
+      // Populate barbersData for name lookups
+      barbersData = barbers.reduce(function(acc, barber) {
+        acc[barber.barber_id] = barber.name;
+        return acc;
+      }, {});
+
+      // Now fetch bookings
+      fetch("https://salonsindbad-api.duckdns.org/api/bookings", {
+        headers: { Authorization: "Bearer " + token },
+      })
+        .then(function(r) { return r.json(); })
+        .then(function(bookings) {
+          if (!Array.isArray(bookings)) { bookings = []; }
+          allBookings = bookings;
+
+          var todayBookings = bookings.filter(function(b) {
+            return b.booking_date && b.booking_date.substring(0, 10) === todayStr;
+          });
+          var upcomingBookings = bookings.filter(function(b) {
+            return b.booking_date && b.booking_date.substring(0, 10) >= todayStr;
+          });
+
+          var statToday = document.getElementById("stat-today");
+          var statUpcoming = document.getElementById("stat-upcoming");
+          if (statToday) statToday.textContent = todayBookings.length;
+          if (statUpcoming) statUpcoming.textContent = upcomingBookings.length;
+
+          renderDashView("today");
+        })
+        .catch(function(err) {
+          console.error("Error loading dashboard:", err);
+          var content = document.getElementById("dash-content");
+          if (content) content.innerHTML = '<div class="dash-empty">Could not load bookings</div>';
+        });
+
+      // Fetch days off for all barbers
       var totalDaysOff = 0;
       var pending = barbers.length;
+
+      if (barbers.length === 0) {
+        var statDaysOff = document.getElementById("stat-daysoff");
+        if (statDaysOff) statDaysOff.textContent = 0;
+      }
 
       barbers.forEach(function(barber) {
         fetch("https://salonsindbad-api.duckdns.org/api/barbers/" + barber.barber_id + "/unavailable-dates", {
@@ -503,7 +518,10 @@ export function loadAdminDashboard() {
           .catch(function() { pending--; });
       });
     })
-    .catch(function() {});
+    .catch(function() {
+      var content = document.getElementById("dash-content");
+      if (content) content.innerHTML = '<div class="dash-empty">Could not load data</div>';
+    });
 }
 //window.loadAdminDashboard = loadAdminDashboard;
 
@@ -536,11 +554,10 @@ export function viewBookings() {
     </div>
   `;
 
-  // Populate the filter dropdown with barbers
-  populateFilterBarbers();
-
-  // Fetch and display bookings
-  fetchBookingsAndDisplay();
+  // Load barbers first, then display bookings
+  populateFilterBarbers(function() {
+    fetchBookingsAndDisplay();
+  });
 
   // Attach event listeners for sorting and filtering
   document
@@ -660,7 +677,7 @@ function deleteBooking(bookingId) {
 }
 
 // Populate filter dropdown with barber options
-function populateFilterBarbers() {
+function populateFilterBarbers(callback) {
   fetch("https://salonsindbad-api.duckdns.org/api/barbers", {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
@@ -668,19 +685,29 @@ function populateFilterBarbers() {
   })
     .then((response) => response.json())
     .then((barbers) => {
-      const barberFilterSelect = document.getElementById("filter-barber");
-      // Clear existing options first, keeping only the "All Barbers" option
-      barberFilterSelect.innerHTML = '<option value="all">All Barbers</option>';
+      // Populate barbersData for name lookups
+      barbersData = barbers.reduce((acc, barber) => {
+        acc[barber.barber_id] = barber.name;
+        return acc;
+      }, {});
 
-      // Add new barber options
-      barbers.forEach((barber) => {
-        const option = document.createElement("option");
-        option.value = barber.barber_id;
-        option.textContent = barber.name;
-        barberFilterSelect.appendChild(option);
-      });
+      const barberFilterSelect = document.getElementById("filter-barber");
+      if (barberFilterSelect) {
+        barberFilterSelect.innerHTML = '<option value="all">All Barbers</option>';
+        barbers.forEach((barber) => {
+          const option = document.createElement("option");
+          option.value = barber.barber_id;
+          option.textContent = barber.name;
+          barberFilterSelect.appendChild(option);
+        });
+      }
+
+      if (callback) callback();
     })
-    .catch((error) => console.error("Error fetching barbers:", error));
+    .catch((error) => {
+      console.error("Error fetching barbers:", error);
+      if (callback) callback();
+    });
 }
 
 // Function to format date

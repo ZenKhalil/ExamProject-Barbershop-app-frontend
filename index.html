@@ -1,11 +1,29 @@
-<!-- v2 -->
+<!-- v3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1a1a1a">
+    <meta name="theme-color" content="#0f0f0f">
+    <meta name="description" content="Book your appointment at Salon Sindbad — Located in the heart of Copenhagen">
     <title>Salon Sindbad — Modern Barbershop</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="public/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Salon Sindbad">
+    <link rel="apple-touch-icon" href="public/icons/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="public/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="public/icons/icon-167x167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="public/icons/icon-180x180.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="public/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="public/icons/icon-32x32.png">
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -49,7 +67,6 @@
             <li><a href="#about-section"><i class="fas fa-info-circle"></i> About Us</a></li>
             <li><a href="#gallery-section"><i class="fas fa-images"></i> Gallery</a></li>
         </ul>
-        <!-- Admin link at bottom of mobile menu -->
         <div class="mobile-admin-area">
             <button class="mobile-admin-btn" type="button">
                 <i class="fas fa-lock"></i> Staff Login
@@ -74,7 +91,6 @@
                 <span>Salon Sindbad</span>
             </div>
 
-            <!-- Desktop admin link — subtle, top right. Hidden on mobile. -->
             <div class="desktop-admin-area" id="admin-login-area">
                 <button id="admin-login-button" class="desktop-admin-btn" type="button">
                     <i class="fas fa-lock"></i> <span class="admin-btn-label">Staff Login</span>
@@ -251,7 +267,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        /* ---- Hero "Book Now" → trigger the real nav link ---- */
+        /* ---- Hero "Book Now" ---- */
         var heroCta = document.getElementById('hero-book-now');
         if (heroCta) {
             heroCta.addEventListener('click', function(e) {
@@ -266,21 +282,19 @@
             });
         }
 
-        /* ---- Mobile admin button → opens same modal ---- */
+        /* ---- Mobile admin button ---- */
         var mobileAdminBtn = document.querySelector('.mobile-admin-btn');
         if (mobileAdminBtn) {
             mobileAdminBtn.addEventListener('click', function() {
                 var token = localStorage.getItem('adminToken');
                 if (token) {
-                    // Already logged in — logout
                     localStorage.removeItem('adminToken');
                     sessionStorage.removeItem('currentSection');
+                    sessionStorage.removeItem('adminSection');
                     window.location.reload();
                 } else {
-                    // Open admin login modal
                     var modal = document.getElementById('admin-login-modal');
                     if (modal) modal.style.display = 'block';
-                    // Close the hamburger menu
                     var hamMenu = document.querySelector('.ham-menu');
                     var offScreen = document.querySelector('.off-screen-menu');
                     if (hamMenu) hamMenu.classList.remove('active');
@@ -289,7 +303,7 @@
             });
         }
 
-        /* ---- Keep mobile admin button in sync with desktop (admin.js changes) ---- */
+        /* ---- Keep mobile admin button in sync ---- */
         var desktopAdminBtn = document.getElementById('admin-login-button');
         var mobileAdminObserver = new MutationObserver(function() {
             var mobileBtn = document.querySelector('.mobile-admin-btn');
@@ -305,7 +319,6 @@
             mobileAdminObserver.observe(desktopAdminBtn, { childList: true, characterData: true, subtree: true });
         }
 
-        /* ---- Sync admin state to mobile button ---- */
         function syncMobileAdminState() {
             var mobileBtn = document.querySelector('.mobile-admin-btn');
             if (!mobileBtn) return;
@@ -318,7 +331,7 @@
         }
         syncMobileAdminState();
 
-        /* ---- Scroll-lock + footer hide when home section is active ---- */
+        /* ---- Scroll-lock when home section is active ---- */
         function updateScrollLock() {
             var homeSection = document.getElementById('home-section');
             if (!homeSection) return;
@@ -345,6 +358,14 @@
 
         updateScrollLock();
     });
+    </script>
+
+    <!-- Register Service Worker -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        var swUrl = '/public/sw.js';
+        navigator.serviceWorker.register(swUrl).catch(function() {});
+    }
     </script>
 </body>
 </html>
