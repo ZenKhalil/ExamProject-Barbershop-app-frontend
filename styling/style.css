@@ -251,14 +251,9 @@ nav ul li button:hover {
 .menu-overlay { display: none; }
 
 @media (max-width: 768px) {
-  header {
-    padding-top: env(safe-area-inset-top);
-    height: calc(50px + env(safe-area-inset-top));
-  }
-
   .header-container {
     padding: 0 16px;
-    height: 60px;
+    height: 78px;
     justify-content: center;
     padding-top: 15px;
   }
@@ -267,7 +262,6 @@ nav ul li button:hover {
     left: 50%;
     transform: translateX(-50%);
     font-size: 1.35rem;
-    bottom: 18px;
   }
 
   #main-nav { display: none; }
