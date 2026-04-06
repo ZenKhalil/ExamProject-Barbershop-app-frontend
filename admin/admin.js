@@ -384,9 +384,14 @@ export function loadAdminDashboard() {
       }
       content.innerHTML = todayBookings.map(function(b) {
         var barberName = barbersData[b.barber_id] || "—";
+        var time = (b.booking_time || "—").substring(0, 5);
+        var services = b.preferred_haircut ? '<div class="dash-services"><i class="fas fa-cut"></i> ' + b.preferred_haircut + '</div>' : '';
         return '<div class="dash-booking-row">' +
-          '<span class="dash-time">' + (b.booking_time || "—") + '</span>' +
-          '<span class="dash-customer">' + b.customer_name + '</span>' +
+          '<span class="dash-time">' + time + '</span>' +
+          '<div class="dash-booking-info">' +
+            '<span class="dash-customer">' + b.customer_name + '</span>' +
+            services +
+          '</div>' +
           '<span class="dash-barber-tag">' + barberName + '</span>' +
           '</div>';
       }).join("");
@@ -422,9 +427,14 @@ export function loadAdminDashboard() {
         html += '<div class="dash-date-label">' + label + (isToday ? ' <span class="today-badge">Today</span>' : '') + '</div>';
         grouped[dateKey].forEach(function(b) {
           var barberName = barbersData[b.barber_id] || "—";
+          var time = (b.booking_time || "—").substring(0, 5);
+          var services = b.preferred_haircut ? '<div class="dash-services"><i class="fas fa-cut"></i> ' + b.preferred_haircut + '</div>' : '';
           html += '<div class="dash-booking-row">' +
-            '<span class="dash-time">' + (b.booking_time || "—") + '</span>' +
-            '<span class="dash-customer">' + b.customer_name + '</span>' +
+            '<span class="dash-time">' + time + '</span>' +
+            '<div class="dash-booking-info">' +
+              '<span class="dash-customer">' + b.customer_name + '</span>' +
+              services +
+            '</div>' +
             '<span class="dash-barber-tag">' + barberName + '</span>' +
             '</div>';
         });
@@ -642,7 +652,7 @@ function displayBookings(bookings) {
       </div>
       <div class="booking-card-body">
         <div class="booking-detail"><i class="fas fa-calendar-day"></i> ${formattedDate}</div>
-        <div class="booking-detail"><i class="fas fa-clock"></i> ${booking.booking_time}</div>
+        <div class="booking-detail"><i class="fas fa-clock"></i> ${(booking.booking_time || "").substring(0, 5)}</div>
         <div class="booking-detail"><i class="fas fa-envelope"></i> ${booking.customer_email}</div>
         <div class="booking-detail"><i class="fas fa-phone"></i> ${booking.customer_phone || 'N/A'}</div>
         ${booking.preferred_haircut ? '<div class="booking-detail"><i class="fas fa-cut"></i> ' + booking.preferred_haircut + '</div>' : ''}

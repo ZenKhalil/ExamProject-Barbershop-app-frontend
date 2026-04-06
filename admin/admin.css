@@ -346,6 +346,27 @@
   flex: 1;
 }
 
+.dash-booking-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dash-services {
+  font-size: 0.72rem;
+  color: var(--clr-text-dim, #9a9590);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dash-services i {
+  color: var(--clr-gold, #c9a84c);
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+
 .dash-barber-tag {
   font-size: 0.7rem;
   font-weight: 600;
