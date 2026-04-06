@@ -291,6 +291,18 @@
         </div>
     </div>
 
+    <!-- Gallery Lightbox -->
+    <div id="gallery-lightbox" class="gallery-lightbox" style="display:none;">
+        <div class="lightbox-backdrop"></div>
+        <button class="lightbox-close"><i class="fas fa-times"></i></button>
+        <button class="lightbox-prev"><i class="fas fa-chevron-left"></i></button>
+        <button class="lightbox-next"><i class="fas fa-chevron-right"></i></button>
+        <div class="lightbox-content">
+            <img id="lightbox-img" class="lightbox-img" alt="">
+            <div id="lightbox-caption" class="lightbox-caption"></div>
+        </div>
+    </div>
+
     <!-- Cookie Consent Banner -->
     <div id="cookie-banner" class="cookie-banner" style="display:none;">
         <div class="cookie-banner-content">
@@ -407,6 +419,8 @@
             var grid = document.getElementById('gallery-grid');
             if (!grid) return;
 
+            var galleryImages = []; // Store loaded image data for lightbox
+
             fetch(API + '/api/gallery')
                 .then(function(r) { return r.json(); })
                 .then(function(images) {
@@ -415,20 +429,25 @@
                         return;
                     }
 
-                    grid.innerHTML = images.map(function(img) {
-                        return '<div class="gallery-item" id="gal-' + img.id + '">' +
+                    galleryImages = images.map(function(img) {
+                        return { id: img.id, caption: img.caption || '', src: null };
+                    });
+
+                    grid.innerHTML = images.map(function(img, i) {
+                        return '<div class="gallery-item" id="gal-' + img.id + '" data-index="' + i + '">' +
                             '<div class="gallery-img-placeholder"><i class="fas fa-image"></i></div>' +
                             (img.caption ? '<div class="gallery-caption">' + img.caption + '</div>' : '') +
                             '</div>';
                     }).join('');
 
                     // Lazy load each image
-                    images.forEach(function(img) {
+                    images.forEach(function(img, i) {
                         fetch(API + '/api/gallery/' + img.id + '/image')
                             .then(function(r) { return r.json(); })
                             .then(function(data) {
                                 var item = document.getElementById('gal-' + img.id);
                                 if (item && data.image_data) {
+                                    galleryImages[i].src = data.image_data;
                                     var placeholder = item.querySelector('.gallery-img-placeholder');
                                     if (placeholder) {
                                         placeholder.outerHTML = '<img src="' + data.image_data + '" alt="' + (img.caption || 'Gallery photo') + '" class="gallery-img">';
@@ -436,10 +455,77 @@
                                 }
                             });
                     });
+
+                    // Click to open lightbox
+                    grid.addEventListener('click', function(e) {
+                        var item = e.target.closest('.gallery-item');
+                        if (!item) return;
+                        var index = parseInt(item.dataset.index);
+                        if (isNaN(index)) return;
+                        openLightbox(index);
+                    });
                 })
                 .catch(function() {
                     grid.innerHTML = '<div class="gallery-empty"><i class="fas fa-camera-retro"></i><p>Photos coming soon</p></div>';
                 });
+
+            // Lightbox
+            var lightbox = document.getElementById('gallery-lightbox');
+            var lightboxImg = document.getElementById('lightbox-img');
+            var lightboxCaption = document.getElementById('lightbox-caption');
+            var currentIndex = 0;
+
+            function openLightbox(index) {
+                if (!galleryImages[index] || !galleryImages[index].src) return;
+                currentIndex = index;
+                lightboxImg.src = galleryImages[index].src;
+                lightboxCaption.textContent = galleryImages[index].caption;
+                lightboxCaption.style.display = galleryImages[index].caption ? 'block' : 'none';
+                lightbox.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLightbox() {
+                lightbox.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+
+            function navigate(dir) {
+                var next = currentIndex + dir;
+                // Skip images that haven't loaded yet
+                while (next >= 0 && next < galleryImages.length && !galleryImages[next].src) {
+                    next += dir;
+                }
+                if (next >= 0 && next < galleryImages.length) openLightbox(next);
+            }
+
+            if (lightbox) {
+                lightbox.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+                lightbox.querySelector('.lightbox-backdrop').addEventListener('click', closeLightbox);
+                lightbox.querySelector('.lightbox-prev').addEventListener('click', function() { navigate(-1); });
+                lightbox.querySelector('.lightbox-next').addEventListener('click', function() { navigate(1); });
+
+                // Keyboard navigation
+                document.addEventListener('keydown', function(e) {
+                    if (lightbox.style.display !== 'flex') return;
+                    if (e.key === 'Escape') closeLightbox();
+                    if (e.key === 'ArrowLeft') navigate(-1);
+                    if (e.key === 'ArrowRight') navigate(1);
+                });
+
+                // Swipe support for mobile
+                var touchStartX = 0;
+                lightbox.addEventListener('touchstart', function(e) {
+                    touchStartX = e.touches[0].clientX;
+                }, { passive: true });
+                lightbox.addEventListener('touchend', function(e) {
+                    var diff = touchStartX - e.changedTouches[0].clientX;
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) navigate(1);
+                        else navigate(-1);
+                    }
+                });
+            }
         })();
 
         /* ---- Cookie Notice ---- */

@@ -2193,16 +2193,8 @@ function setupGalleryUpload() {
         uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
         if (data.error) { alert(data.error); return; }
 
-        // Reset form
-        selectedImageData = null;
-        previewContainer.style.display = "none";
-        uploadBtn.style.display = "none";
-        document.getElementById("gallery-caption").value = "";
-        var uploadArea = document.getElementById("gallery-upload-area");
-        uploadArea.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><p>Click to select a photo or drag & drop</p><small>JPEG or PNG, max 2MB</small>';
-        document.getElementById("gallery-file-input").value = "";
-
-        loadGalleryAdmin();
+        // Reload the gallery management page
+        displayManageGallery();
       })
       .catch(function(err) {
         uploadBtn.disabled = false;
