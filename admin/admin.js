@@ -7,6 +7,7 @@ export const adminFunctions = {
   "edit-availabilities-section": displayEditAvailabilityForm,
   "manage-services-section": displayManageServices,
   "manage-barbers-section": displayManageBarbers,
+  "manage-gallery-section": displayManageGallery,
   "settings-section": displaySettings,
 };
 
@@ -46,6 +47,7 @@ export function generateAdminNavBar() {
             <li><a href="#view-bookings-section" id="view-bookings-link"><i class="fas fa-calendar-check"></i> Bookings</a></li>
             <li><a href="#manage-services-section" id="manage-services-link"><i class="fas fa-cut"></i> Services</a></li>
             <li><a href="#manage-barbers-section" id="manage-barbers-link"><i class="fas fa-user-tie"></i> Barbers</a></li>
+            <li><a href="#manage-gallery-section" id="manage-gallery-link"><i class="fas fa-images"></i> Gallery</a></li>
             <li><a href="#edit-availabilities-section" id="edit-availabilities-link"><i class="fas fa-clock"></i> Schedule</a></li>
             <li><a href="#settings-section" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
         </ul>
@@ -74,6 +76,7 @@ function updateOffScreenMenuToAdmin() {
         <li><a href="#view-bookings-section">Bookings</a></li>
         <li><a href="#manage-services-section">Services</a></li>
         <li><a href="#manage-barbers-section">Barbers</a></li>
+        <li><a href="#manage-gallery-section">Gallery</a></li>
         <li><a href="#edit-availabilities-section">Schedule</a></li>
         <li><a href="#settings-section">Settings</a></li>
     `;
@@ -291,6 +294,14 @@ export function setupAdminNavBarListeners() {
     manageBarbersLink.addEventListener("click", (e) => {
       e.preventDefault();
       displayManageBarbers();
+    });
+  }
+
+  const manageGalleryLink = document.getElementById("manage-gallery-link");
+  if (manageGalleryLink) {
+    manageGalleryLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      displayManageGallery();
     });
   }
 }
@@ -2051,6 +2062,230 @@ function loadBarbersList() {
       });
     })
     .catch(function(err) { console.error("Error loading barbers:", err); });
+}
+
+
+// ============================================================
+// MANAGE GALLERY
+// ============================================================
+
+export function displayManageGallery() {
+  const mainContent = document.getElementById("main-content");
+  mainContent.innerHTML = `
+    <div class="admin-page">
+      <div class="admin-page-header">
+        <h2><i class="fas fa-images"></i> Manage Gallery</h2>
+      </div>
+
+      <div class="manage-add-card">
+        <h3><i class="fas fa-plus-circle"></i> Upload Photo</h3>
+        <div class="manage-add-form">
+          <div class="gallery-upload-area" id="gallery-upload-area">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Click to select a photo or drag & drop</p>
+            <small>JPEG or PNG, max 2MB. Images are automatically resized.</small>
+            <input type="file" id="gallery-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;">
+          </div>
+          <div id="gallery-preview-container" style="display:none;">
+            <img id="gallery-preview-img" class="gallery-preview-img">
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label>Caption (optional)</label>
+            <input type="text" id="gallery-caption" class="form-control" placeholder="e.g. Fresh fade by Jaafar">
+          </div>
+          <button class="btn" id="gallery-upload-btn" style="display:none;"><i class="fas fa-upload"></i> Upload Photo</button>
+        </div>
+      </div>
+
+      <div class="gallery-admin-grid" id="gallery-admin-grid">
+        <div class="avail-loading"><i class="fas fa-spinner fa-spin"></i></div>
+      </div>
+    </div>
+  `;
+
+  loadGalleryAdmin();
+  setupGalleryUpload();
+}
+
+function setupGalleryUpload() {
+  var uploadArea = document.getElementById("gallery-upload-area");
+  var fileInput = document.getElementById("gallery-file-input");
+  var previewContainer = document.getElementById("gallery-preview-container");
+  var previewImg = document.getElementById("gallery-preview-img");
+  var uploadBtn = document.getElementById("gallery-upload-btn");
+  var selectedImageData = null;
+
+  // Click to select
+  uploadArea.addEventListener("click", function() { fileInput.click(); });
+
+  // Drag and drop
+  uploadArea.addEventListener("dragover", function(e) {
+    e.preventDefault();
+    uploadArea.classList.add("dragover");
+  });
+  uploadArea.addEventListener("dragleave", function() {
+    uploadArea.classList.remove("dragover");
+  });
+  uploadArea.addEventListener("drop", function(e) {
+    e.preventDefault();
+    uploadArea.classList.remove("dragover");
+    if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]);
+  });
+
+  fileInput.addEventListener("change", function() {
+    if (fileInput.files.length > 0) processFile(fileInput.files[0]);
+  });
+
+  function processFile(file) {
+    if (!file.type.match(/image\/(jpeg|png|webp)/)) {
+      alert("Please select a JPEG, PNG, or WebP image");
+      return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        // Resize to max 800px wide, compress as JPEG
+        var canvas = document.createElement("canvas");
+        var maxW = 800;
+        var maxH = 800;
+        var w = img.width;
+        var h = img.height;
+
+        if (w > maxW) { h = h * (maxW / w); w = maxW; }
+        if (h > maxH) { w = w * (maxH / h); h = maxH; }
+
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+
+        selectedImageData = canvas.toDataURL("image/jpeg", 0.82);
+        previewImg.src = selectedImageData;
+        previewContainer.style.display = "block";
+        uploadBtn.style.display = "flex";
+        uploadArea.innerHTML = '<i class="fas fa-check-circle" style="color:var(--clr-success);"></i><p>Photo selected — click Upload</p>';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Upload
+  uploadBtn.addEventListener("click", function() {
+    if (!selectedImageData) { alert("Select a photo first"); return; }
+
+    var caption = document.getElementById("gallery-caption").value.trim();
+    var token = localStorage.getItem("adminToken");
+
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+    fetch(API_BASE + "/api/gallery", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ image_data: selectedImageData, caption: caption }),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+        if (data.error) { alert(data.error); return; }
+
+        // Reset form
+        selectedImageData = null;
+        previewContainer.style.display = "none";
+        uploadBtn.style.display = "none";
+        document.getElementById("gallery-caption").value = "";
+        var uploadArea = document.getElementById("gallery-upload-area");
+        uploadArea.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><p>Click to select a photo or drag & drop</p><small>JPEG or PNG, max 2MB</small>';
+        document.getElementById("gallery-file-input").value = "";
+
+        loadGalleryAdmin();
+      })
+      .catch(function(err) {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+        alert("Upload failed");
+        console.error(err);
+      });
+  });
+}
+
+function loadGalleryAdmin() {
+  var grid = document.getElementById("gallery-admin-grid");
+  if (!grid) return;
+
+  fetch(API_BASE + "/api/gallery")
+    .then(function(r) { return r.json(); })
+    .then(function(images) {
+      if (!Array.isArray(images) || images.length === 0) {
+        grid.innerHTML = '<div class="dash-empty"><i class="fas fa-images"></i> No photos uploaded yet</div>';
+        return;
+      }
+
+      grid.innerHTML = images.map(function(img) {
+        return '<div class="gallery-admin-item" data-id="' + img.id + '">' +
+          '<div class="gallery-admin-img" id="gimg-' + img.id + '"><div class="avail-loading"><i class="fas fa-spinner fa-spin"></i></div></div>' +
+          '<div class="gallery-admin-info">' +
+            '<span class="gallery-admin-caption">' + (img.caption || '<em style="opacity:0.4;">No caption</em>') + '</span>' +
+            '<div class="gallery-admin-actions">' +
+              '<button class="manage-edit-btn gallery-edit-btn" data-id="' + img.id + '" data-caption="' + (img.caption || '') + '"><i class="fas fa-pen"></i></button>' +
+              '<button class="manage-delete-btn gallery-delete-btn" data-id="' + img.id + '"><i class="fas fa-trash-alt"></i></button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+
+      // Lazy load images
+      images.forEach(function(img) {
+        fetch(API_BASE + "/api/gallery/" + img.id + "/image")
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var container = document.getElementById("gimg-" + img.id);
+            if (container && data.image_data) {
+              container.innerHTML = '<img src="' + data.image_data + '" alt="' + (img.caption || 'Gallery') + '">';
+            }
+          });
+      });
+
+      // Edit caption
+      grid.querySelectorAll(".gallery-edit-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          showEditModal("Edit Caption", [
+            { label: "Caption", id: "edit-gallery-caption", type: "text", value: btn.dataset.caption },
+          ], function() {
+            var token = localStorage.getItem("adminToken");
+            var newCaption = document.getElementById("edit-gallery-caption").value.trim();
+            fetch(API_BASE + "/api/gallery/" + btn.dataset.id, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+              body: JSON.stringify({ caption: newCaption }),
+            })
+              .then(function(r) { return r.json(); })
+              .then(function() { closeEditModal(); loadGalleryAdmin(); })
+              .catch(function() { alert("Failed to update"); });
+          });
+        });
+      });
+
+      // Delete
+      grid.querySelectorAll(".gallery-delete-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          if (!confirm("Delete this photo?")) return;
+          var token = localStorage.getItem("adminToken");
+          fetch(API_BASE + "/api/gallery/" + btn.dataset.id, {
+            method: "DELETE",
+            headers: { Authorization: "Bearer " + token },
+          })
+            .then(function(r) { return r.json(); })
+            .then(function() { loadGalleryAdmin(); })
+            .catch(function() { alert("Failed to delete"); });
+        });
+      });
+    })
+    .catch(function(err) { console.error("Error loading gallery:", err); });
 }
 
 

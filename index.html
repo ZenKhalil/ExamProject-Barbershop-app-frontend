@@ -130,14 +130,10 @@
             <section id="gallery-section">
                 <div class="gallery-header">
                     <h2>Our Gallery</h2>
-                    <p class="gallery-subtitle">Follow our work on Instagram</p>
+                    <p class="gallery-subtitle">See our latest work</p>
                 </div>
-                <div class="instagram-feed-container">
-                    <script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script>
-                    <div class="gallery-placeholder">
-                        <i class="fas fa-camera-retro"></i>
-                        <p>COMING SOON</p>
-                    </div>
+                <div class="gallery-grid" id="gallery-grid">
+                    <div class="avail-loading" style="grid-column:1/-1;padding:60px;"><i class="fas fa-spinner fa-spin" style="color:var(--clr-gold);font-size:1.2rem;"></i></div>
                 </div>
             </section>
 
@@ -404,6 +400,47 @@
         });
 
         updateScrollLock();
+
+        /* ---- Load Gallery ---- */
+        (function() {
+            var API = 'https://salonsindbad-api.duckdns.org';
+            var grid = document.getElementById('gallery-grid');
+            if (!grid) return;
+
+            fetch(API + '/api/gallery')
+                .then(function(r) { return r.json(); })
+                .then(function(images) {
+                    if (!Array.isArray(images) || images.length === 0) {
+                        grid.innerHTML = '<div class="gallery-empty"><i class="fas fa-camera-retro"></i><p>Photos coming soon</p></div>';
+                        return;
+                    }
+
+                    grid.innerHTML = images.map(function(img) {
+                        return '<div class="gallery-item" id="gal-' + img.id + '">' +
+                            '<div class="gallery-img-placeholder"><i class="fas fa-image"></i></div>' +
+                            (img.caption ? '<div class="gallery-caption">' + img.caption + '</div>' : '') +
+                            '</div>';
+                    }).join('');
+
+                    // Lazy load each image
+                    images.forEach(function(img) {
+                        fetch(API + '/api/gallery/' + img.id + '/image')
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                var item = document.getElementById('gal-' + img.id);
+                                if (item && data.image_data) {
+                                    var placeholder = item.querySelector('.gallery-img-placeholder');
+                                    if (placeholder) {
+                                        placeholder.outerHTML = '<img src="' + data.image_data + '" alt="' + (img.caption || 'Gallery photo') + '" class="gallery-img">';
+                                    }
+                                }
+                            });
+                    });
+                })
+                .catch(function() {
+                    grid.innerHTML = '<div class="gallery-empty"><i class="fas fa-camera-retro"></i><p>Photos coming soon</p></div>';
+                });
+        })();
 
         /* ---- Cookie Notice ---- */
         (function() {
