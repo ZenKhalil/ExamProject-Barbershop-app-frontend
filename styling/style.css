@@ -1484,12 +1484,13 @@ div#selected-datetime { margin-bottom: 0; }
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
-  .gallery-caption { padding: 8px 10px; font-size: 0.75rem; }
+  .gallery-caption {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
 }
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
 
 /* ============================================================
    FOOTER — inside #page-wrap, pushed down by flex
