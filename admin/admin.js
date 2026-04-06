@@ -1550,7 +1550,7 @@ export function displaySettings() {
     if (preview.style.display === "none") {
       preview.innerHTML = editor.value;
       preview.style.display = "block";
-      this.innerHTML = '<i class="fas fa-edit"></i> Edit';
+      this.innerHTML = '<i class="fas fa-edit"></i> Hide preview';
     } else {
       preview.style.display = "none";
       this.innerHTML = '<i class="fas fa-eye"></i> Preview';
