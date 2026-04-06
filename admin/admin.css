@@ -1351,7 +1351,7 @@
   font-size: 1.6rem;
   color: var(--clr-gold, #c9a84c);
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1360,11 +1360,70 @@
 
 .settings-container > h2 i { font-size: 1.2rem; }
 
-.settings-card {
+/* Tabs */
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0;
   background: var(--clr-card, #222222);
   border: 1px solid var(--clr-border, #2e2e2e);
-  border-radius: var(--radius-md, 12px);
+  border-bottom: none;
+  border-radius: var(--radius-md, 12px) var(--radius-md, 12px) 0 0;
+  padding: 6px 6px 0;
+}
+
+.settings-tab {
+  flex: 1;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm, 6px) var(--radius-sm, 6px) 0 0;
+  color: var(--clr-text-dim, #9a9590);
+  font-family: var(--font-body, 'DM Sans', sans-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.settings-tab:hover {
+  color: var(--clr-text, #e8e4de);
+  background: rgba(201,168,76,0.05);
+}
+
+.settings-tab.active {
+  color: var(--clr-gold, #c9a84c);
+  background: var(--clr-surface, #1a1a1a);
+}
+
+.settings-tab i {
+  font-size: 0.8rem;
+}
+
+/* Tab content */
+.settings-tab-content {
+  display: none;
   padding: 24px;
+}
+
+.settings-tab-content.active {
+  display: block;
+}
+
+.settings-tab-status {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.settings-card {
+  background: var(--clr-surface, #1a1a1a);
+  border: 1px solid var(--clr-border, #2e2e2e);
+  border-radius: 0 0 var(--radius-md, 12px) var(--radius-md, 12px);
 }
 
 .settings-card-header {
@@ -1581,10 +1640,10 @@
   /* Settings */
   .settings-container { padding: 20px 12px; }
   .settings-container > h2 { font-size: 1.3rem; }
-  .settings-card { padding: 16px; }
+  .settings-tab-content { padding: 16px; }
   .settings-actions { flex-direction: column; }
   .settings-actions .btn { min-width: 100%; }
-  .settings-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .settings-tab { font-size: 0.78rem; padding: 10px 12px; }
 
   /* Form controls — larger touch targets */
   .form-control {

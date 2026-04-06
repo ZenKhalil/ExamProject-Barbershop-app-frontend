@@ -700,10 +700,6 @@ nav ul li button:hover {
   margin-bottom: 10px;
 }
 
-.service-pick-label .required-dot {
-  color: var(--clr-gold);
-}
-
 .service-bubble {
   background: var(--clr-card);
   color: var(--clr-text);

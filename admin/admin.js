@@ -1333,83 +1333,96 @@ export function displaySettings() {
     <div class="settings-container">
       <h2><i class="fas fa-cog"></i> Settings</h2>
 
-      <div class="settings-card" style="margin-bottom:20px;">
-        <div class="settings-card-header">
-          <h3><i class="fas fa-key"></i> Change Password</h3>
-        </div>
-        <div class="settings-form">
-          <div class="form-group">
-            <label for="settings-current-pw">Current Password</label>
-            <div class="pw-input-wrap">
-              <input type="password" id="settings-current-pw" class="form-control" placeholder="Enter current password">
-              <button type="button" class="pw-toggle" data-target="settings-current-pw"><i class="fas fa-eye"></i></button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="settings-new-pw">New Password</label>
-            <div class="pw-input-wrap">
-              <input type="password" id="settings-new-pw" class="form-control" placeholder="Enter new password">
-              <button type="button" class="pw-toggle" data-target="settings-new-pw"><i class="fas fa-eye"></i></button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="settings-confirm-pw">Confirm New Password</label>
-            <div class="pw-input-wrap">
-              <input type="password" id="settings-confirm-pw" class="form-control" placeholder="Repeat new password">
-              <button type="button" class="pw-toggle" data-target="settings-confirm-pw"><i class="fas fa-eye"></i></button>
-            </div>
-          </div>
-          <div class="settings-actions">
-            <button type="button" id="change-password-btn" class="btn"><i class="fas fa-lock"></i> Update Password</button>
-          </div>
-          <div id="password-message" class="settings-message" style="display:none;"></div>
-        </div>
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-tab="tab-password"><i class="fas fa-key"></i> Password</button>
+        <button class="settings-tab" data-tab="tab-email"><i class="fas fa-envelope"></i> Email</button>
       </div>
 
       <div class="settings-card">
-        <div class="settings-card-header">
-          <h3><i class="fas fa-envelope"></i> Email Configuration</h3>
-          <span class="settings-status" id="email-status">Loading...</span>
+        <div id="tab-password" class="settings-tab-content active">
+          <div class="settings-form">
+            <div class="form-group">
+              <label for="settings-current-pw">Current Password</label>
+              <div class="pw-input-wrap">
+                <input type="password" id="settings-current-pw" class="form-control" placeholder="Enter current password">
+                <button type="button" class="pw-toggle" data-target="settings-current-pw"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="settings-new-pw">New Password</label>
+              <div class="pw-input-wrap">
+                <input type="password" id="settings-new-pw" class="form-control" placeholder="Enter new password">
+                <button type="button" class="pw-toggle" data-target="settings-new-pw"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="settings-confirm-pw">Confirm New Password</label>
+              <div class="pw-input-wrap">
+                <input type="password" id="settings-confirm-pw" class="form-control" placeholder="Repeat new password">
+                <button type="button" class="pw-toggle" data-target="settings-confirm-pw"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="settings-actions">
+              <button type="button" id="change-password-btn" class="btn"><i class="fas fa-lock"></i> Update Password</button>
+            </div>
+            <div id="password-message" class="settings-message" style="display:none;"></div>
+          </div>
         </div>
 
-        <div class="settings-form" id="email-settings-form">
-          <div class="form-group">
-            <label for="settings-email-service">Email Service</label>
-            <select id="settings-email-service" class="form-control">
-              <option value="gmail">Gmail</option>
-              <option value="outlook">Outlook</option>
-              <option value="yahoo">Yahoo</option>
-            </select>
+        <div id="tab-email" class="settings-tab-content">
+          <div class="settings-tab-status">
+            <span class="settings-status" id="email-status">Loading...</span>
           </div>
-
-          <div class="form-group">
-            <label for="settings-email-username">Email Address</label>
-            <input type="email" id="settings-email-username" class="form-control" placeholder="your@email.com">
-          </div>
-
-          <div class="form-group">
-            <label for="settings-email-password">App Password</label>
-            <div class="input-with-hint">
-              <input type="password" id="settings-email-password" class="form-control" placeholder="Leave empty to keep current">
-              <small class="form-hint">For Gmail: generate at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a></small>
+          <div class="settings-form" id="email-settings-form">
+            <div class="form-group">
+              <label for="settings-email-service">Email Service</label>
+              <select id="settings-email-service" class="form-control">
+                <option value="gmail">Gmail</option>
+                <option value="outlook">Outlook</option>
+                <option value="yahoo">Yahoo</option>
+              </select>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="settings-owner-email">Owner Notification Email</label>
-            <input type="email" id="settings-owner-email" class="form-control" placeholder="Where booking notifications are sent">
-          </div>
+            <div class="form-group">
+              <label for="settings-email-username">Email Address</label>
+              <input type="email" id="settings-email-username" class="form-control" placeholder="your@email.com">
+            </div>
 
-          <div class="settings-actions">
-            <button type="button" id="save-email-settings" class="btn"><i class="fas fa-save"></i> Save Settings</button>
-            <button type="button" id="test-email-settings" class="btn btn-secondary"><i class="fas fa-paper-plane"></i> Send Test Email</button>
-          </div>
+            <div class="form-group">
+              <label for="settings-email-password">App Password</label>
+              <div class="input-with-hint">
+                <input type="password" id="settings-email-password" class="form-control" placeholder="Leave empty to keep current">
+                <small class="form-hint">For Gmail: generate at <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a></small>
+              </div>
+            </div>
 
-          <div id="settings-message" class="settings-message" style="display:none;"></div>
+            <div class="form-group">
+              <label for="settings-owner-email">Owner Notification Email</label>
+              <input type="email" id="settings-owner-email" class="form-control" placeholder="Where booking notifications are sent">
+            </div>
+
+            <div class="settings-actions">
+              <button type="button" id="save-email-settings" class="btn"><i class="fas fa-save"></i> Save Settings</button>
+              <button type="button" id="test-email-settings" class="btn btn-secondary"><i class="fas fa-paper-plane"></i> Send Test Email</button>
+            </div>
+
+            <div id="settings-message" class="settings-message" style="display:none;"></div>
+          </div>
         </div>
       </div>
     </div>
   `;
+
+  // Tab switching
+  document.querySelectorAll(".settings-tab").forEach(function(tab) {
+    tab.addEventListener("click", function() {
+      document.querySelectorAll(".settings-tab").forEach(function(t) { t.classList.remove("active"); });
+      document.querySelectorAll(".settings-tab-content").forEach(function(c) { c.classList.remove("active"); });
+      tab.classList.add("active");
+      var target = document.getElementById(tab.dataset.tab);
+      if (target) target.classList.add("active");
+    });
+  });
 
   // Load current settings
   loadEmailSettings();
