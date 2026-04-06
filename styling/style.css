@@ -253,14 +253,14 @@ nav ul li button:hover {
 @media (max-width: 768px) {
   .header-container {
     padding: 0 16px;
-    height: 60px;
+    height: 78px;
     justify-content: center;
   }
 
   .header-brand {
     left: 50%;
     transform: translateX(-50%);
-    font-size: 1.1rem;
+    font-size: 1.35rem;
   }
 
   #main-nav { display: none; }
