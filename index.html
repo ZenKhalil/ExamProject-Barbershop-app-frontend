@@ -240,6 +240,7 @@
                                 <label for="customer-phone"><i class="fas fa-phone"></i> Phone</label>
                                 <input type="tel" id="customer-phone" name="customer_phone" placeholder="Your phone number">
                             </div>
+                            <p class="booking-legal-notice">By completing this booking, you agree to our <a href="#" class="legal-link" data-modal="terms-modal">Terms &amp; Conditions</a> and acknowledge our <a href="#" class="legal-link" data-modal="privacy-modal">Privacy Policy</a>.</p>
                             <button type="submit" class="btn-book">
                                 <i class="fas fa-calendar-check"></i> Confirm Booking
                             </button>
@@ -260,7 +261,7 @@
                     <span class="footer-dot">&middot;</span>
                     <a href="#" id="footer-terms-link">Terms &amp; Conditions</a>
                     <span class="footer-dot">&middot;</span>
-                    <a href="#" id="footer-cookie-link">Cookie Settings</a>
+                    <a href="#" id="footer-cookie-link">Cookie Notice</a>
                 </div>
             </div>
         </footer>
@@ -298,47 +299,11 @@
     <div id="cookie-banner" class="cookie-banner" style="display:none;">
         <div class="cookie-banner-content">
             <div class="cookie-banner-text">
-                <h3><i class="fas fa-cookie-bite"></i> We value your privacy</h3>
-                <p>We use cookies and process personal data (name, email, phone) when you book an appointment. Your data is only used to manage your booking and send confirmations. <a href="#" id="cookie-privacy-link" style="color:var(--clr-gold);text-decoration:underline;">Read our Privacy Policy</a></p>
+                <h3><i class="fas fa-cookie-bite"></i> Cookie Notice</h3>
+                <p>This website uses only essential cookies required for the site to function (login sessions, booking management). No tracking or advertising cookies are used. For more details, read our <a href="#" id="cookie-privacy-link" style="color:var(--clr-gold);text-decoration:underline;">Privacy Policy</a>.</p>
             </div>
             <div class="cookie-banner-actions">
-                <button id="cookie-accept-all" class="cookie-btn cookie-btn-accept">Accept All</button>
-                <button id="cookie-essential" class="cookie-btn cookie-btn-essential">Essential Only</button>
-                <button id="cookie-customize" class="cookie-btn cookie-btn-customize">Customize</button>
-            </div>
-        </div>
-
-        <!-- Customize panel (hidden by default) -->
-        <div id="cookie-details" class="cookie-details" style="display:none;">
-            <div class="cookie-detail-item">
-                <div class="cookie-detail-info">
-                    <strong>Essential</strong>
-                    <span>Required for the site to function. Includes login sessions and security.</span>
-                </div>
-                <span class="cookie-always-on">Always on</span>
-            </div>
-            <div class="cookie-detail-item">
-                <div class="cookie-detail-info">
-                    <strong>Booking & Functional</strong>
-                    <span>Stores your booking preferences and remembers your choices for a smoother experience.</span>
-                </div>
-                <label class="cookie-switch">
-                    <input type="checkbox" id="cookie-functional" checked>
-                    <span class="cookie-slider"></span>
-                </label>
-            </div>
-            <div class="cookie-detail-item">
-                <div class="cookie-detail-info">
-                    <strong>Analytics</strong>
-                    <span>Helps us understand how visitors use the site so we can improve it.</span>
-                </div>
-                <label class="cookie-switch">
-                    <input type="checkbox" id="cookie-analytics">
-                    <span class="cookie-slider"></span>
-                </label>
-            </div>
-            <div class="cookie-detail-actions">
-                <button id="cookie-save-prefs" class="cookie-btn cookie-btn-accept">Save Preferences</button>
+                <button id="cookie-accept" class="cookie-btn cookie-btn-accept">Got it</button>
             </div>
         </div>
     </div>
@@ -440,66 +405,30 @@
 
         updateScrollLock();
 
-        /* ---- Cookie Consent ---- */
+        /* ---- Cookie Notice ---- */
         (function() {
-            var consent = localStorage.getItem('cookieConsent');
+            var acknowledged = localStorage.getItem('cookieNotice');
             var banner = document.getElementById('cookie-banner');
             if (!banner) return;
 
-            if (!consent) {
+            if (!acknowledged) {
                 banner.style.display = 'block';
             } else {
+                // Re-show after 180 days
                 try {
-                    var parsed = JSON.parse(consent);
-                    var expiry = parsed.timestamp + (180 * 24 * 60 * 60 * 1000);
-                    if (Date.now() > expiry) {
-                        localStorage.removeItem('cookieConsent');
+                    var ts = parseInt(acknowledged);
+                    if (Date.now() - ts > 180 * 24 * 60 * 60 * 1000) {
+                        localStorage.removeItem('cookieNotice');
                         banner.style.display = 'block';
                     }
-                } catch(e) {
-                    banner.style.display = 'block';
-                }
+                } catch(e) { banner.style.display = 'block'; }
             }
 
-            function saveConsent(essential, functional, analytics) {
-                var data = {
-                    essential: true,
-                    functional: functional,
-                    analytics: analytics,
-                    timestamp: Date.now()
-                };
-                localStorage.setItem('cookieConsent', JSON.stringify(data));
-                banner.style.display = 'none';
-            }
-
-            var acceptAll = document.getElementById('cookie-accept-all');
-            if (acceptAll) {
-                acceptAll.addEventListener('click', function() {
-                    saveConsent(true, true, true);
-                });
-            }
-
-            var essentialOnly = document.getElementById('cookie-essential');
-            if (essentialOnly) {
-                essentialOnly.addEventListener('click', function() {
-                    saveConsent(true, false, false);
-                });
-            }
-
-            var customizeBtn = document.getElementById('cookie-customize');
-            var detailsPanel = document.getElementById('cookie-details');
-            if (customizeBtn && detailsPanel) {
-                customizeBtn.addEventListener('click', function() {
-                    detailsPanel.style.display = detailsPanel.style.display === 'none' ? 'block' : 'none';
-                });
-            }
-
-            var savePrefs = document.getElementById('cookie-save-prefs');
-            if (savePrefs) {
-                savePrefs.addEventListener('click', function() {
-                    var functional = document.getElementById('cookie-functional').checked;
-                    var analytics = document.getElementById('cookie-analytics').checked;
-                    saveConsent(true, functional, analytics);
+            var acceptBtn = document.getElementById('cookie-accept');
+            if (acceptBtn) {
+                acceptBtn.addEventListener('click', function() {
+                    localStorage.setItem('cookieNotice', Date.now().toString());
+                    banner.style.display = 'none';
                 });
             }
         })();
@@ -549,12 +478,23 @@
                 openLegalModal('privacy-modal', 'privacy-body', 'privacy');
             });
 
-            // Cookie settings link in footer — reopens cookie banner
+            // Cookie settings link in footer — reopens cookie notice
             var cookieLink = document.getElementById('footer-cookie-link');
             if (cookieLink) cookieLink.addEventListener('click', function(e) {
                 e.preventDefault();
                 var banner = document.getElementById('cookie-banner');
                 if (banner) banner.style.display = 'block';
+            });
+
+            // Booking form legal links
+            document.querySelectorAll('.legal-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var modalId = link.dataset.modal;
+                    var bodyId = modalId.replace('-modal', '-body');
+                    var endpoint = modalId.replace('-modal', '');
+                    openLegalModal(modalId, bodyId, endpoint);
+                });
             });
 
             // Close modal buttons
