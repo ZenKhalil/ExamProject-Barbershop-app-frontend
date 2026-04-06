@@ -154,7 +154,6 @@ function handleAdminLogin(event) {
       sessionStorage.setItem("adminSection", "dashboard-section");
       console.log("Logged in successfully");
       adminLoginModal.style.display = "none"; // Hide the modal
-      displayLoginSuccessMessage(); // Display a success message
       loadAdminDashboard(); // Load the admin dashboard after successful login
       adminLoginButton.textContent = "Logout"; // Change button text to "Logout"
       adminLoginButton.onclick = logoutAdmin; // Change the button's click event to the logout function
@@ -181,26 +180,6 @@ function handleAdminLogin(event) {
         });
       });
     });
-}
-
-function displayLoginSuccessMessage() {
-  const message = document.createElement("div");
-  message.textContent = "Logged in successfully!";
-  message.style.position = "fixed";
-  message.style.left = "50%";
-  message.style.top = "10px";
-  message.style.transform = "translateX(-50%)";
-  message.style.backgroundColor = "#28a745";
-  message.style.color = "white";
-  message.style.padding = "10px";
-  message.style.borderRadius = "5px";
-  message.style.zIndex = "1001";
-  document.body.appendChild(message);
-
-  // Remove the message after a short delay
-  setTimeout(() => {
-    document.body.removeChild(message);
-  }, 2000);
 }
 
 // Define the logoutAdmin function as shown in the previous message
