@@ -47,8 +47,8 @@ export function generateAdminNavBar() {
             <li><a href="#view-bookings-section" id="view-bookings-link"><i class="fas fa-calendar-check"></i> Bookings</a></li>
             <li><a href="#manage-services-section" id="manage-services-link"><i class="fas fa-cut"></i> Services</a></li>
             <li><a href="#manage-barbers-section" id="manage-barbers-link"><i class="fas fa-user-tie"></i> Barbers</a></li>
-            <li><a href="#manage-gallery-section" id="manage-gallery-link"><i class="fas fa-images"></i> Gallery</a></li>
             <li><a href="#edit-availabilities-section" id="edit-availabilities-link"><i class="fas fa-clock"></i> Schedule</a></li>
+            <li><a href="#manage-gallery-section" id="manage-gallery-link"><i class="fas fa-images"></i> Gallery</a></li>
             <li><a href="#settings-section" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
         </ul>
     `;
