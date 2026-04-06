@@ -255,11 +255,93 @@
                     <i class="fas fa-cut"></i> Salon Sindbad
                 </div>
                 <p>&copy; 2026 Salon Sindbad. All rights reserved.</p>
+                <div class="footer-legal">
+                    <a href="#" id="footer-privacy-link">Privacy Policy</a>
+                    <span class="footer-dot">&middot;</span>
+                    <a href="#" id="footer-terms-link">Terms &amp; Conditions</a>
+                    <span class="footer-dot">&middot;</span>
+                    <a href="#" id="footer-cookie-link">Cookie Settings</a>
+                </div>
             </div>
         </footer>
     </div>
 
     <div id="tooltip" class="hidden"></div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacy-modal" class="legal-modal" style="display:none;">
+        <div class="legal-modal-content">
+            <div class="legal-modal-header">
+                <h2><i class="fas fa-shield-alt"></i> Privacy Policy</h2>
+                <button class="legal-modal-close" data-close="privacy-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="legal-modal-body" id="privacy-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions Modal -->
+    <div id="terms-modal" class="legal-modal" style="display:none;">
+        <div class="legal-modal-content">
+            <div class="legal-modal-header">
+                <h2><i class="fas fa-file-contract"></i> Terms &amp; Conditions</h2>
+                <button class="legal-modal-close" data-close="terms-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="legal-modal-body" id="terms-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-banner" class="cookie-banner" style="display:none;">
+        <div class="cookie-banner-content">
+            <div class="cookie-banner-text">
+                <h3><i class="fas fa-cookie-bite"></i> We value your privacy</h3>
+                <p>We use cookies and process personal data (name, email, phone) when you book an appointment. Your data is only used to manage your booking and send confirmations. <a href="#" id="cookie-privacy-link" style="color:var(--clr-gold);text-decoration:underline;">Read our Privacy Policy</a></p>
+            </div>
+            <div class="cookie-banner-actions">
+                <button id="cookie-accept-all" class="cookie-btn cookie-btn-accept">Accept All</button>
+                <button id="cookie-essential" class="cookie-btn cookie-btn-essential">Essential Only</button>
+                <button id="cookie-customize" class="cookie-btn cookie-btn-customize">Customize</button>
+            </div>
+        </div>
+
+        <!-- Customize panel (hidden by default) -->
+        <div id="cookie-details" class="cookie-details" style="display:none;">
+            <div class="cookie-detail-item">
+                <div class="cookie-detail-info">
+                    <strong>Essential</strong>
+                    <span>Required for the site to function. Includes login sessions and security.</span>
+                </div>
+                <span class="cookie-always-on">Always on</span>
+            </div>
+            <div class="cookie-detail-item">
+                <div class="cookie-detail-info">
+                    <strong>Booking & Functional</strong>
+                    <span>Stores your booking preferences and remembers your choices for a smoother experience.</span>
+                </div>
+                <label class="cookie-switch">
+                    <input type="checkbox" id="cookie-functional" checked>
+                    <span class="cookie-slider"></span>
+                </label>
+            </div>
+            <div class="cookie-detail-item">
+                <div class="cookie-detail-info">
+                    <strong>Analytics</strong>
+                    <span>Helps us understand how visitors use the site so we can improve it.</span>
+                </div>
+                <label class="cookie-switch">
+                    <input type="checkbox" id="cookie-analytics">
+                    <span class="cookie-slider"></span>
+                </label>
+            </div>
+            <div class="cookie-detail-actions">
+                <button id="cookie-save-prefs" class="cookie-btn cookie-btn-accept">Save Preferences</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -357,6 +439,140 @@
         });
 
         updateScrollLock();
+
+        /* ---- Cookie Consent ---- */
+        (function() {
+            var consent = localStorage.getItem('cookieConsent');
+            var banner = document.getElementById('cookie-banner');
+            if (!banner) return;
+
+            if (!consent) {
+                banner.style.display = 'block';
+            } else {
+                try {
+                    var parsed = JSON.parse(consent);
+                    var expiry = parsed.timestamp + (180 * 24 * 60 * 60 * 1000);
+                    if (Date.now() > expiry) {
+                        localStorage.removeItem('cookieConsent');
+                        banner.style.display = 'block';
+                    }
+                } catch(e) {
+                    banner.style.display = 'block';
+                }
+            }
+
+            function saveConsent(essential, functional, analytics) {
+                var data = {
+                    essential: true,
+                    functional: functional,
+                    analytics: analytics,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('cookieConsent', JSON.stringify(data));
+                banner.style.display = 'none';
+            }
+
+            var acceptAll = document.getElementById('cookie-accept-all');
+            if (acceptAll) {
+                acceptAll.addEventListener('click', function() {
+                    saveConsent(true, true, true);
+                });
+            }
+
+            var essentialOnly = document.getElementById('cookie-essential');
+            if (essentialOnly) {
+                essentialOnly.addEventListener('click', function() {
+                    saveConsent(true, false, false);
+                });
+            }
+
+            var customizeBtn = document.getElementById('cookie-customize');
+            var detailsPanel = document.getElementById('cookie-details');
+            if (customizeBtn && detailsPanel) {
+                customizeBtn.addEventListener('click', function() {
+                    detailsPanel.style.display = detailsPanel.style.display === 'none' ? 'block' : 'none';
+                });
+            }
+
+            var savePrefs = document.getElementById('cookie-save-prefs');
+            if (savePrefs) {
+                savePrefs.addEventListener('click', function() {
+                    var functional = document.getElementById('cookie-functional').checked;
+                    var analytics = document.getElementById('cookie-analytics').checked;
+                    saveConsent(true, functional, analytics);
+                });
+            }
+        })();
+
+        /* ---- Legal Modals (Privacy Policy, Terms, Cookie Settings) ---- */
+        (function() {
+            var API = 'https://salonsindbad-api.duckdns.org';
+
+            function openLegalModal(modalId, bodyId, endpoint) {
+                var modal = document.getElementById(modalId);
+                var body = document.getElementById(bodyId);
+                if (!modal) return;
+                modal.style.display = 'flex';
+                body.innerHTML = '<p style="text-align:center;color:var(--clr-text-dim);padding:40px;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+
+                fetch(API + '/api/legal/' + endpoint)
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.content) {
+                            body.innerHTML = data.content;
+                        } else {
+                            body.innerHTML = '<p style="color:var(--clr-text-dim);">No content available yet.</p>';
+                        }
+                    })
+                    .catch(function() {
+                        body.innerHTML = '<p style="color:var(--clr-text-dim);">Could not load content.</p>';
+                    });
+            }
+
+            // Footer links
+            var privacyLink = document.getElementById('footer-privacy-link');
+            if (privacyLink) privacyLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                openLegalModal('privacy-modal', 'privacy-body', 'privacy');
+            });
+
+            var termsLink = document.getElementById('footer-terms-link');
+            if (termsLink) termsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                openLegalModal('terms-modal', 'terms-body', 'terms');
+            });
+
+            // Cookie banner privacy link
+            var cookiePrivacy = document.getElementById('cookie-privacy-link');
+            if (cookiePrivacy) cookiePrivacy.addEventListener('click', function(e) {
+                e.preventDefault();
+                openLegalModal('privacy-modal', 'privacy-body', 'privacy');
+            });
+
+            // Cookie settings link in footer — reopens cookie banner
+            var cookieLink = document.getElementById('footer-cookie-link');
+            if (cookieLink) cookieLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                var banner = document.getElementById('cookie-banner');
+                if (banner) banner.style.display = 'block';
+            });
+
+            // Close modal buttons
+            document.querySelectorAll('.legal-modal-close').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var modalId = btn.dataset.close;
+                    var modal = document.getElementById(modalId);
+                    if (modal) modal.style.display = 'none';
+                });
+            });
+
+            // Close on backdrop click
+            document.querySelectorAll('.legal-modal').forEach(function(modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) modal.style.display = 'none';
+                });
+            });
+        })();
     });
     </script>
 

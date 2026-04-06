@@ -1346,6 +1346,7 @@ export function displaySettings() {
       <div class="settings-tabs">
         <button class="settings-tab active" data-tab="tab-password"><i class="fas fa-key"></i> Password</button>
         <button class="settings-tab" data-tab="tab-email"><i class="fas fa-envelope"></i> Email</button>
+        <button class="settings-tab" data-tab="tab-legal"><i class="fas fa-file-contract"></i> Legal</button>
       </div>
 
       <div class="settings-card">
@@ -1419,6 +1420,29 @@ export function displaySettings() {
             <div id="settings-message" class="settings-message" style="display:none;"></div>
           </div>
         </div>
+
+        <div id="tab-legal" class="settings-tab-content">
+          <div class="settings-form">
+            <div class="form-group">
+              <label>Editing</label>
+              <div class="legal-edit-tabs">
+                <button class="legal-edit-tab active" data-edit="privacy"><i class="fas fa-shield-alt"></i> Privacy Policy</button>
+                <button class="legal-edit-tab" data-edit="terms"><i class="fas fa-file-contract"></i> Terms &amp; Conditions</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="legal-editor">Content <small style="color:var(--clr-text-dim);font-weight:400;">(HTML supported)</small></label>
+              <textarea id="legal-editor" class="form-control legal-textarea" rows="14" placeholder="Enter your legal text here... HTML tags like <h3>, <p>, <ul>, <li> are supported."></textarea>
+            </div>
+            <div class="settings-actions">
+              <button type="button" id="save-legal-btn" class="btn"><i class="fas fa-save"></i> Save</button>
+              <button type="button" id="preview-legal-btn" class="btn btn-secondary"><i class="fas fa-eye"></i> Preview</button>
+            </div>
+            <div id="legal-message" class="settings-message" style="display:none;"></div>
+            <div id="legal-preview" class="legal-preview" style="display:none;"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   `;
@@ -1456,6 +1480,81 @@ export function displaySettings() {
         icon.className = "fas fa-eye";
       }
     });
+  });
+
+  // Legal editor
+  var currentLegalType = "privacy";
+
+  function loadLegalContent(type) {
+    currentLegalType = type;
+    var editor = document.getElementById("legal-editor");
+    if (!editor) return;
+    editor.value = "Loading...";
+    fetch(API_BASE + "/api/legal/" + type)
+      .then(function(r) { return r.json(); })
+      .then(function(data) { editor.value = data.content || ""; })
+      .catch(function() { editor.value = "Error loading content"; });
+  }
+
+  document.querySelectorAll(".legal-edit-tab").forEach(function(tab) {
+    tab.addEventListener("click", function() {
+      document.querySelectorAll(".legal-edit-tab").forEach(function(t) { t.classList.remove("active"); });
+      tab.classList.add("active");
+      loadLegalContent(tab.dataset.edit);
+      var preview = document.getElementById("legal-preview");
+      if (preview) preview.style.display = "none";
+    });
+  });
+
+  var legalTabBtn = document.querySelector('.settings-tab[data-tab="tab-legal"]');
+  if (legalTabBtn) legalTabBtn.addEventListener("click", function() { loadLegalContent(currentLegalType); });
+
+  document.getElementById("save-legal-btn").addEventListener("click", function() {
+    var btn = this;
+    var editor = document.getElementById("legal-editor");
+    var msgEl = document.getElementById("legal-message");
+    var token = localStorage.getItem("adminToken");
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    fetch(API_BASE + "/api/legal/" + currentLegalType, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+      body: JSON.stringify({ content: editor.value }),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Save';
+        msgEl.style.display = "block";
+        if (data.error) {
+          msgEl.className = "settings-message settings-msg-error";
+          msgEl.textContent = data.error;
+        } else {
+          msgEl.className = "settings-message settings-msg-success";
+          msgEl.textContent = "Saved successfully!";
+          setTimeout(function() { msgEl.style.display = "none"; }, 3000);
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Save';
+        msgEl.style.display = "block";
+        msgEl.className = "settings-message settings-msg-error";
+        msgEl.textContent = "Failed to save";
+      });
+  });
+
+  document.getElementById("preview-legal-btn").addEventListener("click", function() {
+    var preview = document.getElementById("legal-preview");
+    var editor = document.getElementById("legal-editor");
+    if (preview.style.display === "none") {
+      preview.innerHTML = editor.value;
+      preview.style.display = "block";
+      this.innerHTML = '<i class="fas fa-edit"></i> Edit';
+    } else {
+      preview.style.display = "none";
+      this.innerHTML = '<i class="fas fa-eye"></i> Preview';
+    }
   });
 }
 
