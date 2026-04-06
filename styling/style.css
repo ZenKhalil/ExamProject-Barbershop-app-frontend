@@ -253,21 +253,25 @@ nav ul li button:hover {
 @media (max-width: 768px) {
   header {
     padding-top: env(safe-area-inset-top);
-    height: calc(50px + env(safe-area-inset-top));
+    height: calc(60px + env(safe-area-inset-top));
+    /* Add this to ensure background covers the safe area */
+    background: var(--clr-surface);
+    position: sticky;
+    top: 0;
   }
 
   .header-container {
     padding: 0 16px;
-    height: 60px;
+    height: 60px; /* Keep this fixed, NOT including safe area */
     justify-content: center;
-    padding-top: 15px;
+    /* Remove padding-top from here */
   }
 
   .header-brand {
     left: 50%;
     transform: translateX(-50%);
     font-size: 1.35rem;
-    bottom: 18px;
+    /* Remove the bottom positioning */
   }
 
   #main-nav { display: none; }
