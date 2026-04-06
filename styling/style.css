@@ -255,6 +255,7 @@ nav ul li button:hover {
     padding: 0 16px;
     height: 78px;
     justify-content: center;
+    padding-top: 15px;
   }
 
   .header-brand {
