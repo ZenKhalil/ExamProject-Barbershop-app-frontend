@@ -7,6 +7,11 @@ let navigationInitialized = false;
 
 // Global Setup
 document.addEventListener("DOMContentLoaded", function () {
+    // Adjust main content padding based on footer height
+    var footerHeight = document.querySelector("footer").offsetHeight;
+    var mainContent = document.getElementById("main-content");
+    mainContent.style.paddingBottom = footerHeight + "px";
+
     setupNavigation();
 
     // Retrieve the last visited section from sessionStorage
@@ -65,6 +70,9 @@ export function showSection(sectionId) {
     console.log("Displaying section:", sectionId);
     selectedSection.style.display = "block";
 
+    // Scroll to top when switching sections
+    window.scrollTo(0, 0);
+
     // Save the current section in sessionStorage
     sessionStorage.setItem("currentSection", sectionId);
 
@@ -85,7 +93,8 @@ export function showSection(sectionId) {
 window.addEventListener("click", (event) => {
     const priceListModal = document.getElementById('priceListModal');
     if (event.target === priceListModal) {
-        priceListModal.style.display = 'none';
+        priceListModal.classList.add("hidden");
+        priceListModal.style.display = 'none'; // Ensure the modal is hidden
     }
 });
 
