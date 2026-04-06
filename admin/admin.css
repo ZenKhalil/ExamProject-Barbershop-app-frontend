@@ -1305,6 +1305,59 @@
   border: 1px solid var(--clr-border, #2e2e2e);
   border-radius: var(--radius-md, 12px);
   overflow: hidden;
+  position: relative;
+  transition: 0.2s ease;
+}
+
+.gallery-admin-item.dragging {
+  opacity: 0.4;
+  border-color: var(--clr-gold, #c9a84c);
+  transform: scale(0.95);
+}
+
+.gallery-drag-handle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clr-text-dim, #9a9590);
+  font-size: 0.75rem;
+  cursor: grab;
+  opacity: 0;
+  transition: 0.3s ease;
+}
+
+.gallery-admin-item:hover .gallery-drag-handle {
+  opacity: 1;
+}
+
+.gallery-drag-handle:active {
+  cursor: grabbing;
+  color: var(--clr-gold, #c9a84c);
+}
+
+.gallery-reorder-hint {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--clr-text-dim, #9a9590);
+  padding: 8px;
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.gallery-reorder-hint i {
+  color: var(--clr-gold, #c9a84c);
 }
 
 .gallery-admin-img {
@@ -1873,6 +1926,10 @@
   .manage-form-bottom .btn { width: 100%; justify-content: center; }
   .manage-item { padding: 12px 14px; }
   .manage-item-name { font-size: 0.85rem; }
+
+  /* Gallery - always show drag handle on touch devices */
+  .gallery-drag-handle { opacity: 0.7; }
+  .gallery-admin-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
 
 /* Extra small screens */
 @media (max-width: 380px) {

@@ -2217,18 +2217,20 @@ function loadGalleryAdmin() {
         return;
       }
 
-      grid.innerHTML = images.map(function(img) {
-        return '<div class="gallery-admin-item" data-id="' + img.id + '">' +
-          '<div class="gallery-admin-img" id="gimg-' + img.id + '"><div class="avail-loading"><i class="fas fa-spinner fa-spin"></i></div></div>' +
-          '<div class="gallery-admin-info">' +
-            '<span class="gallery-admin-caption">' + (img.caption || '<em style="opacity:0.4;">No caption</em>') + '</span>' +
-            '<div class="gallery-admin-actions">' +
-              '<button class="manage-edit-btn gallery-edit-btn" data-id="' + img.id + '" data-caption="' + (img.caption || '') + '"><i class="fas fa-pen"></i></button>' +
-              '<button class="manage-delete-btn gallery-delete-btn" data-id="' + img.id + '"><i class="fas fa-trash-alt"></i></button>' +
+      grid.innerHTML = '<div class="gallery-reorder-hint"><i class="fas fa-grip-vertical"></i> Drag photos to reorder</div>' +
+        images.map(function(img) {
+          return '<div class="gallery-admin-item" data-id="' + img.id + '" draggable="true">' +
+            '<div class="gallery-drag-handle"><i class="fas fa-grip-vertical"></i></div>' +
+            '<div class="gallery-admin-img" id="gimg-' + img.id + '"><div class="avail-loading"><i class="fas fa-spinner fa-spin"></i></div></div>' +
+            '<div class="gallery-admin-info">' +
+              '<span class="gallery-admin-caption">' + (img.caption || '<em style="opacity:0.4;">No caption</em>') + '</span>' +
+              '<div class="gallery-admin-actions">' +
+                '<button class="manage-edit-btn gallery-edit-btn" data-id="' + img.id + '" data-caption="' + (img.caption || '') + '"><i class="fas fa-pen"></i></button>' +
+                '<button class="manage-delete-btn gallery-delete-btn" data-id="' + img.id + '"><i class="fas fa-trash-alt"></i></button>' +
+              '</div>' +
             '</div>' +
-          '</div>' +
-        '</div>';
-      }).join("");
+          '</div>';
+        }).join("");
 
       // Lazy load images
       images.forEach(function(img) {
@@ -2240,6 +2242,79 @@ function loadGalleryAdmin() {
               container.innerHTML = '<img src="' + data.image_data + '" alt="' + (img.caption || 'Gallery') + '">';
             }
           });
+      });
+
+      // Drag and drop reorder
+      var dragItem = null;
+
+      grid.querySelectorAll(".gallery-admin-item").forEach(function(item) {
+        item.addEventListener("dragstart", function(e) {
+          dragItem = item;
+          item.classList.add("dragging");
+          e.dataTransfer.effectAllowed = "move";
+        });
+
+        item.addEventListener("dragend", function() {
+          item.classList.remove("dragging");
+          dragItem = null;
+          // Save new order
+          saveGalleryOrder();
+        });
+
+        item.addEventListener("dragover", function(e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          if (!dragItem || dragItem === item) return;
+
+          var items = Array.from(grid.querySelectorAll(".gallery-admin-item"));
+          var dragIndex = items.indexOf(dragItem);
+          var hoverIndex = items.indexOf(item);
+
+          if (dragIndex < hoverIndex) {
+            grid.insertBefore(dragItem, item.nextSibling);
+          } else {
+            grid.insertBefore(dragItem, item);
+          }
+        });
+      });
+
+      // Touch drag for mobile
+      var touchDragItem = null;
+      var touchClone = null;
+      var touchStartY = 0;
+
+      grid.querySelectorAll(".gallery-drag-handle").forEach(function(handle) {
+        handle.addEventListener("touchstart", function(e) {
+          touchDragItem = handle.closest(".gallery-admin-item");
+          touchStartY = e.touches[0].clientY;
+          touchDragItem.classList.add("dragging");
+          e.preventDefault();
+        }, { passive: false });
+      });
+
+      document.addEventListener("touchmove", function(e) {
+        if (!touchDragItem) return;
+        var touch = e.touches[0];
+        var target = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (!target) return;
+        var hoverItem = target.closest(".gallery-admin-item");
+        if (hoverItem && hoverItem !== touchDragItem) {
+          var items = Array.from(grid.querySelectorAll(".gallery-admin-item"));
+          var dragIdx = items.indexOf(touchDragItem);
+          var hoverIdx = items.indexOf(hoverItem);
+          if (dragIdx < hoverIdx) {
+            grid.insertBefore(touchDragItem, hoverItem.nextSibling);
+          } else {
+            grid.insertBefore(touchDragItem, hoverItem);
+          }
+        }
+      }, { passive: true });
+
+      document.addEventListener("touchend", function() {
+        if (!touchDragItem) return;
+        touchDragItem.classList.remove("dragging");
+        touchDragItem = null;
+        saveGalleryOrder();
       });
 
       // Edit caption
@@ -2278,6 +2353,27 @@ function loadGalleryAdmin() {
       });
     })
     .catch(function(err) { console.error("Error loading gallery:", err); });
+}
+
+function saveGalleryOrder() {
+  var grid = document.getElementById("gallery-admin-grid");
+  if (!grid) return;
+
+  var items = grid.querySelectorAll(".gallery-admin-item");
+  var order = Array.from(items).map(function(item) { return parseInt(item.dataset.id); });
+
+  var token = localStorage.getItem("adminToken");
+  fetch(API_BASE + "/api/gallery/reorder", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+    body: JSON.stringify({ order: order }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) console.error("Reorder error:", data.error);
+      else console.log("Gallery reordered");
+    })
+    .catch(function(err) { console.error("Failed to save order:", err); });
 }
 
 
