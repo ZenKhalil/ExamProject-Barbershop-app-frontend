@@ -131,6 +131,7 @@ header {
   z-index: 100;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  padding-top: env(safe-area-inset-top);
 }
 
 .header-container {
@@ -322,6 +323,8 @@ nav ul li button:hover {
     display: flex;
     flex-direction: column;
     padding: 0;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
     transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
     border-right: 1px solid var(--clr-border);
@@ -857,9 +860,8 @@ nav ul li button:hover {
 }
 
 .date-card.selected {
-  background: linear-gradient(var(--clr-gold), var(--clr-gold-dark));
+  background: linear-gradient(135deg, var(--clr-gold), var(--clr-gold-dark));
   border-color: var(--clr-gold);
-  pointer-events: none;
 }
 
 .date-card.selected .date-card-day,
@@ -1279,7 +1281,7 @@ div#selected-datetime { margin-bottom: 0; }
 
   #booking-modal .modal-content {
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: 24px 20px 32px;
+    padding: 24px 20px calc(32px + env(safe-area-inset-bottom));
     max-height: 92vh;
     overflow-y: auto;
     animation: modalSlideUp 0.35s ease-out;
@@ -1624,6 +1626,7 @@ footer {
   color: var(--clr-text-dim);
   text-align: center;
   padding: 24px 20px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
   width: 100%;
 }
 
@@ -1867,6 +1870,7 @@ footer p { font-size: 0.85rem; font-weight: 400; color: var(--clr-text-dim); }
   border-top: 1px solid var(--clr-border);
   box-shadow: 0 -4px 30px rgba(0,0,0,0.5);
   animation: cookieSlideUp 0.4s ease-out;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 @keyframes cookieSlideUp {
